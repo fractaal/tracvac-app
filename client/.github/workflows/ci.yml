@@ -49,8 +49,8 @@ jobs:
 
       - name: List build artifacts
         run: |
-          cd ./dist/cordova
-          ls
+          cd ./dist/cordova/android
+          ls -R
         
 #     - name: Create and upload release
 #       uses: softprops/action-gh-release@v1
