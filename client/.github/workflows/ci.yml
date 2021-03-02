@@ -47,6 +47,9 @@ jobs:
       - name: Perform build/compile step
         run: npx quasar build -m cordova -T android
 
+      - name: Sign APK
+        run: jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ./my-release-key.keystore ./dist/cordova/android/apk/release/app-release-unsigned.apk alias_name
+
       - name: List build artifacts
         run: ls ./dist/cordova/android -R
 
