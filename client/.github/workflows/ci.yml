@@ -37,6 +37,9 @@ jobs:
 
       - name: Install Quasar CLI 
         run: yarn global add @quasar/cli
+
+      - name: Add yarn binary path to PATH environment variable
+        run: set PATH=%PATH%;(yarn global bin)
           
       - name: Install packages
         run: yarn install
