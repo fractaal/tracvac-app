@@ -54,8 +54,15 @@ jobs:
       - name: Perform build/compile step
         run: npx quasar build -m cordova -T android
 
-      - name: Sign APK
-        run: jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ./my-release-key.keystore ./dist/cordova/android/apk/release/app-release-unsigned.apk alias_name
+      - uses: r0adkll/sign-android-release@v1
+        name: Sign app APK
+        # ID used to access action output
+        id: sign_app
+        with:
+          releaseDirectory: ./dist/cordova/android/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
 
       - name: List build artifacts
         run: ls ./dist/cordova/android -R
@@ -78,6 +85,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./dist/cordova/android/apk/release/app-release-unsigned.apk
-          asset_name: app-release-unsigned.apk
+          asset_path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          asset_name: Application.apk
           asset_content_type: application/vnd.android.package-archive
