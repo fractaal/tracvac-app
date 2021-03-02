@@ -48,7 +48,7 @@ jobs:
         run: npx quasar build -m cordova -T android
 
       - name: List build artifacts
-        run: ls ./dist/cordova/android -R'
+        run: ls ./dist/cordova/android -R
 
       - name: Create Release
         id: create_release
