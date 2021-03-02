@@ -36,16 +36,13 @@ jobs:
           architecture: x64 
 
       - name: Install Quasar CLI 
-        run: yarn global add @quasar/cli
-
-      - name: Add yarn binary path to PATH environment variable
-        run: export PATH="$(yarn global bin):$PATH"
+        run: npm install -g @quasar/cli
           
       - name: Install packages
-        run: yarn install
+        run: npm install
 
       - name: Perform build/compile step
-        run: quasar build -m cordova -T android
+        run: npx quasar build -m cordova -T android
 
       - name: List build artifacts
         run: |
