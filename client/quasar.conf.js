@@ -127,7 +127,7 @@ module.exports = configure(function (ctx) {
       manifest: {
         name: 'Hestia App',
         short_name: 'Hestia App',
-        description: 'Contact tracing application.',
+        description: 'Vaccine passport application.',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
