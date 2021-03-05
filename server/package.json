@@ -1,0 +1,31 @@
+{
+  "name": "hestia-backend",
+  "version": "0.0.1",
+  "description": "Backend for Hestia App",
+  "main": "./src/index.ts",
+  "author": "benedict.jude.rocat@gmail.com",
+  "license": "MIT",
+  "scripts": {
+    "build": "pkg -t node14-win dist/index.js",
+    "dev": "node dist/"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.11",
+    "@types/knex": "^0.16.1",
+    "express": "^4.17.1",
+    "knex": "^0.95.1",
+    "objection": "^2.2.14",
+    "pg": "^8.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "pkg": {
+    "assets": [
+      "./node_modules/@types",
+      "./node_modules/typescript/lib/*.d.ts",
+      "src/**/*.ts",
+      "./tsconfig.json"
+    ]
+  }
+}
