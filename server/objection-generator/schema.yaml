@@ -1,0 +1,169 @@
+config:
+  model:
+    classNamePrefix:
+    classNamePostfix: Model
+
+models:
+  User:
+    tableName: users
+    jsonSchema:
+      required: [
+        'username', 
+        'password', 
+        'email',
+        'category',
+        'lastName', 
+        'firstName', 
+        'middleName',
+        'fullAddress',
+        'province',
+        'municipalityOrCity',
+        'barangay',
+        'sex',
+        'dateOfBirth',
+        'civilStatus',
+      ]
+      properties:
+        username:
+          type: string
+          minLength: 8
+          maxLength: 100
+        password:
+          type: string
+        email:
+          type: string
+        category:
+          type: string
+          enum: [
+            '01 - Health Care Worker',
+            '02 - Senior Citizen', 
+            '03 - Indigent',
+            '04 - Uniformed Personnel',
+            '05 - Essential Worker',
+            '06 - Other',
+          ]
+        categoryID:
+          type: string
+        philHealthID:
+          type: string
+        lastName:
+          type: string
+        firstName:
+          type: string
+        middleName:
+          type: string
+        suffix:
+          type: string
+        contactNumber:
+          type: string
+        fullAddress:
+          type: string
+        province:
+          type: string
+        municipalityOrCity:
+          type: string
+        barangay:
+          type: string
+        sex:
+          type: string
+          enum: [
+            '01 - Female',
+            '02 - Male',
+            '03 - Not to Disclose'
+          ]
+        dateOfBirth:
+          type: string
+          format: date
+        employed:
+          type: string
+          enum: [
+            '01 - Government Employed',
+            '02 - Private Employed',
+            '03 - Self Employed',
+            '04 - Private Practitioner',
+            '05 - Others',
+          ]
+        profession:
+          type: string
+          enum: [
+            '01 - Dental Hygienist',
+            '02 - Dental Technologist',
+            '03 - Dentist',
+            '04 - Medical Technologist',
+            '05 - Midwife',
+            '06 - Nurse',
+            '07 - Nutritionist/Dietician',
+            '08 - Occupational Therapist',
+            '09 - Optomerist',
+            '10 - Pharmacist',
+            '11 - Physical Therapist',
+            '12 - Physician',
+            '13 - Radiologic Technologist',
+            '14 - Respiratory Therapist',
+            '15 - X-ray Technologist',
+            '16 - Barangay Health Worker',
+            '17 - Maintenance Staff',
+            '18 - Administrative Staff',
+            '19 - Other Workers in Frontline Health Services',
+          ]
+        otherProfession:
+          type: string
+        directCOVID:
+          type: boolean
+        employerName:
+          type: string
+        employerLGU:
+          type: string
+        employerAddress:
+          type: string
+        emplyerContactNumber:
+          type: string
+        pregnancyStatus:
+          type: boolean
+          default: true
+        withAllergy:
+          type: boolean
+        allergy:
+          type: string
+        withComorbidities:
+          type: boolean
+        comorbidity:
+          type: string
+          enum: [
+            '01 - Hypertension',
+            '02 - Heart Disease',
+            '03 - Kidney Disease',
+            '04 - Diabetes Mellitus',
+            '05 - Bronchial Asthma',
+            '06 - Immunodeficiency State',
+            '07 - Cancer',
+            '08 - Others',
+          ]
+        covidHistory:
+          type: boolean
+        covidDate:
+          type: string
+          format: date
+        covidClassification:
+          type: string
+          enum: [
+            '01 - Asymptomatic',
+            '02 - Mild',
+            '03 - Moderate',
+            '04 - Severe',
+            '05 - Critical',
+          ]
+        consentForDataCollection:
+          type: string
+          enum: [
+            '01 - Yes',
+            '02 - No',
+            '03 - Unknown',
+          ]
+        consentForVaccination:
+          type: string
+          enum: [
+            '01 - Yes',
+            '02 - No',
+            '03 - Unknown',
+          ]
