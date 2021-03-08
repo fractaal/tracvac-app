@@ -1,19 +1,20 @@
 <template>
-  <q-page class="column items-center justify-evenly">
-    <div class="text-h1">Log in</div>
-    <div class="flex flex-center">
-      <q-input class="full-width q-my-xs" v-model="username" filled label="Username"/>
-      <q-input class="full-width q-my-xs" v-model="password" filled :type="isPassword ? 'password' : 'text'" label="Password">
-        <template v-slot:append>
-          <q-icon
-            :name="isPassword ? 'visibility_off' : 'visibility'"
-            class="cursor-pointer"
-            @click="isPassword = !isPassword"
-          />
-        </template>
-      </q-input>
+  <q-page class="column items-center">
+    <div class="m-0 p-0 font-serif text-h1 mt-56">💖</div>
+    <p class="m-0 p-0">Amazing.</p>
+    <br><br>
+    <div class="column items-center w-3/5">
+      <div class="full-width">
+        <input placeholder="Username" v-model="username" type="text" label="Username" class="full-width focus:ring-2 focus:ring-red-600 p-4 rounded-full focus:outline-none border-none shadow"/>
+      </div>
       <br>
-      <q-btn rounded flat outlined class="q-my-md" padding="lg" :loading="isLoggingIn" @click="login">WAWAWIWA</q-btn>
+      <div class="full-width relative text-red-500">
+        <span class="absolute inset-y-0 right-5 flex items-center pl-2">
+          <q-icon class="cursor-pointer" :name="isPassword ? 'visibility' : 'visibility_off'" size="sm" @click="isPassword = !isPassword"/>
+        </span>
+        <input :type="isPassword ? 'password' : 'text'" placeholder="Password" v-model="password" class="full-width focus:ring-2 focus:ring-red-600 p-4 rounded-full focus:outline-none border-none shadow">
+      </div>
+      <q-btn rounded flat outlined class="btn btn--primary bg-red-500 text-white q-my-md shadow focus:outline-none focus:ring-2 focus:ring-purple-600" padding="lg" :loading="isLoggingIn" @click="login">WAWAWIWA</q-btn>
     </div>
   </q-page>
 </template>
