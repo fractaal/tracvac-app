@@ -2,8 +2,6 @@
  * This is the CSS base class used to generate Tailwind CSS Code
  */
 
-@tailwind base;
-
 
 @tailwind components;
 

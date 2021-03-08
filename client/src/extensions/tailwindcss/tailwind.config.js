@@ -5,8 +5,6 @@ module.exports = {
         extend: {}
     },
     
-    prefix:  'tw-',
-    
     variants: {},
     plugins: []
 }
