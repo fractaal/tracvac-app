@@ -49,7 +49,7 @@ export async function dbStatusCheck() {
        */
     }
   } catch(err) {
-    logger.error(`While trying to determine database status - ${err}`);
+    logger.error(`While trying to determine database status - ${err.stack}`);
     process.exit(1);
   }
 }
@@ -71,15 +71,21 @@ export async function migrateToLatest() {
 
 export async function migrate(version: number) {
   const activeSchemaVersion = parseInt(await getDbSchemaVersion());
+
+  logger.log(`Performing migration to version ${version} (from version ${activeSchemaVersion})`)
+  logger.log(`Schema v${version} desription: ${migrations[version-1].description}`);
+
   if (version == activeSchemaVersion) {
     logger.warn('Version to migrate to and database schema version is the same! Aborting...');
     return;
   } else if (Math.abs(version - activeSchemaVersion) !== 1) {
-    logger.warn('Version to migrate to and database schema version are not adjacent (Version diff is not 1)! Aborting...');
+    logger.warn('Version to migrate to and database schema version are not adjacent (Version diff is not 1)! For data safety, this operation is aborted.');
+    return;
+  } else if ((version - activeSchemaVersion) === -1) {
+    logger.warn('Version to migrate to is lower than the database schema version! For data safety, this operation is aborted.');
     return;
   }
-  logger.log(`Performing migration to version ${version} (from version ${activeSchemaVersion})`)
-  logger.log(`Schema v${version} desription: ${migrations[version-1].description}`);
+  
   await migrations[version-1].up(knex);
 
   if (await getDbSchemaVersion() === '0') {
