@@ -7,7 +7,10 @@
   "license": "MIT",
   "scripts": {
     "build": "pkg -t node14-win dist/index.js",
-    "dev": "node dist/"
+    "dev": "node dist/",
+    "generate-models": "objection-generator generate ./objection-generator/schema.yaml ./src/database",
+    "generate-migrations": "objection-generator knex ./objection-generator/schema.yaml ./tmp_migrations",
+    "generate-all": "yarn generate-models && yarn generate-migrations"
   },
   "dependencies": {
     "@types/express": "^4.17.11",
