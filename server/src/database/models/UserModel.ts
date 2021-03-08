@@ -195,7 +195,7 @@ export class UserModel extends BaseModel {
           enum: ['01 - Female', '02 - Male', '03 - Not to Disclose']
         },
         dateOfBirth: {
-          type: 'string',
+          type: 'date',
           format: 'date'
         },
         employed: {
@@ -280,7 +280,7 @@ export class UserModel extends BaseModel {
           type: 'boolean'
         },
         covidDate: {
-          type: 'string',
+          type: 'date',
           format: 'date'
         },
         covidClassification: {
