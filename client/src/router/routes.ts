@@ -5,7 +5,9 @@ const routes: RouteConfig[] = [
     path: '/',
     component: () => import('layouts/LoginLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Login.vue') }
+      { path: '', component: () => import('src/pages/Splash.vue') },
+      { path: '/login', component: () => import('src/pages/Login.vue') },
+      { path: '/connect', component: () => import('src/pages/Connect.vue') }
     ]
   },
   {
