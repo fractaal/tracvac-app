@@ -41,12 +41,15 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <transition :enter-active-class="`animated ${transition.in}`" :leave-active-class="`animated ${transition.out}`" mode="out-in" :duration="300">
+        <router-view/>
+      </transition>
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
+import transition from '../transitions'
 import EssentialLink from 'components/EssentialLink.vue'
 
 const linksData = [
@@ -101,6 +104,7 @@ export default Vue.extend({
   components: { EssentialLink },
   data () {
     return {
+      transition,
       leftDrawerOpen: false,
       essentialLinks: linksData
     }
