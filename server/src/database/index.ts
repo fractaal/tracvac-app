@@ -1,6 +1,5 @@
 import Logger from '../logger';
 import { dbStatusCheck } from './migration';
-import { Model, snakeCaseMappers } from 'objection';
 import Knex from 'knex';
 
 const logger = Logger('Database');
@@ -17,7 +16,6 @@ export const knex = Knex({
     password : 'postgres',
     database : 'vaccinePassportDb',
   },
-  ...snakeCaseMappers()
 });
 
 export async function connect() {
