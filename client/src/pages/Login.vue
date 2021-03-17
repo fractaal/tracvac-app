@@ -1,20 +1,30 @@
 <template>
-  <q-page class="column items-center" key="login">
-    <img src="~assets/tracvac-logo.png" class="mx-auto mt-16 w-1/2" alt="">
-    <div class="text-h4 logo-text border-2 border-blue-400">Log in</div>
-    <br><br>
-    <div class="w-full p-8">
-      <div class="full-width">
-        <input placeholder="Username" v-model="username" type="text" label="Username" class="full-width focus:ring-2 focus:ring-blue-400 p-4 rounded-2xl focus:outline-none border-none shadow"/>
+  <q-page class="column mx-12">
+    <div class="bg-blue-500 text-white p-8 mb-32 rounded-b-3xl">
+      <div class="flex flex-row justify-between align-baseline">
+        <h4 class="m-0 logo-text">LOGIN</h4>
       </div>
-      <br>
-      <div class="full-width relative text-blue">
-        <span class="absolute inset-y-0 right-5 flex items-center pl-2">
-          <q-icon class="cursor-pointer" :name="isPassword ? 'visibility' : 'visibility_off'" size="sm" @click="isPassword = !isPassword"/>
-        </span>
-        <input :type="isPassword ? 'password' : 'text'" placeholder="Password" v-model="password" class="full-width focus:ring-2 focus:ring-blue-600 p-4 rounded-2xl focus:outline-none border-none shadow">
-      </div>
-      <q-btn flat outlined class="btn btn--primary bg-blue-400 text-white rounded-2xl my-5 py-2 px-8 shadow focus:outline-none focus:ring-2 focus:ring-blue-600" :loading="isLoggingIn" @click="login">LOG IN</q-btn>
+    </div>
+    <div class="mt-4 full-width">
+      <q-input rounded class="mb-2" outlined v-model="username" label="Username" :rules="[
+        val => !!val || 'Your username can\'t be empty.'
+      ]"/>
+      <q-input rounded v-model="password" outlined :type="isPassword? 'password' : 'text'" label="Password" :rules="[
+        val => !!val || 'Your password can\'t be empty.'
+      ]">
+        <template v-slot:append>
+          <q-icon
+            :name="isPassword ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="isPassword= !isPassword"
+          />
+        </template>
+      </q-input>
+    </div>
+    <br>
+    <q-btn outline rounded class="px-5 py-2" color="primary" @click="login" :loading="isLoggingIn" :disable="isLoginDisabled">Log in</q-btn>
+    <div class="mt-auto mb-4">
+      <p><b>Or, you could also <router-link to="/register">create an account</router-link>.</b></p>
     </div>
   </q-page>
 </template>
@@ -33,6 +43,11 @@ export default Vue.extend({
       isLoggingIn: false
     }
   },
+  computed: {
+    isLoginDisabled: function (): boolean {
+      return this.username.length === 0 || this.password.length === 0
+    }
+  },
   beforeRouteLeave (to, from, next) {
     if (to.path === '/connect') {
       this.$q.dialog({
@@ -47,6 +62,8 @@ export default Vue.extend({
       })
     } else if (to.path === '/home') {
       next()
+    } else {
+      next()
     }
   },
   methods: {
@@ -60,7 +77,9 @@ export default Vue.extend({
       } else {
         this.$q.notify({
           type: 'negative',
-          message
+          message,
+          timeout: 2500,
+          position: 'center'
         })
       }
     }
