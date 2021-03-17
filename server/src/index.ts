@@ -15,7 +15,6 @@ import * as database from './database';
 // Middleware
 import { json } from 'body-parser';
 import cors from 'cors';
-import { TokenData } from './interfaces/TokenData';
 
 const logger = Logger('Main');
 export const app = express();
