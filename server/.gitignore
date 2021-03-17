@@ -2,6 +2,7 @@ node_modules
 yarn-error.log
 dist
 index.exe
+hestia-backend.exe
 
 objection-generator/*
 !objection-generator/schema.yaml
