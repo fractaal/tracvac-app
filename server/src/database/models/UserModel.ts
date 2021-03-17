@@ -77,6 +77,7 @@ export enum UserConsentForVaccinationEnum {
 }
 
 export class UserModel extends BaseModel {
+  id!: number;
   username!: string
   password!: string
   email!: string
