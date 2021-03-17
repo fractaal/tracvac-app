@@ -23,8 +23,8 @@ export const app = express();
 app.use(cors());
 app.use(json());
 
+// JWT Middleware
 logger.log("Initializing JWT middleware"); 
-
 app.use(function (req, res, next) {
   const token = req.header('x-access-token');
   if (!token) {
@@ -43,6 +43,14 @@ app.use(function (req, res, next) {
   next();
 });
 
+// HTTPS middleware
+app.use((req, _, next) => {
+  if (!req.secure) {
+    logger.warn(`This request (${req.ip}) is not secure. Sensitive data such as login credentials or access tokens can be intercepted.
+    To silence this warning, access your administrative interface at https://localhost:6960 or turn it off in settings.json.`)
+  }
+  next()
+});
 
 (async () => {
   logger.log("Initializing database...");
