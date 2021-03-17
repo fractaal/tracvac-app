@@ -61,3 +61,21 @@ app.post('/user', async (req, res) => {
 
   }
 })
+
+// Get user info
+app.get('/user', async (req, res) => {
+  if (req.isAuthenticated) {
+    if (req.tokenData.userId) {
+      const match: Record<string, any>|undefined = await (await UserModel.query()).find(user => user.id === req.tokenData.userId);
+      if (match) {
+        delete match.password;
+        res.json({ result: true, user: match });
+      } else {
+        logger.warn(`An authenticated user ${req.tokenData.userId} requested their user info, but they weren't found in the database...`);
+        res.json({ result: false, message: 'User not found' })
+      }
+    } else {
+      res.status(400).json({ result: false, message: 'Please reauthenticate' })
+    }
+  }
+})
