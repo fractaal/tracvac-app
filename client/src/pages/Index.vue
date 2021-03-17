@@ -1,5 +1,5 @@
 <template>
-  <q-page class="column items-center" key="index">
+  <q-page class="column items-center">
     <h1 class="m-auto text-center">FUCK YOU</h1>
   </q-page>
 </template>
