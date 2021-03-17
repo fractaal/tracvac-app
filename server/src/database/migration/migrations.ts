@@ -28,10 +28,19 @@ export const migrations = [
         t.string('username').notNullable().index();
         t.string('password').notNullable();
         t.string('email').notNullable();
-
+        
+        // Updated at / created at 
         t.dateTime('createdAt')
         t.dateTime('updatedAt')
 
+        // Vaccination status
+        t.boolean('isVaccinated').defaultTo(false);
+        t.enum('isVaccineReady', [
+          'Not Ready',
+          'Pending',
+          'Ready',
+        ]).defaultTo('Not Ready');
+        
         t.enum('category', [
           '01 - Health Care Worker',
           '02 - Senior Citizen', 
