@@ -22,12 +22,15 @@ export const migrations = [
     up: async (knex: Knex) => {
       await knex.schema.createTable('users', t => {
         // Primary
-        t.increments().primary();
+        t.increments('id').primary();
         
         // User data needed for stuff like this
-        t.string('username').notNullable();
+        t.string('username').notNullable().index();
         t.string('password').notNullable();
         t.string('email').notNullable();
+
+        t.dateTime('createdAt')
+        t.dateTime('updatedAt')
 
         t.enum('category', [
           '01 - Health Care Worker',
@@ -102,7 +105,7 @@ export const migrations = [
         t.string('employerLGU');
         t.string('employerAddress');
         t.string('employerContactNumber');
-        t.boolean('pregnancyStatus').defaultTo(true);
+        t.boolean('pregnancyStatus').defaultTo(false);
         t.boolean('withAllergy');
         t.string('allergy').nullable();
         t.boolean('withComorbidities');
@@ -144,4 +147,34 @@ export const migrations = [
       knex.schema.dropTable('users');
     }
   },
+  {
+    version: 3,
+    description: 'Adds a log table containing logs users may submit',
+    up: async (knex) => {
+      await knex.schema.createTable('logs', t => {
+        // Primary key
+        t.increments('id').primary();
+        // Foreign key
+        t.integer('userId').index();
+        t.foreign('userId').references('id').inTable('users');
+        
+        t.boolean('fever').defaultTo('false')
+        t.boolean('abdominalPain').defaultTo('false')
+        t.boolean('chills').defaultTo('false')
+        t.boolean('cough').defaultTo('false')
+        t.boolean('diarrhea').defaultTo('false')
+        t.boolean('difficultyBreathing').defaultTo('false')
+        t.boolean('headache').defaultTo('false')
+        t.boolean('soreThroat').defaultTo('false')
+        t.boolean('nauseaOrVomiting').defaultTo('false')
+
+        // Created at / updated at
+        t.dateTime('createdAt')
+        t.dateTime('updatedAt')
+      })
+    },
+    down: async (knex) => {
+      await knex.schema.dropTable('logs');
+    }
+  }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[]; 
