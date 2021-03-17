@@ -3,10 +3,11 @@
   "version": "0.0.1",
   "description": "Backend for Hestia App",
   "main": "./src/index.ts",
+  "bin": "dist/index.js",
   "author": "benedict.jude.rocat@gmail.com",
   "license": "MIT",
   "scripts": {
-    "build": "pkg -t node14-win dist/index.js",
+    "build": "pkg package.json -t node14-win",
     "dev": "node dist/",
     "generate-models": "objection-generator generate ./objection-generator/schema.yaml ./src/database",
     "generate-migrations": "objection-generator knex ./objection-generator/schema.yaml ./tmp_migrations",
@@ -18,23 +19,24 @@
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "chalk": "^4.1.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.1",
     "objection": "^2.2.14",
     "pg": "^8.5.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
+    "@types/cors": "^2.8.10",
+    "@types/jsonwebtoken": "^8.5.0",
     "nodemon": "^2.0.7",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
   },
   "pkg": {
-    "assets": [
-      "./node_modules/@types",
-      "./node_modules/typescript/lib/*.d.ts",
-      "src/**/*.ts",
-      "./tsconfig.json"
+    "scripts": [
+      "dist/**/*.js"
     ]
   }
 }
