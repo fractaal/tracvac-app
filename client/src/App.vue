@@ -8,6 +8,7 @@
 <script lang="ts">
 import transition from './transitions'
 import { recept } from './api/server'
+import { loginWithToken } from './api/auth'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -29,13 +30,23 @@ export default Vue.extend({
 
     if (server) {
       // Connect to the server and go to the login screen.
-      await recept(server)
-      await this.$router.push('/login')
+      if (await recept(server)) {
+        if (await loginWithToken()) {
+          await this.$router.push('/home')
+        } else {
+          await this.$router.push('/login')
+        }
+      } else {
+        await this.$router.push('/connect')
+      }
     } else {
       // Go to the server connecet screen otherwise
       await this.$router.push('/connect')
     }
-    NavigationBar.show()
+
+    if (window.NavigationBar) {
+      NavigationBar && NavigationBar.show()
+    }
   }
 })
 </script>
