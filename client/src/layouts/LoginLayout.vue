@@ -1,8 +1,14 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
-        <transition :enter-active-class="`animated ${transition.in}`" :leave-active-class="`animated ${transition.out}`" mode="out-in" :duration="300">
-          <router-view/>
+        <transition
+          :enter-active-class="`animated ${transition.in}`"
+          :leave-active-class="`animated ${transition.out}`"
+          mode="out-in"
+          :duration="300">
+          <keep-alive>
+            <router-view/>
+          </keep-alive>
         </transition>
     </q-page-container>
   </q-layout>
