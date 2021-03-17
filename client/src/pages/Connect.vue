@@ -1,11 +1,19 @@
 <template>
-  <q-page key="connect" class="column mx-12">
-    <img src="~assets/tracvac-logo.png" class="mx-auto mt-16 mb-8 w-3/4" alt="">
-    <div class="text-h3 logo-text border-2 border-blue-400">Hello!</div>
+  <q-page class="column mx-12">
+    <div class="text-h3 logo-text border-2 border-blue-400 mt-48">Hello!</div>
     <p>To get started, let's type in the address of your local Tracvac site.</p>
     <br>
-    <input placeholder="https://your-local-site.gov" type="text" v-model="address" class="full-width focus:ring-2 focus:ring-blue-400 p-4 rounded-2xl focus:outline-none border-none shadow"/>
-    <q-btn flat outlined class="btn btn--primary bg-blue-400 text-white rounded-2xl my-5 px-14 shadow focus:outline-none focus:ring-2 focus:ring-blue-600" :loading="isLoading" @click="connectToReception">Continue</q-btn>
+    <q-input
+      outlined
+      rounded
+      placeholder="http://your-local-site.gov"
+      v-model="address"
+      :rules="[
+        val => siteValidator(val) || 'Please input a valid site.'
+      ]"
+      autofocus
+      />
+    <q-btn :disabled="isDisabled" flat outlined class="btn btn--primary bg-blue-400 text-white rounded-2xl my-5 px-14 shadow focus:outline-none focus:ring-2 focus:ring-blue-600" :loading="isLoading" @click="connectToReception">Continue</q-btn>
   </q-page>
 </template>
 
@@ -22,10 +30,26 @@ export default Vue.extend({
     }
   },
   created () {
-    StatusBar.backgroundColorByHexString('#fff')
-    StatusBar.styleDefault()
+    if (window.StatusBar) {
+      StatusBar.backgroundColorByHexString('#fff')
+      StatusBar.styleDefault()
+    }
+  },
+  computed: {
+    isDisabled: function (): boolean {
+      return !this.siteValidator(this.address)
+    }
   },
   methods: {
+    siteValidator (value: string) {
+      if (value.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/g) !== -1) {
+        return true
+      } else if (value.search(/^(?=\d+\.\d+\.\d+\.\d+$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.?){4}$/) !== -1) {
+        return true
+      } else {
+        return false
+      }
+    },
     async connectToReception () {
       this.isLoading = true
       if (await recept(this.address)) {
