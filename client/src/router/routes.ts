@@ -7,6 +7,7 @@ const routes: RouteConfig[] = [
     children: [
       { path: '', component: () => import('src/pages/Splash.vue') },
       { path: '/login', component: () => import('src/pages/Login.vue') },
+      { path: '/register', component: () => import('src/pages/Register.vue') },
       { path: '/connect', component: () => import('src/pages/Connect.vue') }
     ]
   },
