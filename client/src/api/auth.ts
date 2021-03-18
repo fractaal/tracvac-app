@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { api } from './server'
-import { LocalStorage } from 'quasar'
+import { routerInstance } from '../boot/router'
+import { LocalStorage, Dialog } from 'quasar'
 
 let authed = false
 
@@ -14,6 +15,10 @@ export async function login (username: string, password: string): Promise<[boole
 
     if (response.data.result) {
       LocalStorage.set('token', response.data.token)
+      api.defaults.headers = {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        'X-Access-Token': response.data.token
+      }
       authed = true
       return [true]
     } else {
@@ -40,6 +45,23 @@ export async function loginWithToken (): Promise<boolean> {
     }
   }
   return false
+}
+
+export function logout () {
+  console.log('logout called')
+  Dialog.create({
+    message: 'Are you sure you want to log out?',
+    cancel: true,
+    ok: true
+  }).onOk(() => {
+    const token = LocalStorage.getItem('token')
+
+    if (token) {
+      LocalStorage.remove('token')
+    }
+
+    routerInstance.push('/login')
+  })
 }
 
 export async function register (formData: Record<string, any>): Promise<[boolean, string?]> {
