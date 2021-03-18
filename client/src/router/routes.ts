@@ -15,7 +15,11 @@ const routes: RouteConfig[] = [
     path: '/home',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Index.vue') }
+      { path: '', component: () => import('src/pages/Home.vue') },
+      { path: '/profile', component: () => import('pages/Profile.vue') },
+      { path: '/logs', component: () => import('src/pages/Logs.vue') },
+      { path: '/vaccine', component: () => import('pages/VaccineStatus.vue') },
+      { path: '/view-log', component: () => import('pages/ViewLog.vue') }
     ]
   },
 
