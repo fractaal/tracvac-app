@@ -1,9 +1,7 @@
 <template>
   <q-page class="column mx-12">
-    <div class="bg-blue-500 text-white p-8 mb-32 rounded-b-3xl">
-      <div class="flex flex-row justify-between align-baseline">
-        <h4 class="m-0 logo-text">LOGIN</h4>
-      </div>
+    <div>
+      <h1 class="logo-text">Login</h1>
     </div>
     <div class="mt-4 full-width">
       <q-input rounded class="mb-2" outlined v-model="username" label="Username" :rules="[
