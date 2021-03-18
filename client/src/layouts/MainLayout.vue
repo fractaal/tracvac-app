@@ -1,118 +1,41 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="leftDrawerOpen = !leftDrawerOpen"
-        />
-
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      content-class="bg-grey-1"
-    >
-      <q-list>
-        <q-item-label
-          header
-          class="text-grey-8"
-        >
-          Essential Links
-        </q-item-label>
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
+  <q-layout view="hHh lpR fFf">
     <q-page-container>
       <transition
           :enter-active-class="`animated ${transition.in}`"
           :leave-active-class="`animated ${transition.out}`"
           mode="out-in"
-          :duration="300">
+          :duration="100">
         <keep-alive>
           <router-view/>
         </keep-alive>
       </transition>
+      <q-footer class="bg-white shadow-lg">
+        <q-tabs
+          v-model="activeTab"
+          class="text-black shadow-lg px-4 rounded-t-md"
+        >
+          <q-tab name="Profile" icon="fas fa-user" label="" @click="$router.push('/profile')" />
+          <q-tab name="Home" icon="fas fa-home" label="" @click="$router.push('/home')" />
+          <q-tab name="Logs" icon="fas fa-pen-fancy" label="" @click="$router.push('/logs')"/>
+        <q-tab name="Vaccine" icon="fas fa-syringe" label="" @click="$router.push('/vaccine')"/>
+        </q-tabs>
+      </q-footer>
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
 import transition from '../transitions'
-import EssentialLink from 'components/EssentialLink.vue'
-
-const linksData = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
 
 import Vue from 'vue'
 
 export default Vue.extend({
   name: 'MainLayout',
-  components: { EssentialLink },
   data () {
     return {
       transition,
-      leftDrawerOpen: false,
-      essentialLinks: linksData
+      activeTab: ''
     }
   }
 })
