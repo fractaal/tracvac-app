@@ -13,11 +13,8 @@
 import { store } from '../api/store'
 import Vue from 'vue'
 
-import ButtonCard from '../components/ButtonCard.vue'
-
 export default Vue.extend({
   name: 'Profile',
-  components: { ButtonCard },
   data () {
     return {
       store
