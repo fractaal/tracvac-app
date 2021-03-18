@@ -75,7 +75,11 @@ app.get('/user', async (req, res) => {
         res.json({ result: false, message: 'User not found' })
       }
     } else {
+      logger.warn(`An authenticated user ${req.tokenData.userId} (probably) has an outdated access token, please relog.`);
       res.status(400).json({ result: false, message: 'Please reauthenticate' })
     }
+  } else {
+    logger.warn(`IP ${req.ip} requested user info but is not logged in.`)
+    res.status(400).json({ result: false, message: 'You are not authenticated' });
   }
 })
