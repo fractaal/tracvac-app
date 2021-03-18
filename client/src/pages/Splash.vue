@@ -14,8 +14,6 @@ export default Vue.extend({
     if (window.StatusBar && window.NavigationBar) {
       StatusBar.styleLightContent()
       StatusBar.backgroundColorByHexString('#1e3a8a')
-      NavigationBar.hide()
-      NavigationBar.backgroundColorByHexString('#1e3a8a', false)
     }
   }
 })
