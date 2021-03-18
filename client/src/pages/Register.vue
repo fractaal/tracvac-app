@@ -1,6 +1,6 @@
 <template>
   <q-page class="mx-12">
-    <div class="bg-blue-500 text-white p-8 rounded-b-3xl">
+    <div class="pt-8">
       <div class="flex flex-row justify-between align-baseline">
         <h4 class="m-0 logo-text">SIGN UP</h4>
         <p>{{activeSection + 1}} of {{template.length}}</p>
