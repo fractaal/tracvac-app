@@ -25,8 +25,8 @@ module.exports = configure(function (ctx) {
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
     boot: [
-
-      'axios'
+      'axios',
+      'router'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -36,10 +36,10 @@ module.exports = configure(function (ctx) {
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
-      // 'ionicons-v4',
+      'ionicons-v4',
       // 'mdi-v5',
-      // 'fontawesome-v5',
-      // 'eva-icons',
+      'fontawesome-v5',
+      'eva-icons',
       // 'themify',
       // 'line-awesome',
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
@@ -91,7 +91,7 @@ module.exports = configure(function (ctx) {
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
-      iconSet: 'material-icons', // Quasar icon set
+      iconSet: 'fontawesome-v5', // Quasar icon set
       lang: 'en-us', // Quasar language pack
       config: {},
 
