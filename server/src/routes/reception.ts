@@ -8,7 +8,7 @@ app.get('/reception', (_, res) => {
     res.json({
       version: require('../../package.json').version,
       name: `Test`,
-      description: `Wow.`,
+      description: `Description.`,
     }); 
   } catch(err) {
     logger.error(`Something happened while trying to send ${_.ip} reception data - ${err.stack}`);
