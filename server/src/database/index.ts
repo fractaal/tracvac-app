@@ -14,7 +14,7 @@ export const knex = Knex({
     user     : 'postgres',
     port     : 35432,
     password : 'postgres',
-    database : 'vaccinePassportDb',
+    database : 'tracvac-db',
   },
 });
 
