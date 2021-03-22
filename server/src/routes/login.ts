@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 import Logger from '../logger';
@@ -18,7 +18,7 @@ app.post('/login', async (req, res) => {
         try {
           let token = jwt.sign({
             userId: user.id,
-          }, secret, {expiresIn: '168h'}) 
+          }, secret, {expiresIn: '168h'})
 
           logger.log(`Login for ${req.body.username} from ${req.ip} succeeded`);
           res.json({ result: true, message: 'Login successful!', token });

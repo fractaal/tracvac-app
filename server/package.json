@@ -14,20 +14,26 @@
     "generate-all": "yarn generate-models && yarn generate-migrations"
   },
   "dependencies": {
+    "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.11",
+    "@types/express-fileupload": "^1.1.6",
     "@types/knex": "^0.16.1",
-    "bcrypt": "^5.0.1",
+    "@types/node-persist": "^3.1.1",
+    "@types/uuid": "^8.3.0",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "chalk": "^4.1.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-fileupload": "^1.2.1",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.1",
+    "node-persist": "^3.1.0",
     "objection": "^2.2.14",
-    "pg": "^8.5.1"
+    "pg": "^8.5.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@types/bcrypt": "^3.0.0",
     "@types/cors": "^2.8.10",
     "@types/jsonwebtoken": "^8.5.0",
     "nodemon": "^2.0.7",
@@ -37,6 +43,9 @@
   "pkg": {
     "scripts": [
       "dist/**/*.js"
+    ],
+    "assets": [
+      "static/**/*"
     ]
   }
 }
