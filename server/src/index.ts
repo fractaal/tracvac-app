@@ -5,7 +5,7 @@ import { port, host } from './constants';
 import { secret } from './secret';
 
 // Libraries
-import express, { NextFunction, Request, Response } from 'express';
+import express, {NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
@@ -14,17 +14,28 @@ import * as database from './database';
 
 // Middleware
 import { json } from 'body-parser';
+import fileUpload from "express-fileupload";
 import cors from 'cors';
 
 const logger = Logger('Main');
 export const app = express();
+export const staticPath = path.resolve(process.cwd(), 'static');
+
+logger.log(`Static files path: ${staticPath}`)
 
 // Use middleware
 app.use(cors());
 app.use(json());
+app.use(fileUpload({
+  limits: { fileSize: 1024 * 1024 }
+}))
+
+// Static
+app.use(express.static(staticPath));
+app.use(express.static(path.resolve(__dirname, '..', 'static')));
 
 // JWT Middleware
-logger.log("Initializing JWT middleware"); 
+logger.log("Initializing JWT middleware");
 app.use(function (req, res, next) {
   const token = req.header('x-access-token');
   if (!token) {
@@ -56,7 +67,7 @@ app.use((req, _, next) => {
   logger.log("Initializing database...");
   await database.connect();
 
-  // API endpoints are stored in the routes folder. This should auto 
+  // API endpoints are stored in the routes folder. This should auto
   logger.log("Initializing API endpoints...")
   const routePath = path.join(__dirname, "/routes");
   for (const filename of fs.readdirSync(routePath)) await import(path.join(routePath, path.basename(filename)));
@@ -67,9 +78,9 @@ app.use((req, _, next) => {
     logger.error(err.stack);
     res.status(500).json({result: false, message: 'Something happened with us while processing your request. Sorry!'});
   })
-  
+
   logger.log(`Binding to port ${port} on ${host}...`)
   app.listen(port, host)
-  
+
   logger.success("Server start complete! Startup took " + (Date.now() - start) + "ms");
 })();
