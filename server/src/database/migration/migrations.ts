@@ -23,13 +23,14 @@ export const migrations = [
       await knex.schema.createTable('users', t => {
         // Primary
         t.increments('id').primary();
-        
+
         // User data needed for stuff like this
         t.string('username').notNullable().index();
         t.string('password').notNullable();
         t.string('email').notNullable();
-        
-        // Updated at / created at 
+        t.string('profilePicturePath');
+
+        // Updated at / created at
         t.dateTime('createdAt')
         t.dateTime('updatedAt')
 
@@ -40,10 +41,11 @@ export const migrations = [
           'Pending',
           'Ready',
         ]).defaultTo('Not Ready');
-        
+        t.string('vaccineManufacturer')
+
         t.enum('category', [
           '01 - Health Care Worker',
-          '02 - Senior Citizen', 
+          '02 - Senior Citizen',
           '03 - Indigent',
           '04 - Uniformed Personnel',
           '05 - Essential Worker',
@@ -166,7 +168,7 @@ export const migrations = [
         // Foreign key
         t.integer('userId').index();
         t.foreign('userId').references('id').inTable('users');
-        
+
         t.boolean('fever').defaultTo('false')
         t.boolean('abdominalPain').defaultTo('false')
         t.boolean('chills').defaultTo('false')
@@ -186,4 +188,4 @@ export const migrations = [
       await knex.schema.dropTable('logs');
     }
   }
-] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[]; 
+] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
