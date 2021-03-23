@@ -1,6 +1,6 @@
 import Logger from '../logger';
 import { app } from '../';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { UserModel } from '../database/models/UserModel';
 
 const logger = Logger('User-Route');
@@ -44,7 +44,7 @@ app.post('/user', async (req, res) => {
         return;
 
       }
-      
+
       res.status(200);
       res.json({result: true, message: 'Registration successful!'});
       logger.log(`Registration request for ${req.ip} succeeded`);
