@@ -76,11 +76,21 @@ export enum UserConsentForVaccinationEnum {
   ITEM_2 = '03 - Unknown'
 }
 
+export enum VaccineReadyStatus {
+  ITEM_0 = 'Not Ready',
+  ITEM_1 = 'Pending',
+  ITEM_2 = 'Ready',
+}
+
 export class UserModel extends BaseModel {
   id!: number;
   username!: string
   password!: string
   email!: string
+  profilePicturePath!: string
+  isVaccinated!: boolean
+  vaccineManufacturer!: string
+  isVaccineReady!: VaccineReadyStatus
   category!: UserCategoryEnum
   categoryID!: string
   philHealthID!: string
