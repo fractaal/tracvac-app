@@ -91,7 +91,7 @@ module.exports = configure(function (ctx) {
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
-      iconSet: 'fontawesome-v5', // Quasar icon set
+      iconSet: 'material-icons', // Quasar icon set
       lang: 'en-us', // Quasar language pack
       config: {},
 
@@ -130,8 +130,8 @@ module.exports = configure(function (ctx) {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: 'Hestia App',
-        short_name: 'Hestia App',
+        name: 'Tracvac',
+        short_name: 'Tracvac',
         description: 'Vaccine passport application.',
         display: 'standalone',
         orientation: 'portrait',
