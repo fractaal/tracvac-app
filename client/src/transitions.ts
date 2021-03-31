@@ -1,4 +1,4 @@
 export default {
-  in: 'slideInLeft',
-  out: 'slideOutRight'
+  in: 'fadeInLeft',
+  out: 'fadeOutRight'
 }
