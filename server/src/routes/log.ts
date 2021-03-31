@@ -21,11 +21,11 @@ app.get('/log', async (request, response, next) => {
     const logs = await LogModel.query()
       .select('*')
       .where('userId', '=', request.tokenData.userId)
-      .orderBy('createdAt');
+      .orderBy('createdAt', 'desc');
 
     response.status(200).json({ result: true, logs })
   } catch (err) { next(err); }
-})  
+})
 
 app.post('/log', async (request, response, next) => {
   try {
