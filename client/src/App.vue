@@ -40,7 +40,7 @@ export default Vue.extend({
         await this.$router.push('/connect')
       }
     } else {
-      // Go to the server connecet screen otherwise
+      // Go to the server connect screen otherwise
       await this.$router.push('/connect')
     }
 
