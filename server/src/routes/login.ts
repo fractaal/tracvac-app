@@ -4,7 +4,8 @@ import jwt from 'jsonwebtoken';
 import Logger from '../logger';
 import { app } from '../';
 import { UserModel } from '../database/models/UserModel';
-import { secret } from '../secret';
+import {getConfig} from "../config";
+
 
 const logger = Logger('Login-Route');
 
@@ -18,7 +19,7 @@ app.post('/login', async (req, res) => {
         try {
           let token = jwt.sign({
             userId: user.id,
-          }, secret, {expiresIn: '168h'})
+          }, (await getConfig()).secret, {expiresIn: '168h'})
 
           logger.log(`Login for ${req.body.username} from ${req.ip} succeeded`);
           res.json({ result: true, message: 'Login successful!', token });
