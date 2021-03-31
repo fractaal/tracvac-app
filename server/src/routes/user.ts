@@ -62,6 +62,37 @@ app.post('/user', async (req, res) => {
   }
 })
 
+app.patch('/user', async (request, response) => {
+  if (!request.isAuthenticated) {
+    response.json({result: false, message: 'You are not authenticated'});
+    return;
+  }
+
+  if (!request.tokenData?.userId) {
+    response.json({result: false, message: 'Please reauthenticate'});
+    return;
+  }
+
+  if (request.body.username) delete request.body.username;
+  if (request.body.password) delete request.body.password;
+  if (request.body.email) delete request.body.email;
+
+  for (const key in request.body) {
+    if (key.toLowerCase().indexOf('date') !== -1) {
+      request.body[key] = new Date(request.body[key]);
+    }
+  }
+
+  try {
+    await UserModel.query().where({id: request.tokenData.userId}).patch(request.body);
+    logger.log(`User ${request.body.username} updated their personal information with ${JSON.stringify(request.body, null, 2)}`)
+    response.json({result: true, message: 'Update successful!'});
+  } catch(e) {
+    logger.error(`Error while trying to update user ${request.tokenData.userId} - ${e}`);
+    response.json({result: false, message:  'Something happened while trying to update your personal information'})
+  }
+})
+
 // Get user info
 app.get('/user', async (req, res) => {
   if (req.isAuthenticated) {
