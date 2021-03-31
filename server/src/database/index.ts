@@ -23,7 +23,8 @@ export const knex = Knex({
   client: 'sqlite3',
   connection: {
     filename: './tracvac-db.sqlite3'
-  }
+  },
+  useNullAsDefault: true,
 })
 
 export async function connect() {
