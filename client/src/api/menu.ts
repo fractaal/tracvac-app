@@ -85,7 +85,7 @@ export const menuLayout = [
 for (const item of menuLayout) {
   if (item.action && !item.disallowRecentlyViewed) {
     const targetAction = item.action
-    item.action = (...args) => {
+    item.action = (...args: unknown[]) => {
       store.recentlyViewed = Object.assign({}, store.recentlyViewed, item)
       console.log(`Recently viewed is now ${store.recentlyViewed?.name}`)
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
