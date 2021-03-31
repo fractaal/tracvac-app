@@ -53,7 +53,6 @@ export default Vue.extend({
     async connectToReception () {
       this.isLoading = true
       if (await recept(this.address)) {
-        this.$q.localStorage.set('server', this.address)
         await new Promise(resolve => setTimeout(resolve, 1000))
         await this.$router.push('/login')
       }
