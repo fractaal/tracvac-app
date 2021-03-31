@@ -141,9 +141,9 @@ export default Vue.extend({
         for (const formItem of section.formItems) {
           console.log(store.userInfo)
           if (formItem.name === 'password' || formItem.name === 'username' || formItem.name === 'email') continue
-          if (formItem.type === 'boolean') this.$set(this.formData, formItem.name, !!(store.userInfo[formItem.name]))
-          else if (formItem.type === 'date') this.$set(this.formData, formItem.name, format(new Date(store.userInfo[formItem.name]), 'yyyy/MM/dd'))
-          else this.$set(this.formData, formItem.name, store.userInfo[formItem.name])
+          if (formItem.type === 'boolean') this.$set(this.formData, formItem.name, !!(store.userInfo![formItem.name]))
+          else if (formItem.type === 'date') this.$set(this.formData, formItem.name, format(new Date(store.userInfo![formItem.name]), 'yyyy/MM/dd'))
+          else this.$set(this.formData, formItem.name, store.userInfo![formItem.name])
         }
       }
       /**
