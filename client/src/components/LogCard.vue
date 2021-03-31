@@ -1,5 +1,5 @@
 <template>
-  <div class="border-solid border-gray-200 mb-5 p-4 shadow-lg rounded-lg">
+  <div class="border border-solid border-gray-200 mb-5 p-4 rounded-lg">
     <div class="flex flex-row items-center justify-between">
       <p class="font-bold">{{formattedDate}}</p>
       <p>{{formattedTime}}</p>
