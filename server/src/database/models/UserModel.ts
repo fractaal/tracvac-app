@@ -112,7 +112,7 @@ export class UserModel extends BaseModel {
   employerName!: string
   employerLGU!: string
   employerAddress!: string
-  emplyerContactNumber!: string
+  employerContactNumber!: string
   pregnancyStatus!: boolean
   withAllergy!: boolean
   allergy!: string
@@ -258,7 +258,7 @@ export class UserModel extends BaseModel {
         employerAddress: {
           type: 'string'
         },
-        emplyerContactNumber: {
+        employerContactNumber: {
           type: 'string'
         },
         pregnancyStatus: {
