@@ -24,7 +24,9 @@ export default route(function ({ Vue }) {
   })
 
   Router.beforeEach((to, from, next) => {
-    if (to.path === '/') next(false)
+    if (to.path === '/' && from.path !== '/') {
+      next(false)
+    }
     store.activeRoute = to.path
     next()
   })
