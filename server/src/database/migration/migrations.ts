@@ -187,5 +187,24 @@ export const migrations = [
     down: async (knex) => {
       await knex.schema.dropTable('logs');
     }
+  },
+  {
+    version: 4,
+    description: 'Create notifications table',
+    up: async (knex: Knex) => {
+      await knex.schema.createTable('notifications', table => {
+        table.increments('id').primary();
+        table.string('title').notNullable()
+        table.string('subtitle')
+        table.string('content').notNullable()
+
+        // Created at / updated at
+        table.dateTime('createdAt')
+        table.dateTime('updatedAt')
+      })
+    },
+    down: async (knex: Knex) => {
+      await knex.schema.dropTable('notifications');
+    }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
