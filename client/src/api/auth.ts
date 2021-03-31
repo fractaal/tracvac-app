@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { api } from './server'
-import { routerInstance } from '../boot/router'
+import { getUserInfo, User } from 'src/api/user'
+import { routerInstance } from 'boot/router'
 import { LocalStorage, Dialog } from 'quasar'
+import { FormData } from 'src/templates/registrationFormTemplate'
+import { store } from 'src/api/store'
 
 let authed = false
 
@@ -19,6 +22,7 @@ export async function login (username: string, password: string): Promise<[boole
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         'X-Access-Token': response.data.token
       }
+      await getUserInfo()
       authed = true
       return [true]
     } else {
@@ -27,6 +31,7 @@ export async function login (username: string, password: string): Promise<[boole
     }
   } catch (err) {
     authed = false
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     return [false, `A clientside error happened while logging you in: ${err}`]
   }
 }
@@ -40,6 +45,7 @@ export async function loginWithToken (): Promise<boolean> {
     }
     const response = await api.get('/is-authorized')
     if (response.data.result === true) {
+      await getUserInfo()
       authed = true
       return true
     }
@@ -47,30 +53,36 @@ export async function loginWithToken (): Promise<boolean> {
   return false
 }
 
-export function logout () {
+export function logout (force: boolean|undefined) {
   console.log('logout called')
-  Dialog.create({
-    message: 'Are you sure you want to log out?',
-    cancel: true,
-    ok: true
-  }).onOk(() => {
+
+  const logoutProcedure = () => {
     const token = LocalStorage.getItem('token')
 
     if (token) {
+      store.userInfo = Object.assign({}, {}) as User
       LocalStorage.remove('token')
     }
 
     routerInstance.push('/login')
-  })
+  }
+
+  if (force) {
+    logoutProcedure()
+  } else {
+    Dialog.create({ message: 'Are you sure you want to log out?', cancel: true, ok: true }).onOk(logoutProcedure)
+  }
 }
 
-export async function register (formData: Record<string, any>): Promise<[boolean, string?]> {
+export async function register (formData: FormData): Promise<[boolean, string?]> {
   console.log('Registering...')
 
   try {
     const response = await api.post('/user', formData)
 
     if (response.data.result) {
+      // Login the user with form data username and password.
+      await login(formData.username as string, formData.password as string)
       authed = true
       return [true]
     } else {
