@@ -1,44 +1,12 @@
-config:
-  model:
-    classNamePrefix:
-    classNamePostfix: Model
-
 models:
-  Log:
-    tableName: logs
-    relations:
-      users:
-        relation: Model.BelongsToOneRelation
-        modelClass: User
-        join:
-          from: logs.userId
-          to: users.id
+  Notification:
+    tableName: notifications
     jsonSchema:
+      required: ['title', 'content']
       properties:
-        fever:
-          type: boolean
-          default: false
-        abdominalPain:
-          type: boolean
-          default: false
-        chills:
-          type: boolean
-          default: false
-        cough:
-          type: boolean
-          default: false
-        diarrhea:
-          type: boolean
-          default: false
-        difficultyBreathing:
-          type: boolean
-          default: false
-        headache:
-          type: boolean
-          default: false
-        soreThroat:
-          type: boolean
-          default: false
-        nauseaOrVomiting:
-          type: boolean
-          default: false
+        title:
+          type: string
+        subtitle:
+          type: string
+        content:
+          type: string
