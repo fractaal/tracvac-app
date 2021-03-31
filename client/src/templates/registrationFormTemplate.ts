@@ -1,6 +1,6 @@
-import { Section } from './baseTemplate'
+import { TypeMap } from './baseTemplate'
 
-export default [
+const template = [
   {
     title: 'Personal Information',
     description: 'Input your personal data here.',
@@ -8,56 +8,59 @@ export default [
       {
         name: 'lastName',
         displayName: 'Last Name',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'firstName',
         displayName: 'First Name',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'middleName',
         displayName: 'Middle Name',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'suffix',
         displayName: 'Suffix',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'contactNumber',
         displayName: 'Contact Number',
-        type: 'Number',
+        type: 'number',
         format: 'Text',
-        limit: 12
+        limit: 12,
+        rules: [
+          (val: string) => /^\d+$/.test(val) || 'Must be a number.'
+        ]
       },
       {
         name: 'fullAddress',
         displayName: 'Full Address',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'province',
         displayName: 'Province',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'municipalityOrCity',
         displayName: 'Municipality or City',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'barangay',
         displayName: 'Barangay',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
@@ -68,13 +71,13 @@ export default [
           '02 - Male',
           '03 - Not To Disclose'
         ],
-        type: 'String',
+        type: 'string',
         format: 'Dropdown'
       },
       {
         name: 'dateOfBirth',
         displayName: 'Date of Birth',
-        type: 'Date',
+        type: 'date',
         format: 'DatePicker'
       },
       {
@@ -87,15 +90,15 @@ export default [
           '04 - Separated/Annulled',
           '05 - Living with Partner'
         ],
-        type: 'String',
+        type: 'string',
         format: 'Dropdown'
       },
       {
         name: 'pregnancyStatus',
         displayName: 'Pregnant?',
-        type: 'Boolean',
+        type: 'boolean',
         format: 'Dropdown',
-        conditionalFunction: (data) => {
+        conditionalFunction: (data: Record<string, any>) => {
           return data.sex === '01 - Female'
         }
       }
@@ -116,19 +119,19 @@ export default [
           '05 - Essential Worker',
           '06 - Other'
         ],
-        type: 'String',
+        type: 'string',
         format: 'Dropdown'
       },
       {
         name: 'categoryID',
         displayName: 'Category ID',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'philHealthID',
         displayName: 'Philhealth ID',
-        type: 'Number',
+        type: 'number',
         format: 'Text',
         limit: 12
       },
@@ -143,7 +146,7 @@ export default [
           '04 - Private Practitioner',
           '05 - Others'
         ],
-        type: 'String',
+        type: 'string',
         format: 'Dropdown'
       },
       {
@@ -170,42 +173,45 @@ export default [
           '18 - Administrative Staff',
           '19 - Other Workers in Frontline Health Services'
         ],
-        type: 'String',
+        type: 'string',
         format: 'Dropdown'
       },
       {
         name: 'otherProfession',
         displayName: 'Please specify profession:',
-        type: 'String',
+        type: 'string',
         format: 'Text',
-        conditionalFunction (data) {
+        conditionalFunction (data: Record<string, any>) {
           return data.profession === '19 - Other Workers in Frontline Health Services'
         }
       },
       {
         name: 'employerName',
         displayName: 'Employer Name',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'employerLGU',
         displayName: 'Employer LGU',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'employerAddress',
         displayName: 'Employer Address',
-        type: 'String',
+        type: 'string',
         format: 'Text'
       },
       {
         name: 'employerContactNumber',
         displayName: 'Employer Contact Number',
-        type: 'Number',
+        type: 'number',
         format: 'Text',
-        limit: 12
+        limit: 12,
+        rules: [
+          (val: string) => /^\d+$/.test(val) || 'Must be a number.'
+        ]
       }
     ]
   },
@@ -217,35 +223,35 @@ export default [
         name: 'directCOVID',
         displayName: 'Providing care?',
         description: 'Are you providing direct COVID care to a patient?',
-        type: 'Boolean',
+        type: 'boolean',
         format: 'Dropdown'
       },
       {
         name: 'withAllergy',
         displayName: 'With Allergy?',
-        type: 'Boolean',
+        type: 'boolean',
         format: 'Dropdown'
       },
       {
         name: 'allergy',
         displayName: 'Allergy',
-        type: 'String',
+        type: 'string',
         format: 'Text',
-        conditionalFunction (data) {
-          if (data.withAllergy && data.withAllergy.value) { return true } else { return false }
+        conditionalFunction (data: Record<string, any>) {
+          return !!data.withAllergy?.value
         }
       },
       {
         name: 'withComorbidities',
         displayName: 'With Comorbidities?',
         description: 'A comorbidity is the simultaneous presence of two or more diseases or medical conditions in a patient.',
-        type: 'Boolean',
+        type: 'boolean',
         format: 'Dropdown'
       },
       {
         name: 'comorbidity',
         displayName: 'Comorbidity',
-        type: 'String',
+        type: 'string',
         options: [
           '01 - Hypertension',
           '02 - Heart Disease',
@@ -257,31 +263,31 @@ export default [
           '08 - Others'
         ],
         format: 'Dropdown',
-        conditionalFunction (data) {
-          if (data.withComorbidities && data.withComorbidities.value) { return true } else { return false }
+        conditionalFunction (data: Record<string, any>) {
+          return !!(data.withComorbidities && data.withComorbidities.value)
         }
       },
       {
         name: 'covidHistory',
         displayName: 'Diagnosed with COVID-19?',
         description: 'Were you at all diagnosed with COVID-19?',
-        type: 'Boolean',
+        type: 'boolean',
         format: 'Dropdown'
       },
       {
         name: 'covidDate',
         displayName: 'Date of First Positive Result',
         description: 'The date of when you were first diagnosed with COVID-19.',
-        type: 'Date',
+        type: 'date',
         format: 'DatePicker',
-        conditionalFunction (data) {
+        conditionalFunction (data: Record<string, any>) {
           if (data.covidHistory && data.covidHistory.value) return true; else return false
         }
       },
       {
         name: 'covidClassification',
         displayName: 'Classification of Infection',
-        type: 'String',
+        type: 'string',
         options: [
           '01 - Asymptomatic',
           '02 - Mild',
@@ -301,7 +307,7 @@ export default [
         name: 'consentForDataCollection',
         displayName: 'Electronic Informed Consent',
         description: 'Have you provided electronic informed consent for data collection?',
-        type: 'String',
+        type: 'string',
         options: [
           '01 - Yes',
           '02 - No',
@@ -313,7 +319,7 @@ export default [
         name: 'consentForVaccination',
         displayName: 'Consent For Vaccination',
         description: 'Have you provided initial consent for vaccination?',
-        type: 'String',
+        type: 'string',
         options: [
           '01 - Yes',
           '02 - No',
@@ -330,22 +336,37 @@ export default [
       {
         name: 'username',
         displayName: 'Username',
-        type: 'String',
-        format: 'Text'
+        type: 'string',
+        format: 'Text',
+        rules: [
+          (val: string) => val.length >= 8 || 'Your username must be at least 8 characters.'
+        ]
       },
       {
         name: 'email',
         displayName: 'E-mail',
-        type: 'String',
-        format: 'Text'
+        type: 'string',
+        format: 'Text',
+        rules: [
+          (val: string) => /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val) || 'Choose a valid email address.'
+        ]
       },
       {
         name: 'password',
         displayName: 'Password',
-        type: 'String',
+        type: 'string',
         format: 'Password'
       }
     ]
   }
 
-] as Section[]
+] as const
+
+type formItemName = (typeof template)[number]['formItems'][number]['name'] & string;
+type formItemType = TypeMap[(typeof template)[number]['formItems'][number]['type']];
+
+export type FormData = {
+  [x in formItemName]?: formItemType
+}
+
+export default template

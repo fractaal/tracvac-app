@@ -19,3 +19,17 @@ export interface Section {
   description: string;
   formItems: FormItem[];
 }
+
+export interface TypeMap {
+    string: string,
+    number: number,
+    boolean: boolean,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    symbol: Symbol,
+    undefined: undefined,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    object: object,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    function: Function,
+    date: Date,
+}

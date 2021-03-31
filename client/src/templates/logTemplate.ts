@@ -1,6 +1,6 @@
-import { Section } from './baseTemplate'
+import { TypeMap } from './baseTemplate'
 
-export default [
+const template = [
   {
     title: 'Create a Log',
     formItems: [
@@ -56,8 +56,17 @@ export default [
         displayName: 'Nausea or Vomiting',
         description: 'An uneasiness of the stomach which could then result in the involuntary emptying of stomach contents through the mouth.',
         name: 'nauseaOrVomiting',
-        type: 'boolean'
+        type: 'string'
       }
     ]
   }
-] as Section[]
+] as const
+
+type formItemName = (typeof template)[number]['formItems'][number]['name'] | string;
+type formItemType = TypeMap[(typeof template)[number]['formItems'][number]['type']];
+
+export type LogData = {
+  [x in formItemName]?: formItemType;
+}
+
+export default template
