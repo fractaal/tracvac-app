@@ -1,6 +1,6 @@
 import { api } from './server'
 import { store } from './store'
-import { Notify } from 'quasar'
+import notify from 'src/api/notify'
 
 interface LogsResponse {
   result: boolean;
@@ -45,11 +45,11 @@ export async function getLogs () {
       store.logs = response.logs
       return true
     } else {
-      Notify.create({ message: 'Getting logs failed.', type: 'negative' })
+      notify.negative('Getting logs failed.')
       return false
     }
   } catch (err) {
-    Notify.create({ message: `Getting logs failed: ${err.message}`, type: 'negative' })
+    notify.negative(`Getting logs failed: ${err.message}`)
     return false
   }
 }
@@ -60,14 +60,14 @@ export async function postLog (logData: Log) {
     const response = await (await api.post('/log', logData)).data as {result: boolean; message?: string}
 
     if (response.result) {
-      Notify.create({ message: 'Log posted!', type: 'positive', position: 'center' })
+      notify.positive('Log posted!')
       return true
     } else {
-      Notify.create({ message: 'Log post failed!', type: 'negative', position: 'center' })
+      notify.negative('Log post failed!')
       return false
     }
   } catch (err) {
-    Notify.create({ message: 'Log post failed!', type: 'negative', position: 'center' })
+    notify.negative('Log post failed!')
     return false
   }
 }
