@@ -10,15 +10,32 @@
           <router-view/>
         </keep-alive>
       </transition>
-      <q-footer class="bg-white shadow-lg">
+      <q-footer class="bg-white shadow-5 rounded-t-2xl mx-4">
         <q-tabs
-          v-model="activeTab"
-          class="text-black shadow-lg px-4 rounded-t-md"
+          v-model="store.activeRoute"
+          class="text-black rounded-t-2xl"
         >
-          <q-tab name="Profile" icon="fas fa-user" label="" @click="$router.push('/profile')" />
-          <q-tab name="Home" icon="fas fa-home" label="" @click="$router.push('/home')" />
-          <q-tab name="Logs" icon="fas fa-pen-fancy" label="" @click="$router.push('/logs')"/>
-        <q-tab name="Vaccine" icon="fas fa-syringe" label="" @click="$router.push('/vaccine')"/>
+          <q-tab
+            name="/profile"
+            icon="fas fa-user"
+            label="Profile"
+            @click="$router.push('/profile')"
+            :class="store.activeRoute === '/profile' ? 'text-blue-500' : ''"
+          />
+          <q-tab
+            name="/home"
+            icon="fas fa-home"
+            label="Home"
+            @click="$router.push('/home')"
+            :class="store.activeRoute === '/home' ? 'text-blue-500' : ''"
+          />
+          <q-tab
+            name="/logs"
+            icon="fas fa-pen-fancy"
+            label="Logs"
+            @click="$router.push('/logs')"
+            :class="store.activeRoute === '/logs' ? 'text-blue-500' : ''"
+          />
         </q-tabs>
       </q-footer>
     </q-page-container>
@@ -27,6 +44,7 @@
 
 <script lang="ts">
 import transition from '../transitions'
+import { store } from 'src/api/store'
 
 import Vue from 'vue'
 
@@ -34,8 +52,8 @@ export default Vue.extend({
   name: 'MainLayout',
   data () {
     return {
-      transition,
-      activeTab: ''
+      store,
+      transition
     }
   }
 })
