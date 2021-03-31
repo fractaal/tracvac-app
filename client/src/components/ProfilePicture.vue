@@ -11,6 +11,7 @@ import { LocalStorage } from 'quasar'
 export default Vue.extend({
   name: 'ProfilePicture',
   created () {
+    // @ts-ignore
     this.fullPath = new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server'))
   },
   data () {
@@ -21,6 +22,7 @@ export default Vue.extend({
   },
   watch: {
     'store.userInfo.profilePicturePath': function () {
+      // @ts-ignore
       this.fullPath = new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server'))
     }
   }
