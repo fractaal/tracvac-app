@@ -74,6 +74,7 @@ module.exports = {
     'one-var': 'off',
     'no-undef': 'off',
 
+    'no-unused-vars': 'warn',
     'import/first': 'off',
     'import/named': 'error',
     'import/namespace': 'error',
@@ -91,6 +92,12 @@ module.exports = {
     '@typescript-eslint/no-unsafe-member-access': 'off',
     '@typescript-eslint/no-unsafe-call': 'off',
     '@typescript-eslint/no-floating-promises': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'warn',
+    '@typescript-eslint/ban-types': 'warn',
+    '@typescript-eslint/no-unsafe-assignment': 'warn',
+    '@typescript-eslint/require-await': 'warn',
+    '@typescript-eslint/ban-ts-comment': 'warn',
+
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
