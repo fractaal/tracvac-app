@@ -23,7 +23,8 @@ const routes: RouteConfig[] = [
       { path: '/view-log', component: () => import('pages/ViewLog.vue') },
       { path: '/notifications', component: () => import('pages/Notifications.vue') },
       { path: '/preferences', component: () => import('pages/Preferences.vue') },
-      { path: '/faqs', component: () => import('pages/FAQs.vue') }
+      { path: '/faqs', component: () => import('pages/FAQs.vue') },
+      { path: '/change-profile-picture', component: () => import('pages/ChangeProfilePicture.vue') }
     ]
   },
 
