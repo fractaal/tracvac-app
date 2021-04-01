@@ -70,7 +70,7 @@ export const migrations = [
           '03 - Not to Disclose'
         ]).notNullable();
 
-        t.date('dateOfBirth').notNullable();
+        t.string('dateOfBirth').notNullable();
 
         t.enum('civilStatus', [
           '01 - Single',
@@ -132,7 +132,7 @@ export const migrations = [
         ]).nullable();
 
         t.boolean('covidHistory');
-        t.date('covidDate');
+        t.string('covidDate');
         t.enum('covidClassification', [
           '01 - Asymptomatic',
           '02 - Mild',
@@ -205,6 +205,23 @@ export const migrations = [
     },
     down: async (knex: Knex) => {
       await knex.schema.dropTable('notifications');
+    }
+  },
+  {
+    version: 5,
+    description: 'Create PUI/PUM fields in users',
+    up: async (knex: Knex) => {
+      await knex.schema.table("users", table => {
+        // Is PUI / Is PUM fields
+        table.boolean("isPUI").defaultTo(false)
+        table.boolean("isPUM").defaultTo(false)
+      })
+    },
+    down: async (knex: Knex) => {
+      await knex.schema.table("users", table => {
+        table.dropColumn("isPUI");
+        table.dropColumn("isPUM");
+      })
     }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];

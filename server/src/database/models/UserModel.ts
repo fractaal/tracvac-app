@@ -88,6 +88,8 @@ export class UserModel extends BaseModel {
   password!: string
   email!: string
   profilePicturePath!: string
+  isPUI!: boolean
+  isPUM!: boolean
   isVaccinated!: boolean
   vaccineManufacturer!: string
   isVaccineReady!: VaccineReadyStatus
@@ -206,8 +208,8 @@ export class UserModel extends BaseModel {
           enum: ['01 - Female', '02 - Male', '03 - Not to Disclose']
         },
         dateOfBirth: {
-          type: 'date',
-          format: 'date'
+          type: 'string',
+          // format: 'date'
         },
         employed: {
           type: 'string',
@@ -291,8 +293,8 @@ export class UserModel extends BaseModel {
           type: 'boolean'
         },
         covidDate: {
-          type: 'date',
-          format: 'date'
+          type: 'string',
+          // format: 'date'
         },
         covidClassification: {
           type: 'string',
@@ -311,6 +313,21 @@ export class UserModel extends BaseModel {
         consentForVaccination: {
           type: 'string',
           enum: ['01 - Yes', '02 - No', '03 - Unknown']
+        },
+        isPUI: {
+          type: 'boolean'
+        },
+        isPUM: {
+          type: 'boolean'
+        },
+        isVaccineReady: {
+          type: 'string'
+        },
+        isVaccinated: {
+          type: 'boolean'
+        },
+        vaccineManufacturer: {
+          type: 'string'
         }
       }
     }

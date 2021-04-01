@@ -1,16 +1,20 @@
 import { app, staticPath } from '../';
 import {v4 } from 'uuid';
 import { UserModel } from "../database/models/UserModel";
+import fs from 'fs';
 import Logger from '../logger';
 import path from 'path';
 import {UploadedFile} from "express-fileupload";
 
 const logger = Logger('Profile Picture Route');
 
+// Make a new folder inside the static route
+if (!fs.existsSync(path.resolve(staticPath, 'users'))) fs.mkdirSync(path.resolve(staticPath, 'users'))
+
 app.post('/upload-profile-picture', async (request, response) => {
     if (request.isAuthenticated) {
         if (request.tokenData.userId) {
-            const unique = v4();
+            const unique = "users/" + v4();
             const img = request.files?.file as unknown as UploadedFile;
 
             if (img) {

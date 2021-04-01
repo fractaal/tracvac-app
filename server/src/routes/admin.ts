@@ -3,7 +3,7 @@ import path from 'path';
 import Logger from '../logger';
 import {Request, Response, NextFunction} from "express";
 import { UserModel } from "../database/models/UserModel";
-import { raw } from 'objection';
+import { raw, transaction } from 'objection';
 import {NotificationModel} from "../database/models/NotificationModel";
 import {getConfig, setConfig} from "../config";
 import Config from "../interfaces/config";
@@ -86,10 +86,26 @@ app.post('/admin/getUsers', async (request, response) => {
                     raw("firstName || ' ' || middleName || ' ' || lastName"),
                     'LIKE',
                     `%${request.body.filter}%`
+                ).where(
+                    (() => {
+                        const where = {} as Record<string,any>;
+                        if (request.body.showPUMs) where.isPUM = true;
+                        if (request.body.showPUIs) where.isPUI = true;
+                        return where
+                    })()
                 )
                 .page(parseInt(request.body.page), parseInt(request.body.pageSize));
         } else {
-            result = await UserModel.query().page(parseInt(request.body.page), parseInt(request.body.pageSize));
+            result = await UserModel.query()
+                .where(
+                    (() => {
+                        const where = {} as Record<string,any>;
+                        if (request.body.showPUMs) where.isPUM = true;
+                        if (request.body.showPUIs) where.isPUI = true;
+                        return where
+                    })()
+                )
+                .page(parseInt(request.body.page), parseInt(request.body.pageSize));
         }
         response.json(result);
     } else {
@@ -98,25 +114,37 @@ app.post('/admin/getUsers', async (request, response) => {
 })
 
 app.post('/admin/editUser', async (request, response) => {
-    if (
-        request.body.userId !== undefined &&
-        request.body.isVaccinated !== undefined &&
-        request.body.vaccineManufacturer !== undefined &&
-        request.body.isVaccineReady !== undefined
-    ) {
-        try {
-            await UserModel.query().where({ id: request.body.userId }).patch({
-                isVaccinated: request.body.isVaccinated,
-                vaccineManufacturer: request.body.vaccineManufacturer,
-                isVaccineReady: request.body.isVaccineReady,
-            });
-            response.json({result: true})
-        } catch (e) {
-            response.status(500).json({result: false, message: 'Something happened while trying to update the user.'});
+    if (request.body.data) {
+        for (const user of request.body.data as Partial<UserModel>[]) {
+            if (
+                user.id === undefined &&
+                user.isVaccinated === undefined &&
+                user.vaccineManufacturer === undefined &&
+                user.isVaccineReady === undefined &&
+                user.isPUM === undefined &&
+                user.isPUI === undefined
+            ) response.status(400).json({result: false, message: "Missing parameters."})
         }
-    } else {
-        console.log(request.body);
-        response.status(400).json({result: false, message: "Missing params"})
+
+        try {
+            console.log(request.body.data)
+            await UserModel.transaction(async (trx) => {
+                for (const user of request.body.data as Partial<UserModel>[]) {
+                    await UserModel.query(trx).where({ id: user.id }).patch({
+                        isVaccinated: !!user.isVaccinated,
+                        vaccineManufacturer: user.vaccineManufacturer,
+                        isVaccineReady: user.isVaccineReady,
+                        isPUI: !!user.isPUI,
+                        isPUM: !!user.isPUM,
+                    });
+                }
+            })
+            response.json({result: true, message: "Changes committed!"})
+        } catch (err) {
+            logger.error(`Error occurred while updating users: ${err}`)
+            response.status(500).json({result: false, message: 'Something happened while trying to update the users. The changes have not been committed.'});
+        }
+
     }
 })
 
