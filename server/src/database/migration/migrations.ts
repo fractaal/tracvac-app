@@ -34,6 +34,10 @@ export const migrations = [
         t.dateTime('createdAt')
         t.dateTime('updatedAt')
 
+        // Is PUI / Is PUM fields
+        t.boolean("isPUI").defaultTo(false)
+        t.boolean("isPUM").defaultTo(false)
+
         // Vaccination status
         t.boolean('isVaccinated').defaultTo(false);
         t.enum('isVaccineReady', [
