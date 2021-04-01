@@ -2,7 +2,7 @@ import { api } from './server'
 import { store } from './store'
 import notify from 'src/api/notify'
 import { logout } from 'src/api/auth'
-import { FormData } from 'src/templates/registrationFormTemplate'
+// import { FormData } from 'src/templates/registrationFormTemplate'
 
 interface UserInfoResponse {
   result: boolean;
