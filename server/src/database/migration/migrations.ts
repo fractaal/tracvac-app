@@ -74,7 +74,7 @@ export const migrations = [
           '03 - Not to Disclose'
         ]).notNullable();
 
-        t.date('dateOfBirth').notNullable();
+        t.string('dateOfBirth').notNullable();
 
         t.enum('civilStatus', [
           '01 - Single',
@@ -136,7 +136,7 @@ export const migrations = [
         ]).nullable();
 
         t.boolean('covidHistory');
-        t.date('covidDate');
+        t.string('covidDate');
         t.enum('covidClassification', [
           '01 - Asymptomatic',
           '02 - Mild',
