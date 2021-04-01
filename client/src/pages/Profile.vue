@@ -2,7 +2,7 @@
   <q-page>
     <q-pull-to-refresh @refresh="getUserInfo">
       <custom-header title="Profile" class="bg-blue-500 text-white m-0"/>
-      <div class="bg-blue-500 p-8 -mt-16 text-white mb-8 rounded-b-3xl">
+      <div class="bg-blue-500 p-8 -mt-12 text-white mb-8 rounded-b-3xl">
         <profile-picture class="block mx-auto w-24 h-24"/>
         <h5 class="my-5 text-center text-bold">{{store.userInfo.firstName}} {{store.userInfo.middleName}} {{store.userInfo.lastName}}</h5>
       </div>
