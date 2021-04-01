@@ -34,10 +34,6 @@ export const migrations = [
         t.dateTime('createdAt')
         t.dateTime('updatedAt')
 
-        // Is PUI / Is PUM fields
-        t.boolean("isPUI").defaultTo(false)
-        t.boolean("isPUM").defaultTo(false)
-
         // Vaccination status
         t.boolean('isVaccinated').defaultTo(false);
         t.enum('isVaccineReady', [
@@ -209,6 +205,23 @@ export const migrations = [
     },
     down: async (knex: Knex) => {
       await knex.schema.dropTable('notifications');
+    }
+  },
+  {
+    version: 5,
+    description: 'Create PUI/PUM fields in users',
+    up: async (knex: Knex) => {
+      await knex.schema.table("users", table => {
+        // Is PUI / Is PUM fields
+        table.boolean("isPUI").defaultTo(false)
+        table.boolean("isPUM").defaultTo(false)
+      })
+    },
+    down: async (knex: Knex) => {
+      await knex.schema.table("users", table => {
+        table.dropColumn("isPUI");
+        table.dropColumn("isPUM");
+      })
     }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
