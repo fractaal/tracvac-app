@@ -35,7 +35,7 @@ export default Vue.extend({
     const symptoms = []
 
     for (const key in this.log) {
-      if (this.log[key] === true) {
+      if (!!(this.log[key]) && displayNameMappings[key]) {
         symptoms.push(displayNameMappings[key])
       }
     }
