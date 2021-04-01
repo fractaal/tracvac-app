@@ -80,11 +80,12 @@ app.patch('/user', async (request, response) => {
   if (request.body.password) delete request.body.password;
   if (request.body.email) delete request.body.email;
 
+  /** Comment out date transforms
   for (const key in request.body) {
     if (key.toLowerCase().indexOf('date') !== -1) {
       request.body[key] = new Date(request.body[key]);
     }
-  }
+  }*/
 
   try {
     await UserModel.query().where({id: request.tokenData.userId}).patch(request.body);
