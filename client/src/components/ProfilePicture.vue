@@ -1,18 +1,37 @@
 <template>
-  <img class="block rounded-full shadow-xl ring-4 ring-white" :src="fullPath" alt="">
+  <div>
+    <q-img class="rounded-full shadow-xl ring-4 ring-white" :src="fullPath" ratio="1">
+      <q-menu>
+        <q-list>
+          <q-item clickable v-ripple v-close-popup>
+            <q-item-section @click="$router.push('/change-profile-picture')">
+              Change Profile Picture
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
+    </q-img>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { store } from 'src/api/store'
-import path from 'path'
 import { LocalStorage } from 'quasar'
+
 
 export default Vue.extend({
   name: 'ProfilePicture',
   created () {
-    // @ts-ignore
-    this.fullPath = new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server'))
+    this.getProfilePicturePath()
+  },
+  methods: {
+    getProfilePicturePath() {
+      // @ts-ignore
+      this.fullPath = store.userInfo?.profilePicturePath ?
+        new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server') as string) :
+        "/profile-placeholder.png";
+    },
   },
   data () {
     return {
@@ -22,8 +41,7 @@ export default Vue.extend({
   },
   watch: {
     'store.userInfo.profilePicturePath': function () {
-      // @ts-ignore
-      this.fullPath = new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server'))
+      this.getProfilePicturePath();
     }
   }
 })
