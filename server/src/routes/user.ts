@@ -9,7 +9,8 @@ const logger = Logger('User-Route');
 app.post('/user', async (req, res) => {
   try {
 
-    const match = await (await UserModel.query()).find(user => user.username === req.body.username)
+    // const match = await (await UserModel.query()).find(user => user.username === req.body.username)
+    const match = await UserModel.query().findOne({username: req.body.username})
     if (match) {
 
       res.status(200);
@@ -21,11 +22,13 @@ app.post('/user', async (req, res) => {
       try {
 
         req.body.password = await bcrypt.hash(req.body.password, await bcrypt.genSalt());
+
+        /** Commented out because transforming date fields to date objects is probably a bad idea
         for (const key in req.body) {
           if (key.toLowerCase().indexOf('date') !== -1) {
             req.body[key] = new Date(parseInt(req.body[key]) * 1000);
           }
-        }
+        }*/
 
         await UserModel.query().insert({
           ...req.body
