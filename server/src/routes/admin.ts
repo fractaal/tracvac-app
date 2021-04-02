@@ -10,6 +10,7 @@ import {getConfig, setConfig} from "../config"
 import Config from "../interfaces/config"
 import { internalStaticPath } from '../'
 import open from 'open'
+import os from 'os'
 
 import ExcelJS from 'exceljs'
 import registrationFormTemplate from "../database/templates/registrationFormTemplate";
@@ -213,6 +214,7 @@ app.post('/admin/viewLogs', async (request, response) => {
 })
 
 app.get('/admin/export', async (request, response) => {
+    const start = Date.now();
     logger.log(`Performing user data export!`)
 
     let workbook: ExcelJS.Workbook;
@@ -269,13 +271,16 @@ app.get('/admin/export', async (request, response) => {
             sheet.addRow(user);
         }
 
-        const pathToWrite = path.resolve(process.cwd(), 'export.xlsx');
+        const pathToWrite = path.resolve(os.homedir(), 'Desktop', 'export.xlsx');
 
         await workbook.xlsx.writeFile(pathToWrite);
         await open(pathToWrite)
 
         response.json({result: true, message: `Export complete!`});
-        logger.success(`Export complete. Opening the exported file.`)
+        logger.success(`User data export complete.`)
+        logger.success(`Took ${Date.now() - start}ms for ${allUsers.length} users`)
+        logger.success(`Export path: ${pathToWrite}`)
+        logger.success(`Auto-opening for convenience.`)
     } catch(err) {
         logger.error(`Error occurred while exporting data: ${err}`);
         response.status(500).json({
