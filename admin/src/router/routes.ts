@@ -6,9 +6,10 @@ const routes: RouteConfig[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/Index.vue') },
-      { path: '/config', component: () => import('pages/Configuration.vue')},
-      { path: '/notif', component: () => import('pages/Notifications.vue')},
-      { path: '/addNotif', component: () => import('pages/AddNotification.vue')}
+      { path: '/config', component: () => import('pages/Configuration.vue') },
+      { path: '/notif', component: () => import('pages/Notifications.vue') },
+      { path: '/addNotif', component: () => import('pages/AddNotification.vue') },
+      { path: '/view-logs', component: () => import('pages/ViewLogs.vue') }
     ]
   },
   // Always leave this as last one,
