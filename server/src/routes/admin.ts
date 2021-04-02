@@ -2,9 +2,10 @@ import { app } from "../index";
 import path from 'path';
 import Logger from '../logger';
 import {Request, Response, NextFunction} from "express";
-import { UserModel } from "../database/models/UserModel";
-import { raw, transaction } from 'objection';
+import { raw } from 'objection';
 import {NotificationModel} from "../database/models/NotificationModel";
+import { UserModel } from "../database/models/UserModel";
+import {LogModel} from "../database/models/LogModel";
 import {getConfig, setConfig} from "../config";
 import Config from "../interfaces/config";
 import { internalStaticPath } from '../'
@@ -127,7 +128,6 @@ app.post('/admin/editUser', async (request, response) => {
         }
 
         try {
-            console.log(request.body.data)
             await UserModel.transaction(async (trx) => {
                 for (const user of request.body.data as Partial<UserModel>[]) {
                     await UserModel.query(trx).where({ id: user.id }).patch({
@@ -192,3 +192,22 @@ app.post('/admin/deleteNotification', async (request, response) => {
         response.status(400).json({result: false, message: "Notification ID missing"});
     }
 })
+
+app.post('/admin/viewLogs', async (request, response) => {
+    if (request.body.userId) {
+        try {
+            const result = await LogModel.query().select('*').where({userId: request.body.userId}).orderBy('createdAt', 'desc');
+            logger.log(`Returning logs for user ${request.body.userId}`)
+            response.json({result: true, data: result});
+        } catch(err) {
+            logger.error(`Notification retrieval for user ${request.body.userId} failed: ${err}`)
+            response.status(500).json({result: false, message: "Something happened while trying to retrieve notifications"})
+        }
+    } else {
+        response.status(400).json({result: false, message: "User ID missing"});
+    }
+})
+
+app.get('/admin/export', async (request, response) => {
+
+});
