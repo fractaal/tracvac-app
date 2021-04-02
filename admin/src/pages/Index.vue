@@ -56,6 +56,14 @@
         <q-page-sticky :offset='[20, 20]' position="bottom-right">
           <q-btn
             class="p-2 mx-2"
+            label=" EXPORT AS EXCEL"
+            color="secondary"
+            icon="fas fa-file-export"
+            @click="exportToExcel"
+            fab
+          />
+          <q-btn
+            class="p-2 mx-2"
             :disable="selected.length !== 1"
             label=" VIEW LOGS"
             color="secondary"
@@ -141,6 +149,34 @@ export default Vue.extend({
     async viewLogs() {
       store.userShownInLogs = Object.assign({}, this.selected[0]);
       await this.$router.push(`/view-logs`);
+    },
+    async exportToExcel() {
+      this.$q.dialog({
+        title: "Export user data to an excel file?",
+        message: `You will be exporting a total of ${this.userPagination.rowsNumber} user's data.`,
+        cancel: true,
+      }).onOk(async () => {
+        try {
+          const response = await this.$axios.get('/admin/export');
+
+          if (response.data.result) {
+            this.$q.notify({
+              message: 'Export successful! Export file located on the Desktop.',
+              type: 'positive',
+            })
+          } else {
+            this.$q.notify({
+              message: 'Export failed! Check server console for details.',
+              type: 'negative',
+            })
+          }
+        } catch(err) {
+          this.$q.notify({
+            message: 'Export failed! ' + err,
+            type: 'negative',
+          })
+        }
+      })
     }
   },
   data() {
