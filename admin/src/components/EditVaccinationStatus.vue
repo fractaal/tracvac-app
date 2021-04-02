@@ -23,7 +23,7 @@
               <q-btn outline color="negative" label="Vaccine Not Ready" @click="toggleVaccineStatus(user, 'Not Ready')"/>
               <q-btn outline color="primary" class="ml-1" label="Vaccine Pending" @click="toggleVaccineStatus(user, 'Pending')"/>
               <q-btn outline color="positive" class="ml-1" label="Vaccine Ready" @click="toggleVaccineStatus(user, 'Ready')"/>
-              <q-input :rules="[val => !!val || 'Must not be empty.']" class="float-right w-2/5" outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
+              <q-input class="float-right w-2/5" outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
               <br/>
               <q-btn class="mt-2" outline label="Mark as not vaccinated" @click="toggleVaccinated(user, false)"/>
               <q-btn class="mt-2 ml-1" outline label="Mark as vaccinated" color="secondary" @click="toggleVaccinated(user, true)"/>
