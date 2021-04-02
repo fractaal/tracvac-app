@@ -249,6 +249,8 @@ export default Vue.extend({
           })
         }
       } else if (this.$props.mode === 'edit') {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         if (await setUserInfo(dataToSubmit)) { this.$router.back() }
       }
     },

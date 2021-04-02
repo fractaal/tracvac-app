@@ -15,38 +15,38 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import CustomHeader from "components/CustomHeader.vue"
+import CustomHeader from 'components/CustomHeader.vue'
 import { uploadProfilePicture } from 'src/api/user'
 
 export default Vue.extend({
   components: { CustomHeader },
-  name: "ChangeProfilePicture",
-  activated() {
-    this.file = null;
+  name: 'ChangeProfilePicture',
+  activated () {
+    this.file = null as unknown as File
   },
-  data() {
+  data () {
     return {
       loading: false,
-      file: null as File,
+      file: null as unknown as File
     }
   },
   computed: {
     url (): string {
       try {
-        console.log(this.file);
+        console.log(this.file)
         return URL.createObjectURL(this.file)
-      } catch(e) {
-        return '';
+      } catch (e) {
+        return ''
       }
     }
   },
   methods: {
-    async uploadProfilePicture() {
-      this.loading = true;
+    async uploadProfilePicture () {
+      this.loading = true
       const response = await uploadProfilePicture(this.file)
-      this.loading = false;
+      this.loading = false
       if (response) {
-        this.$router.back();
+        this.$router.back()
       }
     }
   }

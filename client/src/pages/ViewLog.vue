@@ -48,8 +48,8 @@ import CustomHeader from 'components/CustomHeader.vue'
 export default Vue.extend({
   name: 'ViewLog',
   components: { CustomHeader },
-  activated() {
-    this.certified = false;
+  activated () {
+    this.certified = false
   },
   data () {
     return {

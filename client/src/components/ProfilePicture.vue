@@ -19,19 +19,18 @@ import Vue from 'vue'
 import { store } from 'src/api/store'
 import { LocalStorage } from 'quasar'
 
-
 export default Vue.extend({
   name: 'ProfilePicture',
   created () {
     this.getProfilePicturePath()
   },
   methods: {
-    getProfilePicturePath() {
+    getProfilePicturePath () {
       // @ts-ignore
-      this.fullPath = store.userInfo?.profilePicturePath ?
-        new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server') as string) :
-        "/profile-placeholder.png";
-    },
+      this.fullPath = store.userInfo?.profilePicturePath
+        ? new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server') as string)
+        : '/profile-placeholder.png'
+    }
   },
   data () {
     return {
@@ -41,7 +40,7 @@ export default Vue.extend({
   },
   watch: {
     'store.userInfo.profilePicturePath': function () {
-      this.getProfilePicturePath();
+      this.getProfilePicturePath()
     }
   }
 })
