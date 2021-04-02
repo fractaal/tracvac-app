@@ -34,7 +34,7 @@ export const displayNameMappings = {
   headache: 'Headache',
   soreThroat: 'Sore Throat',
   nauseaOrVomiting: 'Nausea or Vomiting'
-} as Record<string, any>
+} as const
 
 export async function getLogs () {
   try {
