@@ -1,14 +1,18 @@
-import { app } from "../index";
-import path from 'path';
-import Logger from '../logger';
-import {Request, Response, NextFunction} from "express";
-import { raw } from 'objection';
-import {NotificationModel} from "../database/models/NotificationModel";
-import { UserModel } from "../database/models/UserModel";
-import {LogModel} from "../database/models/LogModel";
-import {getConfig, setConfig} from "../config";
-import Config from "../interfaces/config";
+import { app } from "../index"
+import path from 'path'
+import Logger from '../logger'
+import {Request, Response, NextFunction} from "express"
+import { raw } from 'objection'
+import {NotificationModel} from "../database/models/NotificationModel"
+import { UserModel } from "../database/models/UserModel"
+import {LogModel} from "../database/models/LogModel"
+import {getConfig, setConfig} from "../config"
+import Config from "../interfaces/config"
 import { internalStaticPath } from '../'
+import open from 'open'
+
+import ExcelJS from 'exceljs'
+import registrationFormTemplate from "../database/templates/registrationFormTemplate";
 
 const logger = Logger("admin");
 
@@ -209,5 +213,75 @@ app.post('/admin/viewLogs', async (request, response) => {
 })
 
 app.get('/admin/export', async (request, response) => {
+    logger.log(`Performing user data export!`)
+
+    let workbook: ExcelJS.Workbook;
+    let sheet: ExcelJS.Worksheet;
+
+    try {
+
+        workbook = new ExcelJS.Workbook();
+
+        workbook.creator = "Tracvac";
+        workbook.created = new Date();
+        workbook.modified = new Date();
+
+        sheet = workbook.addWorksheet("people");
+
+        const columns = [];
+
+        for (const section of registrationFormTemplate) {
+            for (const formItem of section.formItems) {
+                if (formItem.name === 'password') continue;
+                columns.push({
+                    header: formItem.displayName,
+                    key: formItem.name
+                })
+            }
+        }
+
+        sheet.columns = columns; // Fix column.equivalentTo is undefined
+
+    } catch(err) {
+        logger.error(`Error occurred while initializing the workbook: ${err}`);
+        response.status(500).json({
+            result: false,
+            message: `Error occurred while initializing the workbook: ${err}`
+        })
+        return;
+    }
+
+    let allUsers: UserModel[];
+
+    try {
+        allUsers = await UserModel.query().select('*');
+    } catch (err) {
+        logger.error(`Error occurred while querying the database: ${err}`);
+        response.status(500).json({
+            result: false,
+            message: `Error occurred while querying the database: ${err}`
+        })
+        return;
+    }
+
+    try {
+        for (const user of allUsers) {
+            sheet.addRow(user);
+        }
+
+        const pathToWrite = path.resolve(process.cwd(), 'export.xlsx');
+
+        await workbook.xlsx.writeFile(pathToWrite);
+        await open(pathToWrite)
+
+        response.json({result: true, message: `Export complete!`});
+        logger.success(`Export complete. Opening the exported file.`)
+    } catch(err) {
+        logger.error(`Error occurred while exporting data: ${err}`);
+        response.status(500).json({
+            result: false,
+            message: `Error occurred while exporting data: ${err}`
+        })
+    }
 
 });
