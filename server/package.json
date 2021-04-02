@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "Backend for Hestia App",
   "main": "./src/index.ts",
-  "bin": "dist/index.js",
+  "bin": "dist/cluster.js",
   "author": "benedict.jude.rocat@gmail.com",
   "license": "MIT",
   "scripts": {
