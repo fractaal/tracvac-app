@@ -9,7 +9,7 @@
       <h5 class="px-8 mt-12 m-0 font-bold truncate">{{store.serverConfig.location}}</h5>
       <p class="px-8 mb-2">TRACVAC ADMINISTRATOR</p>
       <p class="px-8 font-semibold" :class="!store.serverConfig.isConfigured ? 'text-red-500' : 'text-green-700'">
-        {{!store.serverConfig.isConfigured ? 
+        {{!store.serverConfig.isConfigured ?
           'SERVER NOT CONFIGURED' :
           'SERVER READY'
         }}
@@ -52,9 +52,24 @@
       <keep-alive>
         <router-view />
       </keep-alive>
-      <q-page-sticky :offset='[20, 20]' position="top-right">
+      <q-page-sticky :offset='[20, 20]' position="bottom-left">
         <q-btn
           fab
+          class='mr-2'
+          color='primary'
+          icon="keyboard_arrow_left"
+          @click="$router.back()"
+        />
+        <q-btn
+          fab
+          class='mr-2'
+          color='primary'
+          icon="keyboard_arrow_right"
+          @click="$router.forward()"
+        />
+        <q-btn
+          fab
+          label='Show/hide menu'
           color="secondary"
           icon="remove_red_eye"
           @click="leftDrawerOpen = !leftDrawerOpen"
