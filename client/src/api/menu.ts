@@ -57,14 +57,14 @@ export const menuLayout = [
     name: 'OTHERS',
     isSeparator: true
   },
-  {
+  /**{
     name: 'Frequently Asked Questions',
     description: 'If you have a question, go to this page and see if they\'re answered here!',
     icon: 'fas fa-question',
     action () {
       routerInstance.push('/faqs')
     }
-  },
+  },*/
   {
     name: 'Preferences',
     icon: 'fas fa-cog',
