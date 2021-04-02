@@ -56,6 +56,15 @@
         <q-page-sticky :offset='[20, 20]' position="bottom-right">
           <q-btn
             class="p-2 mx-2"
+            :disable="selected.length !== 1"
+            label=" VIEW LOGS"
+            color="secondary"
+            icon="remove_red_eye"
+            @click="viewLogs"
+            fab
+          />
+          <q-btn
+            class="p-2 mx-2"
             :disable="selected.length === 0"
             label="ADD TO EDITOR PANEL"
             color="primary"
@@ -128,6 +137,10 @@ export default Vue.extend({
         store.usersToModify.push(Object.assign({}, item));
       }
       this.selected = [];
+    },
+    async viewLogs() {
+      store.userShownInLogs = Object.assign({}, this.selected[0]);
+      await this.$router.push(`/view-logs`);
     }
   },
   data() {
