@@ -1,6 +1,6 @@
 {
   "name": "hestia-backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Backend for Hestia App",
   "main": "./src/index.ts",
   "bin": "dist/index.js",
