@@ -29,6 +29,7 @@ export default Vue.extend({
   components: { CustomHeader },
   activated () {
     this.setIcon()
+    store.changeInVaccineStatus = false
   },
   updated () {
     this.setIcon()
