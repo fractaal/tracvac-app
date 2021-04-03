@@ -13,9 +13,13 @@ app.use('/notification', (request, response, next) => {
     }
 })
 
-app.get('/notification', async (request, response, next) => {
+app.get('/notification/:index', async (request, response, next) => {
     try {
-        const notifs = await NotificationModel.query().select('*');
+        const notifs = await NotificationModel
+            .query()
+            .select('*')
+            .orderBy('createdAt', 'desc')
+            .page(parseInt(request.params.index) ?? 0, 7);
 
         response.json({
             result: true,

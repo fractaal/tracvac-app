@@ -16,13 +16,13 @@ app.use('/log', async (request, response, next) => {
   }
 })
 
-app.get('/log', async (request, response, next) => {
+app.get('/log/:index', async (request, response, next) => {
   try {
     const logs = await LogModel.query()
       .select('*')
       .where('userId', '=', request.tokenData.userId)
-      .orderBy('createdAt', 'desc');
-
+      .orderBy('createdAt', 'desc')
+      .page(parseInt(request.params.index), 7);
     response.status(200).json({ result: true, logs })
   } catch (err) { next(err); }
 })
