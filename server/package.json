@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "build": "pkg package.json -t node14-win",
-    "dev": "node dist/",
+    "dev": "node dist/cluster",
     "generate-models": "objection-generator generate ./objection-generator/schema.yaml ./src/database",
     "generate-migrations": "objection-generator knex ./objection-generator/schema.yaml ./tmp_migrations",
     "generate-all": "yarn generate-models && yarn generate-migrations"
