@@ -14,6 +14,7 @@
           <p class="text-xs"><i>Please check the vaccine status tab for more details.</i></p>
         </div>
         <button-card @click="$router.push('/personal-info')" icon="fas fa-user" title="Personal Information"/>
+        <button-card @click="$router.push('/change-profile-picture')" icon="fas fa-portrait" title="Change Profile Picture"/>
         <button-card :show-badge="store.changeInVaccineStatus" @click="$router.push('/vaccine')" icon="fas fa-syringe" title="Vaccine Status"/>
         <button-card @click="$router.push('/view-log')" icon="fas fa-pen-fancy" title="Create A Log"/>
       </div>
