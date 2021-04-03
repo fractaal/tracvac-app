@@ -13,7 +13,6 @@ tmp_migrations
 tracvac-db.sqlite3
 node_sqlite3.node
 xdg-open
-tracvac-config
 
 cert.pem
 key.pem
