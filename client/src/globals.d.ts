@@ -2,7 +2,8 @@
 declare module 'http-proxy-middleware';
 
 interface Window {
-  NavigationBar: NavigationBar
+  NavigationBar: NavigationBar,
+  BackgroundFetch: any,
 }
 
 interface NavigationBar {
