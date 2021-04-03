@@ -1,5 +1,6 @@
 <template>
   <div v-ripple @click="emitClick" class="border border-solid border-gray-200 mb-5 flex items-center content-center justify-between relative p-4 rounded-lg">
+    <q-badge v-if="showBadge" label="NEW" floating color="red"/>
     <div class=" flex items-center">
       <q-icon :name="icon" class="mr-2 text-blue-500" size="md"></q-icon>
       <p class="font-bold m-0">{{title}}</p>
@@ -21,6 +22,10 @@ export default Vue.extend({
     icon: {
       type: String,
       required: true
+    },
+    showBadge: {
+      type: Boolean,
+      required: false
     }
   },
   methods: {
