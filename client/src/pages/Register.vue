@@ -1,16 +1,16 @@
 <template>
-  <q-page class="mx-12">
-    <div class="pt-8">
+  <q-page>
+    <div class="text-white bg-blue-500 px-12 py-6">
       <div class="flex flex-row justify-between align-baseline">
-        <h4 class="m-0 logo-text">{{$props.mode === 'register' ? 'SIGN UP' : 'YOUR INFO'}}</h4>
+        <h4 class="m-0">{{$props.mode === 'register' ? 'SIGN UP' : 'YOUR INFO'}}</h4>
         <p>{{activeSection + 1}} of {{template.length}}</p>
       </div>
     </div>
-    <div>
+    <div class="mx-12">
       <transition :enter-active-class="`animated fadeIn`" :leave-active-class="`animated fadeOut`" mode="out-in" :duration="100">
         <div :key="activeSection">
           <div>
-            <h6 class="mt-8 mb-0 logo-text">{{template[activeSection].title.toUpperCase()}}</h6>
+            <h6 class="mt-8 mb-0">{{template[activeSection].title.toUpperCase()}}</h6>
             <p>{{template[activeSection].description}}</p>
           </div>
           <div>
@@ -33,13 +33,14 @@
                     :options="[
                       {
                         label: 'Yes',
-                        value: true
+                        value: 'Yes',
                       },
                       {
                         label: 'No',
-                        value: false,
+                        value:  'No',
                       }
                     ]"
+                    emit-value
                     v-model="formData[data.name]"
                     />
                   <q-input dense
@@ -139,9 +140,9 @@ export default Vue.extend({
       console.log('template: ', this.template)
       for (const section of registrationFormTemplate) {
         for (const formItem of section.formItems) {
-          console.log(store.userInfo)
+          // console.log(store.userInfo)
           if (formItem.name === 'password' || formItem.name === 'username' || formItem.name === 'email') continue
-          if (formItem.type === 'boolean') this.$set(this.formData, formItem.name, !!(store.userInfo![formItem.name]))
+          if (formItem.type === 'boolean') this.$set(this.formData, formItem.name, store.userInfo![formItem.name] ? 'Yes' : 'No')
           else if (formItem.type === 'date') this.$set(this.formData, formItem.name, format(new Date(store.userInfo![formItem.name]), 'yyyy/MM/dd'))
           else this.$set(this.formData, formItem.name, store.userInfo![formItem.name])
         }
@@ -224,10 +225,10 @@ export default Vue.extend({
 
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore
-                  if (this.formData[itemName].label) {
+                  if (formItem.type === 'boolean') {
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
-                    dataToSubmit[itemName] = this.formData[itemName].value
+                    dataToSubmit[itemName] = this.formData[itemName] === 'Yes'
                   }
                 }
               }
