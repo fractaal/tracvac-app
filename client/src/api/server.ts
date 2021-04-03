@@ -8,7 +8,10 @@ import { menuLayout } from 'src/api/menu'
 
 export const api = axios.create({
   timeout: 5000,
-  baseURL: ''
+  baseURL: '',
+  validateStatus (status) {
+    return status < 500
+  }
 })
 
 export let server: string
