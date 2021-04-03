@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-img class="rounded-full shadow-xl ring-4 ring-white" :src="fullPath" ratio="1">
+    <q-img class="rounded-full shadow-xl ring-4 ring-white" @error="errored = true; getProfilePicturePath()" :src="fullPath" ratio="1">
       <q-menu>
         <q-list>
           <q-item clickable v-ripple v-close-popup>
@@ -26,14 +26,16 @@ export default Vue.extend({
   },
   methods: {
     getProfilePicturePath () {
+      this.errored = false
       // @ts-ignore
-      this.fullPath = store.userInfo?.profilePicturePath
+      this.fullPath = this.errored ? '/profile-placeholder.png' : store.userInfo?.profilePicturePath
         ? new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server') as string)
         : '/profile-placeholder.png'
     }
   },
   data () {
     return {
+      errored: false,
       store,
       fullPath: ''
     }
