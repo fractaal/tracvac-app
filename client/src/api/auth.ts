@@ -64,6 +64,7 @@ export function logout (force: boolean|undefined) {
       LocalStorage.remove('token')
     }
 
+    authed = false
     routerInstance.push('/login')
   }
 
