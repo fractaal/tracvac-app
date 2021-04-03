@@ -4,7 +4,10 @@ import notify from 'src/api/notify'
 
 interface LogsResponse {
   result: boolean;
-  logs: Log[];
+  logs: {
+    results: Log[],
+    total: number
+  }
 }
 
 export interface Log {
@@ -36,21 +39,26 @@ export const displayNameMappings = {
   nauseaOrVomiting: 'Nausea or Vomiting'
 } as const
 
-export async function getLogs () {
-  try {
-    const response = await (await api.get('/log')).data as LogsResponse
+export function resetLogs () {
+  store.logs = []
+}
 
+export async function getLogs (index: number) {
+  try {
+    const response = await (await api.get(`/log/${index}`)).data as LogsResponse
+
+    console.log(response)
     if (response.result) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      store.logs = response.logs
-      return true
+      store.logs.push(...response.logs.results)
+      return [true, response.logs.results.length === 0]
     } else {
       notify.negative('Getting logs failed.')
-      return false
+      return [false]
     }
   } catch (err) {
     notify.negative(`Getting logs failed: ${err.message}`)
-    return false
+    return [false]
   }
 }
 
