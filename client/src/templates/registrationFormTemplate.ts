@@ -1,5 +1,16 @@
 import { TypeMap } from './baseTemplate'
 
+function numberValidator (number: string) {
+  const _number = String(number)
+  if (!(/^\d+$/.test(_number))) return false
+  if (_number[0] === '0') {
+    if (_number.length === 11) {
+      return true
+    }
+  }
+  return false
+}
+
 const template = [
   {
     title: 'Personal Information',
@@ -36,7 +47,7 @@ const template = [
         format: 'Text',
         limit: 12,
         rules: [
-          (val: string) => /^\d+$/.test(val) || 'Must be a number.'
+          (val: string) => numberValidator(val) || 'Must be a valid contact number.'
         ]
       },
       {
@@ -210,7 +221,7 @@ const template = [
         format: 'Text',
         limit: 12,
         rules: [
-          (val: string) => /^\d+$/.test(val) || 'Must be a number.'
+          (val: string) => numberValidator(val) || 'Must be a valid contact number.'
         ]
       }
     ]
@@ -238,7 +249,7 @@ const template = [
         type: 'string',
         format: 'Text',
         conditionalFunction (data: Record<string, any>) {
-          return !!data.withAllergy?.value
+          return data.withAllergy === 'Yes'
         }
       },
       {
@@ -264,7 +275,7 @@ const template = [
         ],
         format: 'Dropdown',
         conditionalFunction (data: Record<string, any>) {
-          return !!(data.withComorbidities && data.withComorbidities.value)
+          return data.withComorbidities === 'Yes'
         }
       },
       {
@@ -281,7 +292,7 @@ const template = [
         type: 'date',
         format: 'DatePicker',
         conditionalFunction (data: Record<string, any>) {
-          if (data.covidHistory && data.covidHistory.value) return true; else return false
+          return data.covidHistory === 'Yes'
         }
       },
       {
@@ -295,7 +306,10 @@ const template = [
           '04 - Severe',
           '05 - Critical'
         ],
-        format: 'Dropdown'
+        format: 'Dropdown',
+        conditionalFunction (data: Record<string, any>) {
+          return data.covidHistory === 'Yes'
+        }
       }
     ]
   },
