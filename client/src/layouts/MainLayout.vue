@@ -21,7 +21,9 @@
             label="Profile"
             @click="$router.push('/profile')"
             :class="store.activeRoute === '/profile' ? 'text-blue-500' : ''"
-          />
+          >
+            <q-badge floating color="red" label="NEW" v-if="store.changeInVaccineStatus || store.changeInVaccinationStatus"/>
+          </q-tab>
           <q-tab
             name="/home"
             icon="fas fa-home"
@@ -45,8 +47,8 @@
 <script lang="ts">
 import transition from '../transitions'
 import { store } from 'src/api/store'
-
 import Vue from 'vue'
+import { logout, isAuthed } from 'src/api/auth'
 
 export default Vue.extend({
   name: 'MainLayout',
@@ -54,6 +56,21 @@ export default Vue.extend({
     return {
       store,
       transition
+    }
+  },
+  beforeRouteLeave (to, from, next) {
+    if (to.path === '/login') {
+      if (!isAuthed()) {
+        next()
+      } else {
+        console.log('preventing unwanted navigation back to login')
+        next(false)
+      }
+    } else if (to.path === '/') {
+      console.log('preventing unwanted navigation back to splash')
+      next(false)
+    } else {
+      next()
     }
   }
 })
