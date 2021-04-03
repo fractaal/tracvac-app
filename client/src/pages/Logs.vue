@@ -8,8 +8,20 @@
         <p class="m-0 font-bold">No logs found</p>
         <p class="text-xs"><i>You can create one by pressing the "Create a Log" button.</i></p>
       </div>
-      <div v-else-if="!isLoading && store.logs.length !== 0">
-        <log-card v-for="log in store.logs" :log="log" :key="log.createdAt"/>
+      <!-- <div v-else-if="!isLoading && store.logs.length !== 0"> -->
+      <div>
+        <q-infinite-scroll :debounce="300" ref="scroll" @load="onLoad" :offset="50">
+          <transition-group name="transition" mode="out-in">
+            <log-card v-for="log in store.logs" :log="log" :key="log.createdAt"/>
+          </transition-group>
+          <template v-slot:loading>
+            <q-spinner-puff
+              class="block mx-auto"
+              color="primary"
+              size="4em"
+            />
+          </template>
+        </q-infinite-scroll>
       </div>
     </div>
   </q-page>
@@ -17,7 +29,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { getLogs } from 'src/api/logs'
+import { getLogs, resetLogs } from 'src/api/logs'
 import { store } from 'src/api/store'
 import ButtonCard from 'components/ButtonCard.vue'
 import LogCard from 'components/LogCard.vue'
@@ -29,13 +41,29 @@ export default Vue.extend({
   data () {
     return {
       store,
-      isLoading: false
+      isLoading: false,
+      lastIndex: -1
     }
   },
-  async activated () {
-    this.isLoading = true
-    await getLogs()
-    this.isLoading = false
+  activated () {
+    console.log(this.$refs.scroll)
+    resetLogs()
+    // @ts-ignore
+    this.$refs.scroll.reset()
+    // @ts-ignore
+    this.$refs.scroll.resume()
+    // @ts-ignore
+    this.$refs.scroll.trigger()
+  },
+  methods: {
+    async onLoad (index: number, done: Function) {
+      if (this.lastIndex === index) {
+        done()
+        return
+      }
+      const [success, isEnd] = await getLogs(index - 1)
+      done(isEnd)
+    }
   }
 })
 </script>
