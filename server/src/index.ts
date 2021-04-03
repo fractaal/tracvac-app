@@ -101,8 +101,8 @@ logger.log(`Static files path: ${staticPath}`);
   })
 
   // HTTPS / HTTP server starts
-  logger.log(`HTTP - Binding to port ${config?.httpPort ?? 80}.`)
-  http.createServer(app).listen(config?.httpPort ?? 80).on('error', (err) => {
+  logger.log(`HTTP - Binding to port ${process.env.PORT ?? config?.httpPort ?? 80}.`)
+  http.createServer(app).listen(process.env.PORT ?? config?.httpPort ?? 80).on('error', (err) => {
     logger.error(`Failed to bind to port ${config?.httpPort ?? 80}: ` + err);
   });
 
