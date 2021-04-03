@@ -44,10 +44,10 @@
 /* Enter and leave animations can use different */
 /* durations and timing functions.              */
 .transition-enter-active {
-  transition: all .125s cubic-bezier(1, 0, 0, 1);
+  transition: all .3s cubic-bezier(1, 0, 0, 1);
 }
 .transition-leave-active {
-  transition: all .125s cubic-bezier(1, 0, 0, 1);
+  transition: all .3s cubic-bezier(1, 0, 0, 1);
 }
 .transition-enter {
   transform: scale(0.75);
