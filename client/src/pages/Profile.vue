@@ -8,12 +8,13 @@
       </div>
       <div class="px-8">
         <div class="p-4 mb-8 border border-solid border-gray-200 rounded-lg text-center">
+          <q-badge label="NEW" color="red" class="float-right" v-if="store.changeInVaccinationStatus"/>
           <q-icon class="text-blue-500 block mx-auto" :name="store.userInfo.isVaccinated ? 'fas fa-check-circle' : 'fas fa-times-circle'" size="128px"/>
           <p class="m-0 mt-4 font-bold">{{store.userInfo.isVaccinated ? 'You are vaccinated' : 'You are not vaccinated'}}</p>
           <p class="text-xs"><i>Please check the vaccine status tab for more details.</i></p>
         </div>
         <button-card @click="$router.push('/personal-info')" icon="fas fa-user" title="Personal Information"/>
-        <button-card @click="$router.push('/vaccine')" icon="fas fa-syringe" title="Vaccine Status"/>
+        <button-card :show-badge="store.changeInVaccineStatus" @click="$router.push('/vaccine')" icon="fas fa-syringe" title="Vaccine Status"/>
         <button-card @click="$router.push('/view-log')" icon="fas fa-pen-fancy" title="Create A Log"/>
       </div>
     </q-pull-to-refresh>
@@ -28,6 +29,7 @@ import Vue from 'vue'
 import ButtonCard from '../components/ButtonCard.vue'
 import ProfilePicture from 'components/ProfilePicture.vue'
 import CustomHeader from 'components/CustomHeader.vue'
+import startup from 'src/api/startup'
 
 export default Vue.extend({
   name: 'Profile',
@@ -37,9 +39,16 @@ export default Vue.extend({
       store
     }
   },
+  beforeRouteLeave (to, from, next) {
+    if (store.changeInVaccinationStatus) {
+      store.changeInVaccinationStatus = false
+    }
+    next()
+  },
   methods: {
     async getUserInfo (done: () => void) {
       await getUserInfo()
+      await startup()
       done()
     }
   }
