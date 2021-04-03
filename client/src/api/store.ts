@@ -1,6 +1,6 @@
 import { Log } from './logs'
 import { User } from './user'
-import { MenuItem } from 'src/api/menu'
+import { MenuItem, menuLayout } from 'src/api/menu'
 import { Notification } from 'src/api/notification'
 
 export const store = {
@@ -9,5 +9,8 @@ export const store = {
   recentlyViewed: {} as MenuItem,
   activeRoute: '',
   notifications: [] as Notification[],
-  serverInfo: {} as Record<string, string>
+  serverInfo: {} as Record<string, string>,
+  menu: menuLayout,
+  changeInVaccinationStatus: false,
+  changeInVaccineStatus: false
 }
