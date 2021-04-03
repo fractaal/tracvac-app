@@ -2,6 +2,7 @@ import Logger from '../logger';
 import { app } from '../';
 import bcrypt from 'bcryptjs';
 import { UserModel } from '../database/models/UserModel';
+import {validateDate, validateEmail, validateNumber, validateUsername} from "../validation";
 
 const logger = Logger('User-Route');
 
@@ -12,23 +13,34 @@ app.post('/user', async (req, res) => {
     // const match = await (await UserModel.query()).find(user => user.username === req.body.username)
     const match = await UserModel.query().findOne({username: req.body.username})
     if (match) {
-
       res.status(200);
       res.json({ result: false, message: `Username ${match.username} is already taken. Try another one!` });
       logger.log(`Registration request for ${req.ip} failed - username taken`);
 
     } else {
-
       try {
+        // validate username, email, and dates
+        // Username must not have spaces in it
+        // Email must be valid
+        // date of birth and covid date must be valid dates
+        if (!validateUsername(req.body.username)) {
+          res.status(400).json({result: false, message: "Your username is invalid."});
+          return;
+        } else if (!validateEmail(req.body.email)) {
+          res.status(400).json({result: false, message: "Your email is invalid."});
+          return;
+        } else if (!validateDate(req.body.dateOfBirth)) {
+          res.status(400).json({result: false, message: "Your birth date is invalid."});
+          return;
+        } else if ((req.body.covidDate !== null || true) && !validateDate(req.body.covidDate)) {
+          res.status(400).json({result: false, message: "Your COVID date is invalid."});
+          return;
+        } else if (!validateNumber(req.body.contactNumber) || !validateNumber(req.body.employerContactNumber)) {
+          res.status(400).json({result: false, message: "Contact numbers are invalid."});
+          return;
+        }
 
         req.body.password = await bcrypt.hash(req.body.password, await bcrypt.genSalt());
-
-        /** Commented out because transforming date fields to date objects is probably a bad idea
-        for (const key in req.body) {
-          if (key.toLowerCase().indexOf('date') !== -1) {
-            req.body[key] = new Date(parseInt(req.body[key]) * 1000);
-          }
-        }*/
 
         await UserModel.query().insert({
           ...req.body
@@ -76,16 +88,22 @@ app.patch('/user', async (request, response) => {
     return;
   }
 
+  // We don't want them to inadvertently (or intentionally) change their username, password or email
   if (request.body.username) delete request.body.username;
   if (request.body.password) delete request.body.password;
   if (request.body.email) delete request.body.email;
 
-  /** Comment out date transforms
-  for (const key in request.body) {
-    if (key.toLowerCase().indexOf('date') !== -1) {
-      request.body[key] = new Date(request.body[key]);
-    }
-  }*/
+
+  if (!validateDate(request.body.dateOfBirth)) {
+    response.status(400).json({result: false, message: "Your birth date is invalid."});
+    return;
+  } else if ((request.body.covidDate !== null || true) && !validateDate(request.body.covidDate)) {
+    response.status(400).json({result: false, message: "Your COVID date is invalid."});
+    return;
+  } else if (!validateNumber(request.body.contactNumber) || !validateNumber(request.body.employerContactNumber)) {
+    response.status(400).json({result: false, message: "Contact numbers are invalid."});
+    return;
+  }
 
   try {
     await UserModel.query().where({id: request.tokenData.userId}).patch(request.body);
