@@ -11,6 +11,7 @@ export interface MenuItem {
   disallowRecentlyViewed?: boolean;
   action?: Function;
   hidden?: boolean;
+  showBadge?: boolean;
 }
 
 export const menuLayout = [
@@ -28,10 +29,16 @@ export const menuLayout = [
   },
   {
     name: 'Notifications from your LGU',
+    showBadge: false,
     description: 'View notifications sent to you from your Local Government Unit.',
     icon: 'fas fa-university',
     action () {
       routerInstance.push('/notifications')
+      for (const menuItem of menuLayout) {
+        if (menuItem.name === 'Notifications from your LGU') {
+          menuItem.showBadge = false
+        }
+      }
     }
   },
   {
@@ -43,30 +50,10 @@ export const menuLayout = [
       window.open(addHttp(LocalStorage.getItem('lguUrl') as string), '_system')
     }
   },
-  /*
-  {
-    name: 'Post-vaccine updates',
-    description: 'A really lengthy description of post-vaccine updates go here. It\'s super cool!',
-    icon: 'fas fa-syringe',
-    action () {
-
-    }
-  },
-  */
   {
     name: 'OTHERS',
     isSeparator: true
   },
-  /**
-    {
-    name: 'Frequently Asked Questions',
-    description: 'If you have a question, go to this page and see if they\'re answered here!',
-    icon: 'fas fa-question',
-    action () {
-      routerInstance.push('/faqs')
-    }
-  },
-   */
   {
     name: 'Preferences',
     icon: 'fas fa-cog',
