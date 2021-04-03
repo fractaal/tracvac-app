@@ -2,7 +2,7 @@
   <q-page>
     <custom-header title="Create New Log" class="bg-blue-500 text-white"/>
     <div class="bg-blue-100 mx-4 mt-8 p-4 rounded-xl">
-      <p class="font-bold">Stop and call 117 if you are experiencing:</p>
+      <p class="font-bold">Stop and call the emergency hotline if you are experiencing:</p>
       <ul class="px-4">
         <li>Severe, constant chest pain or pressure</li>
         <li>Extreme difficulty breathing</li>
