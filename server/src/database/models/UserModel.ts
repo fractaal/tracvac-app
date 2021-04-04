@@ -145,7 +145,8 @@ export class UserModel extends BaseModel {
         'barangay',
         'sex',
         'dateOfBirth',
-        'civilStatus'
+        'civilStatus',
+        'covidHistory'
       ],
       properties: {
         username: {
