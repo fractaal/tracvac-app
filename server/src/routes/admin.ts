@@ -63,10 +63,9 @@ app.post('/admin/setup', async (request, response) => {
 })
 
 app.get('/admin/setup', async (request, response) => {
-    const config = await getConfig();
+    const config: Partial<Config> = await getConfig();
 
     if (config) {
-        // @ts-ignore
         delete config.password;
 
         response.json({
@@ -89,7 +88,7 @@ app.post('/admin/getUsers', async (request, response) => {
             result = await UserModel.query()
                 .select('*')
                 .where(
-                    raw("firstName || ' ' || middleName || ' ' || lastName"),
+                    raw("CONCAT(\"firstName\", \"middleName\", \"lastName\")"),
                     'LIKE',
                     `%${request.body.filter}%`
                 ).where(
