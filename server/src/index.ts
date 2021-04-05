@@ -88,7 +88,7 @@ logger.log(`Static files path: ${staticPath}`);
   logger.log("Initializing database...");
   await database.connect();
 
-  // API endpoints are stored in the routes folder. This should auto
+  // API endpoints are stored in the routes folder. This should auto-import all of them.
   logger.log("Initializing API endpoints...")
   const routePath = path.join(__dirname, "/routes");
   for (const filename of fs.readdirSync(routePath)) await import(path.join(routePath, path.basename(filename)));
