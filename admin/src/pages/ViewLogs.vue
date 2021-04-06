@@ -12,11 +12,11 @@
               <br>
               {{formatDateAndTime(log.createdAt).formattedDistance}}
             </div>
-            <div class='grid grid-cols-2' v-for='(displayName, name) in displayNameMappings'>
+            <div class='grid grid-cols-2' v-for='(displayName, name) in displayNameMappings' :key='name'>
               <p class='p-0 m-0' >
                 {{displayName}}
               </p>
-              <div v-if='!!log[name]' class='text-green-500'>
+              <div v-if='!log[name]' class='text-green-500'>
                 <q-icon name='fas fa-check-circle'/>
                 No
               </div>
@@ -55,6 +55,9 @@ const displayNameMappings = {
 export default Vue.extend({
   name: "ViewLogs",
   activated() {
+    if (store.userShownInLogs === null) {
+      this.$router.back();
+    }
     this.logs = [];
     this.getLogs();
   },
