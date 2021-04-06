@@ -118,7 +118,9 @@ export default Vue.extend({
         pageSize: this.userPagination.rowsPerPage,
         filter: this.searchFilter,
         showPUIs: this.showPUIs,
-        showPUMs: this.showPUMs
+        showPUMs: this.showPUMs,
+        orderBy: this.userPagination.sortBy,
+        ascending: !this.userPagination.descending,
       });
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       this.data = response.data.results
@@ -150,7 +152,7 @@ export default Vue.extend({
       store.userShownInLogs = Object.assign({}, this.selected[0]);
       await this.$router.push(`/view-logs`);
     },
-    async exportToExcel() {
+    exportToExcel() {
       this.$q.dialog({
         title: "Export user data to an excel file?",
         message: `You will be exporting a total of ${this.userPagination.rowsNumber} user's data.`,
@@ -172,7 +174,7 @@ export default Vue.extend({
           }
         } catch(err) {
           this.$q.notify({
-            message: 'Export failed! ' + err,
+            message: `Export failed! ${err}`,
             type: 'negative',
           })
         }
@@ -194,6 +196,8 @@ export default Vue.extend({
         page: 0,
         rowsPerPage: 10,
         rowsNumber: 0,
+        sortBy: 'id',
+        descending: false,
       },
       userColumns: [
         {
@@ -201,25 +205,29 @@ export default Vue.extend({
           required: true,
           label: 'Username',
           field: 'username',
-          align: 'left'
+          align: 'left',
+          sortable: true,
         },
         {
           name: 'firstName',
           required: true,
           label: 'First Name',
           field: 'firstName',
+          sortable: true,
         },
         {
           name: 'middleName',
           required: true,
           label: 'Middle Name',
           field: 'middleName',
+          sortable: true,
         },
         {
           name: 'lastName',
           required: true,
           label: 'Last Name',
           field: 'lastName',
+          sortable: true,
         },
         {
           name: 'isPUM',
@@ -227,6 +235,7 @@ export default Vue.extend({
           label: 'Is Under Monitoring',
           format: (val: number) => `${!!val ? '✔ Yes' : '❌ No'}`,
           field: 'isPUM',
+          sortable: true,
         },
         {
           name: 'isPUI',
@@ -234,6 +243,7 @@ export default Vue.extend({
           label: 'Is Under Investigation',
           format: (val: number) => `${!!val ? '✔ Yes' : '❌ No'}`,
           field: 'isPUI',
+          sortable: true,
         },
         {
           name: 'isVaccinated',
@@ -241,18 +251,21 @@ export default Vue.extend({
           label: 'Is Vaccinated',
           format: (val: number) => `${!!val ? '✔ Yes' : '❌ No'}`,
           field: 'isVaccinated',
+          sortable: true,
         },
         {
           name: 'isVaccineReady',
           required: true,
           label: 'Vaccine Readiness',
           field: 'isVaccineReady',
+          sortable: true,
         },
         {
           name: 'vaccineManufacturer',
           required: true,
           label: 'Vaccine Manufacturer',
           field: 'vaccineManufacturer',
+          sortable: true,
         },
       ]
     }
