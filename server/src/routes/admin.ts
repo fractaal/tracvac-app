@@ -82,7 +82,12 @@ app.get('/admin/setup', async (request, response) => {
 
 app.post('/admin/getUsers', async (request, response) => {
     if (request.body.pageSize === 0) request.body.pageSize = 1000;
-    if (request.body.pageSize !== undefined && request.body.page !== undefined) {
+    if (
+        request.body.pageSize !== undefined &&
+        request.body.page !== undefined &&
+        request.body.orderBy !== undefined &&
+        request.body.ascending !== undefined
+    ) {
         let result;
         if (request.body.filter) {
             result = await UserModel.query()
@@ -98,7 +103,7 @@ app.post('/admin/getUsers', async (request, response) => {
                         if (request.body.showPUIs) where.isPUI = true;
                         return where
                     })()
-                )
+                ).orderBy(request.body.orderBy, request.body.ascending ? 'asc' : 'desc')
                 .page(parseInt(request.body.page), parseInt(request.body.pageSize));
         } else {
             result = await UserModel.query()
@@ -109,12 +114,12 @@ app.post('/admin/getUsers', async (request, response) => {
                         if (request.body.showPUIs) where.isPUI = true;
                         return where
                     })()
-                )
+                ).orderBy(request.body.orderBy, request.body.ascending ? 'asc' : 'desc')
                 .page(parseInt(request.body.page), parseInt(request.body.pageSize));
         }
         response.json(result);
     } else {
-        response.status(400).json({result: false, message: 'Missing page/pageSize params'})
+        response.status(400).json({result: false, message: 'Missing params'})
     }
 })
 
