@@ -5,7 +5,7 @@
       class="border-0 border-b border-solid border-gray-300"
       v-model="activeTab"
     >
-      <q-tab name="select" class="px-24" icon="add" label="Select" @click='getData({pagination: userPagination, filter: searchFilter})'/>
+      <q-tab name="select" class="px-24" icon="add" label="Select" @click='getData({pagination: pagination, filter: searchFilter})'/>
       <q-tab name="edit" class="px-24" icon="create" label="Edit"/>
     </q-tabs>
     <q-tab-panels v-model="activeTab" animated>
@@ -16,11 +16,12 @@
           class='sticky'
           :loading="loading"
           virtual-scroll
-          table-style="max-height: 550px;"
+          table-style="max-height: 500px;"
           flat
-          :columns="userColumns"
+          :columns="columns"
+          :visible-columns='visibleColumns'
           :filter="searchFilter"
-          :pagination.sync="userPagination"
+          :pagination.sync="pagination"
           binary-state-sort
           selection="multiple"
           :selected.sync="selected"
@@ -29,22 +30,45 @@
           @request="getData"
         >
           <template v-slot:top>
-            <div class='flex flex-row justify-between w-full'>
-              <q-input outlined debounce="300" v-model="searchFilter" placeholder="Search">
+            <div class='flex flex-row items-center content-center'>
+              <q-input
+                dense
+                outlined
+                debounce="300"
+                v-model="searchFilter"
+                placeholder="Search names"
+                style='min-width: 400px'
+              >
                 <template v-slot:append>
                   <q-icon name="search" />
                 </template>
               </q-input>
+              <q-select
+                class='mx-4'
+                v-model="visibleColumns"
+                multiple
+                outlined
+                dense
+                options-dense
+                display-value='Show/hide columns'
+                emit-value
+                map-options
+                :options="columns"
+                option-value="name"
+                options-cover
+                style="min-width: 150px"
+              />
               <div>
                 <q-btn
-                  outline class='ml-2'
+                  outline class='mx-2'
+                  :color='showPUMs ? "green" : "black"'
                   :label='showPUMs ? "Showing Under Monitoring" : "Show Under Monitoring"'
                   :icon='showPUMs ? "fas fa-eye" : "fas fa-eye-slash"'
                   @click='toggleShow("PUMs", !showPUMs)'
                 />
-                <br>
                 <q-btn
-                  outline class='ml-2 mt-2'
+                  outline class='mx-2'
+                  :color='showPUIs ? "green" : "black"'
                   :label='showPUIs ? "Showing Under Investigation" : "Show Under Investigation"'
                   :icon='showPUIs ? "fas fa-eye" : "fas fa-eye-slash"'
                   @click='toggleShow("PUIs", !showPUIs)'
@@ -95,6 +119,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import store from 'src/api/store';
+import peopleColumns from 'src/people-columns';
 import Vue from 'vue';
 import EditVaccinationStatus from 'components/EditVaccinationStatus.vue'
 
@@ -104,27 +129,48 @@ export default Vue.extend({
   async activated() {
     this.loading = true;
     await this.getData({
-      pagination: this.userPagination,
+      pagination: this.pagination,
       filter: undefined,
     });
     this.loading = false;
   },
+  data() {
+    return {
+      selected: [] as Record<string,any>[],
+      store,
+      searchFilter: '',
+      data: [],
+      showPUIs: false,
+      showPUMs: false,
+      activeTab: 'select',
+      loading: false,
+      pagination: {
+        page: 0,
+        rowsPerPage: 10,
+        rowsNumber: 0,
+        sortBy: 'id',
+        descending: false,
+      },
+      columns: peopleColumns,
+      visibleColumns: ["username", "firstName", "middleName", "lastName"],
+    }
+  },
   methods: {
     async getData(props: Record<string,any>) {
-      this.userPagination = Object.assign({}, props.pagination);
+      this.pagination = Object.assign({}, props.pagination);
       this.loading = true;
       const response = await store.axios.post('/admin/getUsers', {
-        page: this.userPagination.page-1,
-        pageSize: this.userPagination.rowsPerPage,
+        page: this.pagination.page-1,
+        pageSize: this.pagination.rowsPerPage,
         filter: this.searchFilter,
         showPUIs: this.showPUIs,
         showPUMs: this.showPUMs,
-        orderBy: this.userPagination.sortBy,
-        ascending: !this.userPagination.descending,
+        orderBy: this.pagination.sortBy,
+        ascending: !this.pagination.descending,
       });
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       this.data = response.data.results
-      this.userPagination.rowsNumber = response.data.total;
+      this.pagination.rowsNumber = response.data.total;
       this.loading = false;
     },
     toggleShow(puiOrPum: string, value: boolean) {
@@ -133,7 +179,7 @@ export default Vue.extend({
       } else if (puiOrPum === 'PUIs') {
         this.showPUIs = value;
       }
-      this.getData({pagination: this.userPagination, filter: this.searchFilter, showPUIs: this.showPUIs, showPUMs: this.showPUMs});
+      this.getData({pagination: this.pagination, filter: this.searchFilter, showPUIs: this.showPUIs, showPUMs: this.showPUMs});
     },
     addSelectionToEdit() {
       itemLoop: for (const item of this.selected) {
@@ -155,7 +201,7 @@ export default Vue.extend({
     exportToExcel() {
       this.$q.dialog({
         title: "Export user data to an excel file?",
-        message: `You will be exporting a total of ${this.userPagination.rowsNumber} user's data.`,
+        message: `You will be exporting all user data.`,
         cancel: true,
       }).onOk(async () => {
         try {
@@ -181,95 +227,6 @@ export default Vue.extend({
       })
     }
   },
-  data() {
-    return {
-      selected: [] as Record<string,any>[],
-      store,
-      searchFilter: '',
-      data: [],
-      showPUIs: false,
-      showPUMs: false,
-      totalRows: 0,
-      activeTab: 'select',
-      loading: false,
-      userPagination: {
-        page: 0,
-        rowsPerPage: 10,
-        rowsNumber: 0,
-        sortBy: 'id',
-        descending: false,
-      },
-      userColumns: [
-        {
-          name: 'username',
-          required: true,
-          label: 'Username',
-          field: 'username',
-          align: 'left',
-          sortable: true,
-        },
-        {
-          name: 'firstName',
-          required: true,
-          label: 'First Name',
-          field: 'firstName',
-          sortable: true,
-        },
-        {
-          name: 'middleName',
-          required: true,
-          label: 'Middle Name',
-          field: 'middleName',
-          sortable: true,
-        },
-        {
-          name: 'lastName',
-          required: true,
-          label: 'Last Name',
-          field: 'lastName',
-          sortable: true,
-        },
-        {
-          name: 'isPUM',
-          required: true,
-          label: 'Is Under Monitoring',
-          format: (val: number) => `${!!val ? '✔ Yes' : '❌ No'}`,
-          field: 'isPUM',
-          sortable: true,
-        },
-        {
-          name: 'isPUI',
-          required: true,
-          label: 'Is Under Investigation',
-          format: (val: number) => `${!!val ? '✔ Yes' : '❌ No'}`,
-          field: 'isPUI',
-          sortable: true,
-        },
-        {
-          name: 'isVaccinated',
-          required: true,
-          label: 'Is Vaccinated',
-          format: (val: number) => `${!!val ? '✔ Yes' : '❌ No'}`,
-          field: 'isVaccinated',
-          sortable: true,
-        },
-        {
-          name: 'isVaccineReady',
-          required: true,
-          label: 'Vaccine Readiness',
-          field: 'isVaccineReady',
-          sortable: true,
-        },
-        {
-          name: 'vaccineManufacturer',
-          required: true,
-          label: 'Vaccine Manufacturer',
-          field: 'vaccineManufacturer',
-          sortable: true,
-        },
-      ]
-    }
-  }
 });
 </script>
 
