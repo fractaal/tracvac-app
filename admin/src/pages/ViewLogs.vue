@@ -5,7 +5,7 @@
     <hr>
     <div v-if='logs.length !== 0'>
       <div class='grid grid-cols-2 gap-4'>
-        <q-card class='mb-2' v-for='log in logs' :key='log.createdAt'>
+        <q-card class='mb-2 shadow-3' v-for='log in logs' :key='log.createdAt'>
           <q-card-section>
             <div class='font-bold'>
               Created {{formatDateAndTime(log.createdAt).formatted}}
