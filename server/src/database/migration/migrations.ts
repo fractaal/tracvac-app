@@ -118,7 +118,7 @@ export const migrations = [
         t.string('employerContactNumber');
         t.boolean('pregnancyStatus').defaultTo(false);
         t.boolean('withAllergy');
-        t.string('allergy').nullable();
+        t.string('allergy')
         t.boolean('withComorbidities');
         t.enum('comorbidity', [
           '01 - Hypertension',
@@ -145,13 +145,20 @@ export const migrations = [
           '01 - Yes',
           '02 - No',
           '03 - Unknown',
-        ])
+        ]).notNullable()
 
         t.enum('consentForVaccination', [
           '01 - Yes',
           '02 - No',
           '03 - Unknown',
-        ])
+        ]).notNullable()
+
+        // Is PUI / Is PUM fields
+        t.boolean("isPUI").defaultTo(false)
+        t.boolean("isPUM").defaultTo(false)
+
+        // Pre-existing medical condition
+        t.string("preexistingCondition")
       })
     },
     down: async (knex: Knex) => {
@@ -169,15 +176,18 @@ export const migrations = [
         t.integer('userId').index();
         t.foreign('userId').references('id').inTable('users');
 
-        t.boolean('fever').defaultTo('false')
-        t.boolean('abdominalPain').defaultTo('false')
-        t.boolean('chills').defaultTo('false')
-        t.boolean('cough').defaultTo('false')
-        t.boolean('diarrhea').defaultTo('false')
-        t.boolean('difficultyBreathing').defaultTo('false')
-        t.boolean('headache').defaultTo('false')
-        t.boolean('soreThroat').defaultTo('false')
-        t.boolean('nauseaOrVomiting').defaultTo('false')
+        t.boolean('fever').defaultTo(false)
+        t.boolean('abdominalPain').defaultTo(false)
+        t.boolean('chills').defaultTo(false)
+        t.boolean('cough').defaultTo(false)
+        t.boolean('diarrhea').defaultTo(false)
+        t.boolean('difficultyBreathing').defaultTo(false)
+        t.boolean('headache').defaultTo(false)
+        t.boolean('soreThroat').defaultTo(false)
+        t.boolean('nauseaOrVomiting').defaultTo(false)
+
+        t.string('others') // <- If others, please specify
+        t.boolean("adminHasRead").defaultTo(false)
 
         // Created at / updated at
         t.dateTime('createdAt')
@@ -205,23 +215,6 @@ export const migrations = [
     },
     down: async (knex: Knex) => {
       await knex.schema.dropTable('notifications');
-    }
-  },
-  {
-    version: 5,
-    description: 'Create PUI/PUM fields in users',
-    up: async (knex: Knex) => {
-      await knex.schema.table("users", table => {
-        // Is PUI / Is PUM fields
-        table.boolean("isPUI").defaultTo(false)
-        table.boolean("isPUM").defaultTo(false)
-      })
-    },
-    down: async (knex: Knex) => {
-      await knex.schema.table("users", table => {
-        table.dropColumn("isPUI");
-        table.dropColumn("isPUM");
-      })
     }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
