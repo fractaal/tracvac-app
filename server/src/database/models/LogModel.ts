@@ -13,7 +13,9 @@ export class LogModel extends BaseModel {
   headache!: boolean
   soreThroat!: boolean
   nauseaOrVomiting!: boolean
-  userId!: number;
+  userId!: number
+  others!: string
+  adminHasRead!: boolean
 
   static tableName = 'logs'
 
@@ -56,6 +58,9 @@ export class LogModel extends BaseModel {
         nauseaOrVomiting: {
           type: 'boolean',
           default: false
+        },
+        others: {
+          type: 'string'
         }
       }
     }
