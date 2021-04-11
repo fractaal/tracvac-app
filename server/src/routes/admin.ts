@@ -1,21 +1,20 @@
 import { app } from "../index"
 import path from 'path'
 import Logger from '../logger'
-import {Request, Response, NextFunction} from "express"
+import { Request, Response, NextFunction } from "express"
 import { raw } from 'objection'
-import {NotificationModel} from "../database/models/NotificationModel"
+import { NotificationModel } from "../database/models/NotificationModel"
 import { UserModel } from "../database/models/UserModel"
-import {LogModel} from "../database/models/LogModel"
-import {getConfig, setConfig} from "../config"
+import { LogModel } from "../database/models/LogModel"
+import { getConfig, isProperlyConfigured, setConfig } from "../config"
 import Config from "../interfaces/config"
 import { internalStaticPath } from '../'
 import open from 'open'
 import os from 'os'
-
 import ExcelJS from 'exceljs'
 import registrationFormTemplate from "../database/templates/registrationFormTemplate";
 
-const logger = Logger("admin");
+const logger = Logger("Administrator Route");
 
 const adminCheckerMiddleware = (request: Request, response: Response, next: NextFunction) => {
     if (request.socket.localAddress === request.socket.remoteAddress) {
@@ -64,10 +63,9 @@ app.post('/admin/setup', async (request, response) => {
 
 app.get('/admin/setup', async (request, response) => {
     const config: Partial<Config> = await getConfig();
+    const isConfigured = await isProperlyConfigured();
 
-    if (config) {
-        delete config.password;
-
+    if (isConfigured) {
         response.json({
             isConfigured: true,
             ...config
@@ -75,6 +73,7 @@ app.get('/admin/setup', async (request, response) => {
     } else {
         response.json({
             isConfigured: false,
+            ...config
         })
     }
 })
@@ -294,3 +293,36 @@ app.get('/admin/export', async (request, response) => {
     }
 
 });
+
+app.get('/admin/getUnreadLogs', async (req, res) => {
+    try {
+        const unreadLogs = await LogModel.query().where({ adminHasRead: false }).select('*');
+
+        res.json({
+            result: true,
+            data: unreadLogs
+        });
+    } catch(err) {
+        logger.error(`Error occurred while trying to return unread logs: ${err.stack}`);
+        res.status(500).json({
+            result: false,
+            message: `An error happened while trying to return unread logs!`
+        })
+    }
+})
+
+app.post('/admin/acknowledgeUnreadLogs', async (req, res) => {
+    try {
+        await LogModel.transaction(async (trx) => {
+            // Admin interface should just return array of IDs of what to acknowledge
+            const numRead = await LogModel.query(trx).findByIds(req.body.data).patch({ adminHasRead: true });
+            res.json({
+                result: true,
+                message: `Marked read ${numRead} logs.`
+            });
+        })
+    } catch(err) {
+        logger.error(`Error occurred while trying to acknowledge unread logs: ${err.stack}`)
+        res.status(500).json({result: false, message: `An error occurred while trying to acknowledge unread logs!`});
+    }
+})
