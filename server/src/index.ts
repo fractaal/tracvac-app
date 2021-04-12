@@ -129,7 +129,7 @@ logger.log(`Static files path: ${staticPath}`);
   if (fs.existsSync(path.join(process.env.CERT_PATH ?? '', 'privkey.pem')) && fs.existsSync(path.join(process.env.CERT_PATH ?? '', 'cert.pem'))) {
     logger.log(`HTTPS certificates detected! Binding to port ${config?.httpsPort}.`)
     https.createServer({
-      key: fs.readFileSync('key.pem'),
+      key: fs.readFileSync('privkey.pem'),
       cert: fs.readFileSync('cert.pem'),
     }, app)
       .listen(config?.httpsPort).on('error', (err) => {
