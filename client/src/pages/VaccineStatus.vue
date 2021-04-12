@@ -13,6 +13,7 @@
         <img src="~assets/tracvac-logo.png" class="w-80" alt=""/>
         <q-icon :class="color" class="block ml-auto mr-12 -mt-16" :name="icon" size="72px"/>
         <p v-if="store.userInfo.isVaccineReady === 'Ready'" class="text-h6">Manufacturer: {{store.userInfo.vaccineManufacturer}}</p>
+        <p v-if="store.userInfo.dosageNumber">Dosage Number: {{store.userInfo.dosageNumber}}</p>
       </div>
     </q-pull-to-refresh>
   </q-page>
