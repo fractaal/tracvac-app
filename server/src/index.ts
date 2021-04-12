@@ -126,11 +126,14 @@ logger.log(`Static files path: ${staticPath}`);
     logger.error(`Failed to bind to port ${config?.httpPort}: ` + err);
   });
 
-  if (fs.existsSync(path.join(process.env.CERT_PATH ?? '', 'privkey.pem')) && fs.existsSync(path.join(process.env.CERT_PATH ?? '', 'cert.pem'))) {
+  const privkeyLocation = path.join(process.env.CERT_PATH ?? '', 'privkey.pem')
+  const certLocation = path.join(process.env.CERT_PATH ?? '', 'cert.pem')
+
+  if (fs.existsSync(privkeyLocation) && fs.existsSync(certLocation)) {
     logger.log(`HTTPS certificates detected! Binding to port ${config?.httpsPort}.`)
     https.createServer({
-      key: fs.readFileSync('privkey.pem'),
-      cert: fs.readFileSync('cert.pem'),
+      key: fs.readFileSync(privkeyLocation),
+      cert: fs.readFileSync(certLocation),
     }, app)
       .listen(config?.httpsPort).on('error', (err) => {
         logger.error(`Failed to bind to port ${config?.httpsPort}: ` + err);
