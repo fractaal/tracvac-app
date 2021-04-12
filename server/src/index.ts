@@ -52,6 +52,7 @@ app.get('/', blocker);
 
 // Public paths
 app.use('/public', express.static(staticPath));
+app.use('/public', express.static(path.join(__dirname, '../public')));
 
 // Secure static path
 app.use('/secure', async (req, res, next) => {
