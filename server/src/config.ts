@@ -13,11 +13,11 @@ export async function getConfig(): Promise<Config> {
     const config = await Storage.get('config') as Config;
 
     return {
-        location: process.env.TV_LOCATION ?? config?.location,
-        lguUrl: process.env.TV_LGUURL ?? config?.lguUrl,
-        secret: process.env.TV_SECRET ?? config?.secret,
-        httpsPort: process.env.TV_PORT_SECURE ?? config?.httpsPort ?? 443,
-        httpPort: process.env.TV_PORT ?? config?.httpPort ?? 80
+        location: process.env.LOCATION ?? config?.location,
+        lguUrl: process.env.LGUURL ?? config?.lguUrl,
+        secret: process.env.SECRET ?? config?.secret,
+        httpsPort: process.env.PORT_SECURE ?? config?.httpsPort ?? 443,
+        httpPort: process.env.PORT ?? config?.httpPort ?? 80
     } as Config;
 }
 
