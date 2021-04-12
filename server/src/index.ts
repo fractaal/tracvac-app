@@ -17,7 +17,7 @@ import cors from 'cors';
 
 const logger = Logger(`Worker Main`);
 export const app = express();
-export const staticPath = path.resolve(process.cwd(), 'static');
+export const staticPath = path.resolve(process.cwd(), 'public');
 export const internalStaticPath = path.resolve(__dirname, '../', 'static')
 
 let isHTTPSAvailable = true;
@@ -50,9 +50,20 @@ const blocker = (_: Request, res: Response) => {
 app.get('/index.html', blocker);
 app.get('/', blocker);
 
-// Static paths
-app.use(express.static(staticPath));
-app.use(express.static(internalStaticPath));
+// Public paths
+app.use('/public', express.static(staticPath));
+
+// Secure static path
+app.use('/secure', async (req, res, next) => {
+  if (req.socket.localAddress === req.socket.remoteAddress) {
+    next();
+  } else {
+    logger.warn(`An attempt to access secure static files was made from ${req.socket.remoteAddress}`)
+    res.status(401).json({result: false, message: "You are not authorized"});
+    return;
+  }
+})
+app.use('/secure', express.static(internalStaticPath));
 
 logger.log(`Static files path: ${staticPath}`);
 
@@ -64,6 +75,7 @@ logger.log(`Static files path: ${staticPath}`);
   // HTTPS middleware
   const protocolIsSecure = (req: Request) => req.secure || req.get("X-Forwarded-Proto") === 'https';
   app.use(async (req, res, next) => {
+    logger.log(`${req.method} ${req.url} ${req.ip}`)
     if (!protocolIsSecure(req) && !isHTTPSAvailable) {
       logger.warn(`This request (${req.ip}) is not secure. Sensitive data such as login credentials or access tokens can be intercepted.`)
       next()
