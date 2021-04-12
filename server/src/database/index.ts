@@ -18,7 +18,7 @@ export const knex = Knex({
     user     : dbConfig.user,
     port     : dbConfig.port,
     password : dbConfig.password,
-    database : 'tracvac-db',
+    database : dbConfig.database,
   },
   pool: {
     max: 5,

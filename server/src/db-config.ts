@@ -7,6 +7,7 @@ export interface DatabaseConfig {
     user: string;
     port: number;
     password: string;
+    database: string;
 }
 
 export function getDbConfig(): DatabaseConfig {
@@ -17,10 +18,11 @@ export function getDbConfig(): DatabaseConfig {
         process.env.DB_USER
     ) {
         return {
-            host: String(process.env.DB_HOST),
-            password: String(process.env.DB_PASSWORD),
-            port: parseInt(process.env.DB_PORT),
-            user: String(process.env.DB_USER),
+            host: process.env.DB_HOST as string,
+            password: process.env.DB_PASSWORD as string,
+            port: process.env.DB_PORT as unknown as number,
+            user: process.env.DB_USER as string,
+            database: process.env.DB_NAME ?? 'tracvac-db' as string
         } as DatabaseConfig;
     } else {
         logger.error(`Database environment variables not set! Please set them before starting Tracvac Server.`);
