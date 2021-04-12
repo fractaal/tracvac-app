@@ -35,6 +35,19 @@
             <i class="text-sm">Push notifications to everyone on this site.</i>
            </q-item-section>
         </q-item>
+        <q-item clickable v-ripple class="p-12" @click="$router.push('/view-logs')">
+          <q-item-section avatar>
+            <q-icon color="primary" name="fas fa-pen" size="lg" />
+          </q-item-section>
+
+          <q-item-section class="text-lg">
+            <q-badge class='mr-4' color='red' floating v-if='store.unreadLogsCount !== 0'>
+              {{store.unreadLogsCount}}
+            </q-badge>
+            <b>Logs</b>
+            <i class="text-sm">Logs users have created.</i>
+          </q-item-section>
+        </q-item>
         <q-item clickable v-ripple class="p-12" @click="$router.push('/config')">
           <q-item-section avatar>
             <q-icon color="primary" name="settings" size="lg"/>
@@ -85,6 +98,9 @@ import Vue from 'vue';
 
 export default Vue.extend({
   name: 'MainLayout',
+  async created() {
+    this.store.unreadLogsCount = (await store.axios.post('/admin/getUnreadLogsCount')).data.count
+  },
   data() {
     return {
       store,
