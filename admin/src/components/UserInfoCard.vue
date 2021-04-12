@@ -15,7 +15,7 @@
         {{user.isPUI ? 'Under Investigation' : 'Not Under Investigation'}}
       </q-badge>
       <hr>
-      <div v-for='item in medicalHistory'>
+      <div v-for='item in medicalHistory' :key='item.name'>
         <p class='m-0 p-0'><b>{{item.displayName}}</b>: {{user[item.name]}}</p>
       </div>
     </q-card-section>

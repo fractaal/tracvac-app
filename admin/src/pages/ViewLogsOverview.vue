@@ -86,12 +86,12 @@ const columns = [
   {
     name: 'username',
     label: 'Username',
-    field: row => row.user.username
+    field: (row: any) => (row.user.username as string)
   },
   {
     name: 'name',
     label: 'Name',
-    field: row => `${row.user.firstName} ${row.user.middleName} ${row.user.lastName}`
+    field: (row: any) => `${row.user.firstName} ${row.user.middleName} ${row.user.lastName}`
   },
   {
     name: 'adminHasRead',
@@ -199,7 +199,7 @@ export default Vue.extend({
       this.loading = false;
     },
     viewLogs () {
-      this.$router.push('/view-logs/' + this.selected[0].user.id);
+      this.$router.push(`/view-logs/${this.selected[0].user.id}`);
     },
     addSelectionToEdit() {
       itemLoop: for (const _ of this.selected) {
