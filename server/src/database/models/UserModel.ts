@@ -122,6 +122,7 @@ export class UserModel extends BaseModel {
   comorbidity!: UserComorbidityEnum
   covidHistory!: boolean
   covidDate!: string
+  dosageNumber!: number
   covidClassification!: UserCovidClassificationEnum
   consentForDataCollection!: UserConsentForDataCollectionEnum
   consentForVaccination!: UserConsentForVaccinationEnum

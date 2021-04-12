@@ -30,6 +30,9 @@ export const migrations = [
         t.string('email').notNullable();
         t.string('profilePicturePath').defaultTo('public/placeholder.png');
 
+        // Dosage no.
+        t.integer('dosageNumber').defaultTo(0)
+
         // Updated at / created at
         t.dateTime('createdAt')
         t.dateTime('updatedAt')
