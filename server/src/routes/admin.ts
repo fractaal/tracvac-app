@@ -9,6 +9,7 @@ import { LogModel } from "../database/models/LogModel"
 import { getConfig, isProperlyConfigured, setConfig } from "../config"
 import Config from "../interfaces/config"
 import { internalStaticPath } from '../'
+import expressBasicAuth from "express-basic-auth";
 import open from 'open'
 import os from 'os'
 import ExcelJS from 'exceljs'
@@ -24,358 +25,359 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         logger.warn(`An attempt to access the administrator interface was made from ${request.socket.remoteAddress}`)
         response.status(401).json({result: false, message: "You are not authorized"});
     }
-
 };
 
-app.use('/admin/*', adminCheckerMiddleware)
-app.use('/admin', adminCheckerMiddleware)
+(async () => {
+    app.use('/admin/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
+    app.use('/admin', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
 
-app.get('/admin', (request, response) => {
-    response.redirect('/secure')
-    // response.sendFile(path.resolve(internalStaticPath, 'index.html'));
-})
+    app.get('/admin', (request, response) => {
+        response.redirect('/secure')
+        // response.sendFile(path.resolve(internalStaticPath, 'index.html'));
+    })
 
-app.post('/admin/setup', async (request, response) => {
+    app.post('/admin/setup', async (request, response) => {
 
-    if (
-        request.body.location &&
-        request.body.lguUrl &&
-        request.body.secret &&
-        request.body.httpPort &&
-        request.body.httpsPort
-    ) {
-        if (request.body.isConfigured) delete request.body.isConfigured;
-        try {
-            if (await setConfig(request.body as Config)) {
-                logger.success(`Configuration was updated: ${request.body}`);
-                response.json({result: true});
-            } else {
+        if (
+            request.body.location &&
+            request.body.lguUrl &&
+            request.body.secret &&
+            request.body.httpPort &&
+            request.body.httpsPort
+        ) {
+            if (request.body.isConfigured) delete request.body.isConfigured;
+            try {
+                if (await setConfig(request.body as Config)) {
+                    logger.success(`Configuration was updated: ${request.body}`);
+                    response.json({result: true});
+                } else {
+                    response.status(500).json({result: false, message: "Something happened while updating the config"});
+                }
+            } catch(e) {
+                logger.error('While updating config: ' + e);
                 response.status(500).json({result: false, message: "Something happened while updating the config"});
             }
-        } catch(e) {
-            logger.error('While updating config: ' + e);
-            response.status(500).json({result: false, message: "Something happened while updating the config"});
-        }
-    } else {
-        logger.warn('Admin sent invalid setup');
-        response.status(400).json({result: false, message: "You sent an invalid setup configuration."});
-    }
-})
-
-app.get('/admin/setup', async (request, response) => {
-    const config: Partial<Config> = await getConfig();
-    const isConfigured = await isProperlyConfigured();
-
-    if (isConfigured) {
-        response.json({
-            isConfigured: true,
-            ...config
-        })
-    } else {
-        response.json({
-            isConfigured: false,
-            ...config
-        })
-    }
-})
-
-app.get('/admin/getUser/:id', async (req, res) => {
-    try {
-        const user = await UserModel.query().findById(req.params.id) as UserModel | null
-
-        if (user) {
-            res.json({result: true, data: user})
         } else {
-            res.status(400).json({result: false, message: `User doesn't exist.`})
+            logger.warn('Admin sent invalid setup');
+            response.status(400).json({result: false, message: "You sent an invalid setup configuration."});
         }
-    } catch(err) {
-        logger.error(err)
-        res.status(500).json({result: false, message: `Server error occurred while trying to get user`})
-    }
-})
+    })
 
-app.post('/admin/getUsers', async (request, response) => {
-    if (request.body.pageSize === 0) request.body.pageSize = 1000;
-    if (
-        request.body.pageSize !== undefined &&
-        request.body.page !== undefined &&
-        request.body.orderBy !== undefined &&
-        request.body.ascending !== undefined
-    ) {
-        let result;
-        if (request.body.filter) {
-            result = await UserModel.query()
-                .select('*')
-                .where(
-                    raw("CONCAT(\"firstName\", \"middleName\", \"lastName\")"),
-                    'LIKE',
-                    `%${request.body.filter}%`
-                ).where(
-                    (() => {
-                        const where = {} as Record<string,any>;
-                        if (request.body.showPUMs) where.isPUM = true;
-                        if (request.body.showPUIs) where.isPUI = true;
-                        return where
-                    })()
-                ).orderBy(request.body.orderBy, request.body.ascending ? 'asc' : 'desc')
-                .page(parseInt(request.body.page), parseInt(request.body.pageSize));
-        } else {
-            result = await UserModel.query()
-                .where(
-                    (() => {
-                        const where = {} as Record<string,any>;
-                        if (request.body.showPUMs) where.isPUM = true;
-                        if (request.body.showPUIs) where.isPUI = true;
-                        return where
-                    })()
-                ).orderBy(request.body.orderBy, request.body.ascending ? 'asc' : 'desc')
-                .page(parseInt(request.body.page), parseInt(request.body.pageSize));
-        }
-        response.json(result);
-    } else {
-        response.status(400).json({result: false, message: 'Missing params'})
-    }
-})
+    app.get('/admin/setup', async (request, response) => {
+        const config: Partial<Config> = await getConfig();
+        const isConfigured = await isProperlyConfigured();
 
-app.post('/admin/editUser', async (request, response) => {
-    if (request.body.data) {
-        for (const user of request.body.data as Partial<UserModel>[]) {
-            if (
-                user.id === undefined &&
-                user.isVaccinated === undefined &&
-                user.vaccineManufacturer === undefined &&
-                user.isVaccineReady === undefined &&
-                user.isPUM === undefined &&
-                user.isPUI === undefined &&
-                user.dosageNumber === undefined
-            ) response.status(400).json({result: false, message: "Missing parameters."})
-        }
-
-        try {
-            await UserModel.transaction(async (trx) => {
-                for (const user of request.body.data as Partial<UserModel>[]) {
-                    await UserModel.query(trx).where({ id: user.id }).patch({
-                        isVaccinated: !!user.isVaccinated,
-                        vaccineManufacturer: user.vaccineManufacturer,
-                        isVaccineReady: user.isVaccineReady,
-                        isPUI: !!user.isPUI,
-                        isPUM: !!user.isPUM,
-                        dosageNumber: user.dosageNumber
-                    });
-                }
+        if (isConfigured) {
+            response.json({
+                isConfigured: true,
+                ...config
             })
-            logger.log(`Committed changes to ${request.body.data.length} people`)
-            response.json({result: true, message: "Changes committed!"})
-        } catch (err) {
-            logger.error(`Error occurred while updating users: ${err}`)
-            response.status(500).json({result: false, message: 'Something happened while trying to update the users. The changes have not been committed.'});
+        } else {
+            response.json({
+                isConfigured: false,
+                ...config
+            })
         }
+    })
 
-    }
-})
-
-app.post('/admin/getNotifications', async (request, response) => {
-    if (request.body.pageSize !== undefined && request.body.page !== undefined) {
-        const result = await NotificationModel.query().select('*');
-
-        response.json(result);
-    } else {
-        response.status(400).json({result: false, message: 'Missing page/pageSize params'})
-    }
-})
-
-app.post('/admin/postNotification', async (request, response) => {
-    if (
-        request.body.title &&
-        request.body.content
-    ) {
+    app.get('/admin/getUser/:id', async (req, res) => {
         try {
-            const notifToAdd: Record<string, string> = {
-                title: request.body.title,
-                content: request.body.content,
+            const user = await UserModel.query().findById(req.params.id) as UserModel | null
+
+            if (user) {
+                res.json({result: true, data: user})
+            } else {
+                res.status(400).json({result: false, message: `User doesn't exist.`})
             }
-            if (request.body.subtitle) notifToAdd.subtitle = request.body.subtitle;
-            await NotificationModel.query().insert(notifToAdd);
-
-            logger.log(`New notification ${notifToAdd.title} added`)
-            response.json({result: true, message: 'Notification posted!'});
-        } catch (e) {
-            response.status(500).json({result: false, message: `Server side error: ${e}`});
-        }
-    } else {
-        response.status(400).json({result: false, message: "Missing title / content"});
-    }
-})
-
-app.post('/admin/deleteNotification', async (request, response) => {
-    if (request.body.notificationId) {
-        try {
-            await NotificationModel.query().deleteById(request.body.notificationId);
-            logger.log(`Deleted notification ${request.body.notificationId}`)
-            response.json({result: true});
-        } catch(e) {
-            response.status(500).json({result: false, message: 'Something happened while trying to delete the notification.'});
-        }
-    } else {
-        response.status(400).json({result: false, message: "Notification ID missing"});
-    }
-})
-
-app.post('/admin/viewLogs', async (request, response) => {
-    if (request.body.userId) {
-        try {
-            const result = await LogModel.query().select('*').where({userId: request.body.userId}).orderBy('createdAt', 'desc');
-            logger.log(`Returning logs for user ${request.body.userId}`)
-            response.json({result: true, data: result});
         } catch(err) {
-            logger.error(`Notification retrieval for user ${request.body.userId} failed: ${err}`)
-            response.status(500).json({result: false, message: "Something happened while trying to retrieve notifications"})
+            logger.error(err)
+            res.status(500).json({result: false, message: `Server error occurred while trying to get user`})
         }
-    } else {
-        response.status(400).json({result: false, message: "User ID missing"});
-    }
-})
+    })
 
-app.get('/admin/export', async (request, response) => {
-    const start = Date.now();
-    logger.log(`Performing user data export!`)
-
-    let workbook: ExcelJS.Workbook;
-    let sheet: ExcelJS.Worksheet;
-
-    try {
-
-        workbook = new ExcelJS.Workbook();
-
-        workbook.creator = "Tracvac";
-        workbook.created = new Date();
-        workbook.modified = new Date();
-
-        sheet = workbook.addWorksheet("people");
-
-        const columns = [];
-
-        for (const section of registrationFormTemplate) {
-            for (const formItem of section.formItems) {
-                if (formItem.name === 'password') continue;
-                columns.push({
-                    header: formItem.displayName,
-                    key: formItem.name
-                })
+    app.post('/admin/getUsers', async (request, response) => {
+        if (request.body.pageSize === 0) request.body.pageSize = 1000;
+        if (
+            request.body.pageSize !== undefined &&
+            request.body.page !== undefined &&
+            request.body.orderBy !== undefined &&
+            request.body.ascending !== undefined
+        ) {
+            let result;
+            if (request.body.filter) {
+                result = await UserModel.query()
+                    .select('*')
+                    .where(
+                        raw("CONCAT(\"firstName\", \"middleName\", \"lastName\")"),
+                        'LIKE',
+                        `%${request.body.filter}%`
+                    ).where(
+                        (() => {
+                            const where = {} as Record<string,any>;
+                            if (request.body.showPUMs) where.isPUM = true;
+                            if (request.body.showPUIs) where.isPUI = true;
+                            return where
+                        })()
+                    ).orderBy(request.body.orderBy, request.body.ascending ? 'asc' : 'desc')
+                    .page(parseInt(request.body.page), parseInt(request.body.pageSize));
+            } else {
+                result = await UserModel.query()
+                    .where(
+                        (() => {
+                            const where = {} as Record<string,any>;
+                            if (request.body.showPUMs) where.isPUM = true;
+                            if (request.body.showPUIs) where.isPUI = true;
+                            return where
+                        })()
+                    ).orderBy(request.body.orderBy, request.body.ascending ? 'asc' : 'desc')
+                    .page(parseInt(request.body.page), parseInt(request.body.pageSize));
             }
+            response.json(result);
+        } else {
+            response.status(400).json({result: false, message: 'Missing params'})
+        }
+    })
+
+    app.post('/admin/editUser', async (request, response) => {
+        if (request.body.data) {
+            for (const user of request.body.data as Partial<UserModel>[]) {
+                if (
+                    user.id === undefined &&
+                    user.isVaccinated === undefined &&
+                    user.vaccineManufacturer === undefined &&
+                    user.isVaccineReady === undefined &&
+                    user.isPUM === undefined &&
+                    user.isPUI === undefined &&
+                    user.dosageNumber === undefined
+                ) response.status(400).json({result: false, message: "Missing parameters."})
+            }
+
+            try {
+                await UserModel.transaction(async (trx) => {
+                    for (const user of request.body.data as Partial<UserModel>[]) {
+                        await UserModel.query(trx).where({ id: user.id }).patch({
+                            isVaccinated: !!user.isVaccinated,
+                            vaccineManufacturer: user.vaccineManufacturer,
+                            isVaccineReady: user.isVaccineReady,
+                            isPUI: !!user.isPUI,
+                            isPUM: !!user.isPUM,
+                            dosageNumber: user.dosageNumber
+                        });
+                    }
+                })
+                logger.log(`Committed changes to ${request.body.data.length} people`)
+                response.json({result: true, message: "Changes committed!"})
+            } catch (err) {
+                logger.error(`Error occurred while updating users: ${err}`)
+                response.status(500).json({result: false, message: 'Something happened while trying to update the users. The changes have not been committed.'});
+            }
+
+        }
+    })
+
+    app.post('/admin/getNotifications', async (request, response) => {
+        if (request.body.pageSize !== undefined && request.body.page !== undefined) {
+            const result = await NotificationModel.query().select('*');
+
+            response.json(result);
+        } else {
+            response.status(400).json({result: false, message: 'Missing page/pageSize params'})
+        }
+    })
+
+    app.post('/admin/postNotification', async (request, response) => {
+        if (
+            request.body.title &&
+            request.body.content
+        ) {
+            try {
+                const notifToAdd: Record<string, string> = {
+                    title: request.body.title,
+                    content: request.body.content,
+                }
+                if (request.body.subtitle) notifToAdd.subtitle = request.body.subtitle;
+                await NotificationModel.query().insert(notifToAdd);
+
+                logger.log(`New notification ${notifToAdd.title} added`)
+                response.json({result: true, message: 'Notification posted!'});
+            } catch (e) {
+                response.status(500).json({result: false, message: `Server side error: ${e}`});
+            }
+        } else {
+            response.status(400).json({result: false, message: "Missing title / content"});
+        }
+    })
+
+    app.post('/admin/deleteNotification', async (request, response) => {
+        if (request.body.notificationId) {
+            try {
+                await NotificationModel.query().deleteById(request.body.notificationId);
+                logger.log(`Deleted notification ${request.body.notificationId}`)
+                response.json({result: true});
+            } catch(e) {
+                response.status(500).json({result: false, message: 'Something happened while trying to delete the notification.'});
+            }
+        } else {
+            response.status(400).json({result: false, message: "Notification ID missing"});
+        }
+    })
+
+    app.post('/admin/viewLogs', async (request, response) => {
+        if (request.body.userId) {
+            try {
+                const result = await LogModel.query().select('*').where({userId: request.body.userId}).orderBy('createdAt', 'desc');
+                logger.log(`Returning logs for user ${request.body.userId}`)
+                response.json({result: true, data: result});
+            } catch(err) {
+                logger.error(`Notification retrieval for user ${request.body.userId} failed: ${err}`)
+                response.status(500).json({result: false, message: "Something happened while trying to retrieve notifications"})
+            }
+        } else {
+            response.status(400).json({result: false, message: "User ID missing"});
+        }
+    })
+
+    app.get('/admin/export', async (request, response) => {
+        const start = Date.now();
+        logger.log(`Performing user data export!`)
+
+        let workbook: ExcelJS.Workbook;
+        let sheet: ExcelJS.Worksheet;
+
+        try {
+
+            workbook = new ExcelJS.Workbook();
+
+            workbook.creator = "Tracvac";
+            workbook.created = new Date();
+            workbook.modified = new Date();
+
+            sheet = workbook.addWorksheet("people");
+
+            const columns = [];
+
+            for (const section of registrationFormTemplate) {
+                for (const formItem of section.formItems) {
+                    if (formItem.name === 'password') continue;
+                    columns.push({
+                        header: formItem.displayName,
+                        key: formItem.name
+                    })
+                }
+            }
+
+            sheet.columns = columns; // Fix column.equivalentTo is undefined
+
+        } catch(err) {
+            logger.error(`Error occurred while initializing the workbook: ${err}`);
+            response.status(500).json({
+                result: false,
+                message: `Error occurred while initializing the workbook: ${err}`
+            })
+            return;
         }
 
-        sheet.columns = columns; // Fix column.equivalentTo is undefined
+        let allUsers: UserModel[];
 
-    } catch(err) {
-        logger.error(`Error occurred while initializing the workbook: ${err}`);
-        response.status(500).json({
-            result: false,
-            message: `Error occurred while initializing the workbook: ${err}`
-        })
-        return;
-    }
-
-    let allUsers: UserModel[];
-
-    try {
-        allUsers = await UserModel.query().select('*');
-    } catch (err) {
-        logger.error(`Error occurred while querying the database: ${err}`);
-        response.status(500).json({
-            result: false,
-            message: `Error occurred while querying the database: ${err}`
-        })
-        return;
-    }
-
-    try {
-        for (const user of allUsers) {
-            sheet.addRow(user);
+        try {
+            allUsers = await UserModel.query().select('*');
+        } catch (err) {
+            logger.error(`Error occurred while querying the database: ${err}`);
+            response.status(500).json({
+                result: false,
+                message: `Error occurred while querying the database: ${err}`
+            })
+            return;
         }
 
-        const pathToWrite = path.resolve(os.homedir(), 'Desktop', 'export.xlsx');
+        try {
+            for (const user of allUsers) {
+                sheet.addRow(user);
+            }
 
-        await workbook.xlsx.writeFile(pathToWrite);
-        await open(pathToWrite)
+            const pathToWrite = path.resolve(os.homedir(), 'Desktop', 'export.xlsx');
 
-        response.json({result: true, message: `Export complete!`});
-        logger.success(`User data export complete.`)
-        logger.success(`Took ${Date.now() - start}ms for ${allUsers.length} users`)
-        logger.success(`Export path: ${pathToWrite}`)
-        logger.success(`Auto-opening for convenience.`)
-    } catch(err) {
-        logger.error(`Error occurred while exporting data: ${err}`);
-        response.status(500).json({
-            result: false,
-            message: `Error occurred while exporting data: ${err}`
-        })
-    }
+            await workbook.xlsx.writeFile(pathToWrite);
+            await open(pathToWrite)
 
-});
-
-app.post('/admin/getUnreadLogsCount', async (req, res) => {
-    try {
-        res.json({result: true, count: (await LogModel.query().select('*').where({adminHasRead: false})).length})
-    } catch {
-        res.status(500).json({result: false})
-    }
-})
-
-app.post('/admin/getLogs', async (req, res) => {
-    if (req.body.pageSize == 0) req.body.pageSize = 999;
-    try {
-        interface UserLogModel extends LogModel {
-            user: UserModel
+            response.json({result: true, message: `Export complete!`});
+            logger.success(`User data export complete.`)
+            logger.success(`Took ${Date.now() - start}ms for ${allUsers.length} users`)
+            logger.success(`Export path: ${pathToWrite}`)
+            logger.success(`Auto-opening for convenience.`)
+        } catch(err) {
+            logger.error(`Error occurred while exporting data: ${err}`);
+            response.status(500).json({
+                result: false,
+                message: `Error occurred while exporting data: ${err}`
+            })
         }
 
-        let unreadLogs = await LogModel.query()
-            .select('*')
-            .orderBy('createdAt', 'desc')
-            .where(
-                (() => {
-                    if (req.body.showOnlyUnread) {
-                        return {adminHasRead: false}
-                    } else return {}
-                })()
-            )
-            .page(parseInt(req.body.page), parseInt(req.body.pageSize));
+    });
 
-        unreadLogs.results = await Promise.all((unreadLogs.results as UserLogModel[]).map(async unreadLog => {
-            unreadLog.user = await UserModel.query().findById(unreadLog.userId);
-            return unreadLog;
-        }));
+    app.post('/admin/getUnreadLogsCount', async (req, res) => {
+        try {
+            res.json({result: true, count: (await LogModel.query().select('*').where({adminHasRead: false})).length})
+        } catch {
+            res.status(500).json({result: false})
+        }
+    })
 
-        res.json({
-            result: true,
-            data: unreadLogs
-        });
-        logger.log(`Returning ${unreadLogs.results.length} logs`);
+    app.post('/admin/getLogs', async (req, res) => {
+        if (req.body.pageSize == 0) req.body.pageSize = 999;
+        try {
+            interface UserLogModel extends LogModel {
+                user: UserModel
+            }
 
-    } catch(err) {
-        logger.error(`Error occurred while trying to return unread logs: ${err.stack}`);
-        res.status(500).json({
-            result: false,
-            message: `An error happened while trying to return unread logs!`
-        })
-    }
-})
+            let unreadLogs = await LogModel.query()
+                .select('*')
+                .orderBy('createdAt', 'desc')
+                .where(
+                    (() => {
+                        if (req.body.showOnlyUnread) {
+                            return {adminHasRead: false}
+                        } else return {}
+                    })()
+                )
+                .page(parseInt(req.body.page), parseInt(req.body.pageSize));
 
-app.post('/admin/markLogs', async (req, res) => {
-    try {
-        await LogModel.transaction(async (trx) => {
-            // Admin interface should just return array of IDs of what to acknowledge
-            const numRead = await LogModel.query(trx).findByIds(req.body.data).patch({ adminHasRead: req.body.read});
+            unreadLogs.results = await Promise.all((unreadLogs.results as UserLogModel[]).map(async unreadLog => {
+                unreadLog.user = await UserModel.query().findById(unreadLog.userId);
+                return unreadLog;
+            }));
+
             res.json({
                 result: true,
-                message: `Marked ${req.body.read} ${numRead} logs.`
+                data: unreadLogs
             });
-            logger.log(`Marked ${req.body.read} ${numRead} logs.`)
-        })
+            logger.log(`Returning ${unreadLogs.results.length} logs`);
+
+        } catch(err) {
+            logger.error(`Error occurred while trying to return unread logs: ${err.stack}`);
+            res.status(500).json({
+                result: false,
+                message: `An error happened while trying to return unread logs!`
+            })
+        }
+    })
+
+    app.post('/admin/markLogs', async (req, res) => {
+        try {
+            await LogModel.transaction(async (trx) => {
+                // Admin interface should just return array of IDs of what to acknowledge
+                const numRead = await LogModel.query(trx).findByIds(req.body.data).patch({ adminHasRead: req.body.read});
+                res.json({
+                    result: true,
+                    message: `Marked ${req.body.read} ${numRead} logs.`
+                });
+                logger.log(`Marked ${req.body.read} ${numRead} logs.`)
+            })
 
 
-    } catch(err) {
-        logger.error(`Error occurred while trying to mark logs: ${err.stack}`)
-        res.status(500).json({result: false, message: `An error occurred while trying to mark logs!`});
-    }
-})
+        } catch(err) {
+            logger.error(`Error occurred while trying to mark logs: ${err.stack}`)
+            res.status(500).json({result: false, message: `An error occurred while trying to mark logs!`});
+        }
+    })
+})();
