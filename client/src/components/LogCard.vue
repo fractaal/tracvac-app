@@ -39,6 +39,8 @@ export default Vue.extend({
       if (!!(this.log[key]) && displayNameMappings[key]) {
         // @ts-ignore
         symptoms.push(displayNameMappings[key])
+      } else if (key === 'others' && this.log[key]) {
+        symptoms.push(this.log[key])
       }
     }
 

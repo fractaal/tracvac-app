@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-img class="rounded-full shadow-xl ring-4 ring-white" @error="errored = true; getProfilePicturePath()" :src="fullPath" ratio="1">
+    <q-img class="rounded-full shadow-xl ring-4 ring-white" :src="fullPath" ratio="1">
       <q-menu>
         <q-list>
           <q-item clickable v-ripple v-close-popup>

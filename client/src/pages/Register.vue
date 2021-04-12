@@ -123,7 +123,8 @@ export default Vue.extend({
       template: [...registrationFormTemplate],
       activeSection: 0,
       isPassword: false,
-      formData: {} as FormData
+      formData: {} as FormData,
+      forceRouteLeave: false
     }
   },
   activated () {
@@ -161,25 +162,34 @@ export default Vue.extend({
       return this.activeSection === this.template.length - 1 ? 'check_circle' : 'keyboard_arrow_right'
     }
   },
+  beforeRouteLeave (to, from, next) {
+    if (this.forceRouteLeave) {
+      this.forceRouteLeave = false
+      next()
+      return
+    }
+
+    if (this.$props.mode === 'register') {
+      Dialog.create({
+        title: 'Cancel registration?',
+        cancel: true
+      }).onOk(() => {
+        next()
+      })
+    } else if (this.$props.mode === 'edit') {
+      Dialog.create({
+        title: 'Go back?',
+        message: 'Any changes you made to your personal information on this screen will be discarded.',
+        cancel: true
+      }).onOk(() => {
+        next()
+      })
+    }
+  },
   methods: {
     back () {
       if (this.activeSection === 0) {
-        if (this.$props.mode === 'register') {
-          Dialog.create({
-            title: 'Cancel registration?',
-            cancel: true
-          }).onOk(() => {
-            this.$router.go(-1)
-          })
-        } else if (this.$props.mode === 'edit') {
-          Dialog.create({
-            title: 'Go back?',
-            message: 'Any changes you made to your personal information on this screen will be discarded.',
-            cancel: true
-          }).onOk(() => {
-            this.$router.go(-1)
-          })
-        }
+        this.$router.back()
       } else {
         this.navigate(-1)
       }
@@ -242,6 +252,7 @@ export default Vue.extend({
         const [result, message] = await register(dataToSubmit)
 
         if (result) {
+          this.forceRouteLeave = true
           await this.$router.push('/home')
         } else {
           this.$q.notify({
@@ -251,6 +262,7 @@ export default Vue.extend({
         }
       } else if (this.$props.mode === 'edit') {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        this.forceRouteLeave = true
         // @ts-ignore
         if (await setUserInfo(dataToSubmit)) { this.$router.back() }
       }

@@ -56,6 +56,11 @@ const template = [
         displayName: 'Nausea or Vomiting',
         description: 'An uneasiness of the stomach which could then result in the involuntary emptying of stomach contents through the mouth.',
         name: 'nauseaOrVomiting',
+        type: 'boolean'
+      },
+      {
+        displayName: 'Others',
+        name: 'others',
         type: 'string'
       }
     ]

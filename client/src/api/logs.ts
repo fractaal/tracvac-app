@@ -24,6 +24,7 @@ export interface Log {
   nauseaOrVomiting: boolean;
   createdAt?: string;
   updatedAt?: any;
+  others: string;
   [x: string]: string|number|boolean|undefined;
 }
 

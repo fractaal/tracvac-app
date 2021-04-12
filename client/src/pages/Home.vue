@@ -45,6 +45,13 @@ export default Vue.extend({
   activated () {
     startup()
   },
+  beforeRouteLeave (to, from, next) {
+    if (to.path === '/register') {
+      next(false)
+    } else {
+      next()
+    }
+  },
   data () {
     return {
       store

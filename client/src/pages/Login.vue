@@ -1,7 +1,7 @@
 <template>
   <q-page class="column">
     <div class="bg-blue-500 text-white pb-8 px-12 rounded-b-3xl">
-      <img src="~assets/tracvac-logo.png" alt="" class="block mt-16 mx-auto w-1/2"/>
+      <img src="~assets/tracvac-logo.png" alt="" class="block mt-16 mx-auto w-64"/>
       <h4 class="logo-text m-0 p-0 text-center">Tracvac</h4>
       <p class="text-center">Your friendly digital vaccine passport</p>
     </div>
@@ -58,7 +58,7 @@ export default Vue.extend({
       }).onCancel(() => {
         next(false)
       })
-    } else if (to.path === '/home' && !isAuthed()) {
+    } else if ((to.path === '/home' && !isAuthed()) || to.path === '/') {
       next(false)
     } else {
       next()

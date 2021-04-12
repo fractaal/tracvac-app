@@ -38,7 +38,8 @@ const template = [
         name: 'suffix',
         displayName: 'Suffix',
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        description: 'If none, write "N/A"'
       },
       {
         name: 'contactNumber',
@@ -80,7 +81,7 @@ const template = [
         options: [
           '01 - Female',
           '02 - Male',
-          '03 - Not To Disclose'
+          '03 - Not to Disclose'
         ],
         type: 'string',
         format: 'Dropdown'
@@ -137,14 +138,16 @@ const template = [
         name: 'categoryID',
         displayName: 'Category ID',
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        description: 'If none, write "N/A"'
       },
       {
         name: 'philHealthID',
         displayName: 'Philhealth ID',
         type: 'number',
         format: 'Text',
-        limit: 12
+        limit: 12,
+        description: 'If none, write "N/A"'
       },
 
       {
@@ -230,6 +233,13 @@ const template = [
     title: 'Medical History',
     description: 'All information regarding your medical history goes here.',
     formItems: [
+      {
+        name: 'preexistingCondition',
+        displayName: 'Pre-existing Condition?',
+        description: 'Do you have an existing medical condition? If none, write "N/A."',
+        type: 'string',
+        format: 'Text'
+      },
       {
         name: 'directCOVID',
         displayName: 'Providing care?',

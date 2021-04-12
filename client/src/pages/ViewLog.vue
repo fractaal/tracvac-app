@@ -10,17 +10,26 @@
         <li>Serious disorientation or unresponsiveness</li>
       </ul>
     </div>
-    <div v-for="formItem in logTemplate[0].formItems" :key="formItem.name" class="flex flex-row items-center m-4 border-2 border-blue-500 border-solid shadow-lg rounded-lg">
-      <q-item tag="label" v-ripple>
-        <q-item-section avatar>
-          <q-checkbox v-model="logData[formItem.name]" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{formItem.displayName}}</q-item-label>
-          <q-item-label caption>{{formItem.description}}</q-item-label>
-        </q-item-section>
-      </q-item>
+    <div v-for="formItem in logTemplate[0].formItems" :key="formItem.name">
+      <div v-if="formItem.name !== 'others'" class="flex flex-row items-center m-4 border-2 border-blue-500 border-solid shadow-lg rounded-lg">
+        <q-item tag="label" v-ripple >
+          <q-item-section avatar>
+            <q-checkbox v-model="logData[formItem.name]" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{formItem.displayName}}</q-item-label>
+            <q-item-label caption>{{formItem.description}}</q-item-label>
+          </q-item-section>
+        </q-item>
+      </div>
     </div>
+    <q-item tag="label" class="flex flex-row items-center m-4 border-2 border-blue-500 border-solid shadow-lg rounded-lg">
+      <q-item-section>
+        <q-item-label>Others</q-item-label>
+        <q-item-label caption class="mb-2">If you have symptoms not present above, write them here.</q-item-label>
+        <q-input outlined dense v-model="logData.others"/>
+      </q-item-section>
+    </q-item>
     <div class="bg-blue-500 py-4 text-white">
       <q-item tag="label" v-ripple class="p-8">
         <q-item-section avatar>
@@ -31,8 +40,8 @@
         </q-item-section>
       </q-item>
       <div class="flex flex-row mt-4">
-        <q-btn unelevated rounded label="Clear All" @click="clearAll" color="white" text-color="black" class="block ml-auto mr-2 px-8 py-2 rounded-lg"/>
-        <q-btn :disable="!certified" rounded unelevated label="Save" @click="submit" color="white" text-color="black" class="block mr-auto ml-2 px-8 py-2 rounded-lg"/>
+        <q-btn unelevated rounded label="Clear All" @click="reset" color="white" text-color="black" class="block ml-auto mr-2 px-8 py-2 rounded-lg"/>
+        <q-btn :disable="!isLogValid" rounded unelevated label="Save" @click="submit" color="white" text-color="black" class="block mr-auto ml-2 px-8 py-2 rounded-lg"/>
       </div>
     </div>
     <br>
@@ -58,29 +67,28 @@ export default Vue.extend({
       certified: false
     }
   },
-  created () {
-    for (const section of logTemplate) {
-      for (const formItem of section.formItems) {
-        Vue.set(this.logData, formItem.name, false)
-      }
+  computed: {
+    isLogValid (): boolean {
+      return (this.certified && (Object.values(this.logData).reduce((acc, curr) => curr || acc, false)) as boolean)
     }
+  },
+  created () {
+    this.reset()
   },
   methods: {
     async submit () {
-      await new Promise(resolve => setTimeout(resolve, 300))
       const result = await postLog(this.logData as Log)
-
-      for (const key in this.logData) {
-        this.logData[key] = false
-      }
-
+      this.reset()
       if (result) {
         this.$router.back()
       }
     },
-    clearAll () {
-      for (const key in this.logData) {
-        this.logData[key] = false
+    reset () {
+      for (const section of logTemplate) {
+        for (const formItem of section.formItems) {
+          if (formItem.name !== 'others') Vue.set(this.logData, formItem.name, false)
+          else Vue.set(this.logData, formItem.name, '')
+        }
       }
     }
   }
