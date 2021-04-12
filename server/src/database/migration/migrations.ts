@@ -28,7 +28,7 @@ export const migrations = [
         t.string('username').notNullable().index();
         t.string('password').notNullable();
         t.string('email').notNullable();
-        t.string('profilePicturePath').defaultTo('placeholder.png');
+        t.string('profilePicturePath').defaultTo('public/placeholder.png');
 
         // Updated at / created at
         t.dateTime('createdAt')
