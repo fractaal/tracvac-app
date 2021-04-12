@@ -9,7 +9,8 @@ const routes: RouteConfig[] = [
       { path: '/config', component: () => import('pages/Configuration.vue') },
       { path: '/notif', component: () => import('pages/Notifications.vue') },
       { path: '/addNotif', component: () => import('pages/AddNotification.vue') },
-      { path: '/view-logs', component: () => import('pages/ViewLogs.vue') }
+      { path: '/view-logs/:id', component: () => import('pages/ViewLogs.vue') },
+      { path: '/view-logs/', component: () => import('pages/ViewLogsOverview.vue')}
     ]
   },
   // Always leave this as last one,
