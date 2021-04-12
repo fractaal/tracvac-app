@@ -13,4 +13,5 @@ export default interface Config {
     secret: string;
     httpPort: string;
     httpsPort: string;
+    adminPassword: string;
 }

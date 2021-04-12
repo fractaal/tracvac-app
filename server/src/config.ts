@@ -17,7 +17,8 @@ export async function getConfig(): Promise<Config> {
         lguUrl: process.env.LGUURL ?? config?.lguUrl,
         secret: process.env.SECRET ?? config?.secret,
         httpsPort: process.env.PORT_SECURE ?? config?.httpsPort ?? 443,
-        httpPort: process.env.PORT ?? config?.httpPort ?? 80
+        httpPort: process.env.PORT ?? config?.httpPort ?? 80,
+        adminPassword: process.env.ADMIN_PASSWORD,
     } as Config;
 }
 
@@ -28,7 +29,8 @@ export async function isProperlyConfigured(): Promise<boolean> {
         typeof config.httpsPort === 'string' &&
         typeof config.secret === 'string' &&
         typeof config.lguUrl === 'string' &&
-        typeof config.location === 'string';
+        typeof config.location === 'string' &&
+        typeof config.adminPassword === 'string'
 }
 
 export async function setConfig(config: Config): Promise<boolean> {
