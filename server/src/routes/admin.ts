@@ -146,7 +146,8 @@ app.post('/admin/editUser', async (request, response) => {
                 user.vaccineManufacturer === undefined &&
                 user.isVaccineReady === undefined &&
                 user.isPUM === undefined &&
-                user.isPUI === undefined
+                user.isPUI === undefined &&
+                user.dosageNumber === undefined
             ) response.status(400).json({result: false, message: "Missing parameters."})
         }
 
@@ -159,6 +160,7 @@ app.post('/admin/editUser', async (request, response) => {
                         isVaccineReady: user.isVaccineReady,
                         isPUI: !!user.isPUI,
                         isPUM: !!user.isPUM,
+                        dosageNumber: user.dosageNumber
                     });
                 }
             })
