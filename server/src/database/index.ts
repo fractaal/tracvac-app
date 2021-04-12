@@ -19,7 +19,7 @@ export const knex = Knex({
     port     : dbConfig.port,
     password : dbConfig.password,
     database : dbConfig.database,
-    ssl      : dbConfig.useSSL,
+    ssl      : dbConfig.useSSL ? { rejectUnauthorized: false } : false,
   },
   pool: {
     max: 5,
