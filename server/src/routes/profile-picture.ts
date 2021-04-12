@@ -22,7 +22,7 @@ app.post('/upload-profile-picture', async (request, response) => {
                     try {
                         const newPath = path.resolve(staticPath, unique);
                         await img.mv(newPath);
-                        await UserModel.query().where({id: request.tokenData.userId}).patch({profilePicturePath: unique});
+                        await UserModel.query().where({id: request.tokenData.userId}).patch({profilePicturePath: `public/${unique}`});
                         logger.log('Updated user profile picture for ' + request.tokenData.userId);
                         response.json({result: true})
                     } catch(err) {
