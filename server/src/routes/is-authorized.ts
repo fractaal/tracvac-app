@@ -1,4 +1,3 @@
-/**
 import { app } from '../';
 
 app.get('/is-authorized', (request, response) => {
@@ -12,4 +11,3 @@ app.get('/is-authorized', (request, response) => {
     })
   }
 })
- */
