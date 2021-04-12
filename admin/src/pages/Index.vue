@@ -8,7 +8,7 @@
       <q-tab name="select" class="px-24" icon="add" label="Select" @click='getData({pagination: pagination, filter: searchFilter})'/>
       <q-tab name="edit" class="px-24" icon="create" label="Edit"/>
     </q-tabs>
-    <q-tab-panels v-model="activeTab" animated>
+    <q-tab-panels v-model="activeTab" animated keep-alive>
       <q-tab-panel name="select">
         <h6 class="m-0 font-light">SELECT ACCOUNTS TO EDIT</h6>
         <br>
@@ -107,8 +107,7 @@
         </q-page-sticky>
       </q-tab-panel>
       <q-tab-panel name="edit">
-        <h6 class="m-0 font-light">EDIT VACCINATION STATUSES</h6>
-        <edit-vaccination-status/>
+        <edit-vaccination-status ref='edit'/>
       </q-tab-panel>
     </q-tab-panels>
   </q-page>
@@ -195,8 +194,7 @@ export default Vue.extend({
       this.selected = [];
     },
     async viewLogs() {
-      store.userShownInLogs = Object.assign({}, this.selected[0]);
-      await this.$router.push(`/view-logs`);
+      await this.$router.push(`/view-logs/${this.selected[0].id}`);
     },
     exportToExcel() {
       this.$q.dialog({
