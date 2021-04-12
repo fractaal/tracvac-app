@@ -51,6 +51,7 @@ export interface User {
   covidClassification: string;
   consentForDataCollection: string;
   consentForVaccination: string;
+  dosageNumber: number;
 }
 
 export async function getUserInfo (): Promise<boolean> {
