@@ -1,13 +1,19 @@
+
 require('dotenv').config()
 
 import cluster from 'cluster';
+import path from "path";
 import os from 'os';
+import fs from 'fs'
 import Logger from './logger';
 import * as database from './database';
 import { isProperlyConfigured, getConfig } from "./config";
 import open from "open";
 
 let forksBeforeStop = 5;
+
+// Extract needed files onto the public folder
+fs.copyFileSync(path.resolve(__dirname, '../', 'files', 'placeholder.png'), path.resolve(process.cwd(), 'public', 'placeholder.png'));
 
 (async () => {
     if (cluster.isMaster) {
