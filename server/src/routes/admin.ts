@@ -78,6 +78,20 @@ app.get('/admin/setup', async (request, response) => {
     }
 })
 
+app.get('/admin/getUser/:id', async (req, res) => {
+    try {
+        const user = await UserModel.query().findById(req.params.id) as UserModel | null
+
+        if (user) {
+            res.json({result: true, data: user})
+        } else {
+            res.status(400).json({result: false, message: `User doesn't exist.`})
+        }
+    } catch(err) {
+        logger.error(err)
+        res.status(500).json({result: false, message: `Server error occurred while trying to get user`})
+    }
+})
 
 app.post('/admin/getUsers', async (request, response) => {
     if (request.body.pageSize === 0) request.body.pageSize = 1000;
@@ -147,6 +161,7 @@ app.post('/admin/editUser', async (request, response) => {
                     });
                 }
             })
+            logger.log(`Committed changes to ${request.body.data.length} people`)
             response.json({result: true, message: "Changes committed!"})
         } catch (err) {
             logger.error(`Error occurred while updating users: ${err}`)
@@ -177,8 +192,9 @@ app.post('/admin/postNotification', async (request, response) => {
                 content: request.body.content,
             }
             if (request.body.subtitle) notifToAdd.subtitle = request.body.subtitle;
-
             await NotificationModel.query().insert(notifToAdd);
+
+            logger.log(`New notification ${notifToAdd.title} added`)
             response.json({result: true, message: 'Notification posted!'});
         } catch (e) {
             response.status(500).json({result: false, message: `Server side error: ${e}`});
@@ -192,6 +208,7 @@ app.post('/admin/deleteNotification', async (request, response) => {
     if (request.body.notificationId) {
         try {
             await NotificationModel.query().deleteById(request.body.notificationId);
+            logger.log(`Deleted notification ${request.body.notificationId}`)
             response.json({result: true});
         } catch(e) {
             response.status(500).json({result: false, message: 'Something happened while trying to delete the notification.'});
@@ -294,14 +311,44 @@ app.get('/admin/export', async (request, response) => {
 
 });
 
-app.get('/admin/getUnreadLogs', async (req, res) => {
+app.post('/admin/getUnreadLogsCount', async (req, res) => {
     try {
-        const unreadLogs = await LogModel.query().where({ adminHasRead: false }).select('*');
+        res.json({result: true, count: (await LogModel.query().select('*').where({adminHasRead: false})).length})
+    } catch {
+        res.status(500).json({result: false})
+    }
+})
+
+app.post('/admin/getLogs', async (req, res) => {
+    if (req.body.pageSize == 0) req.body.pageSize = 999;
+    try {
+        interface UserLogModel extends LogModel {
+            user: UserModel
+        }
+
+        let unreadLogs = await LogModel.query()
+            .select('*')
+            .orderBy('createdAt', 'desc')
+            .where(
+                (() => {
+                    if (req.body.showOnlyUnread) {
+                        return {adminHasRead: false}
+                    } else return {}
+                })()
+            )
+            .page(parseInt(req.body.page), parseInt(req.body.pageSize));
+
+        unreadLogs.results = await Promise.all((unreadLogs.results as UserLogModel[]).map(async unreadLog => {
+            unreadLog.user = await UserModel.query().findById(unreadLog.userId);
+            return unreadLog;
+        }));
 
         res.json({
             result: true,
             data: unreadLogs
         });
+        logger.log(`Returning ${unreadLogs.results.length} logs`);
+
     } catch(err) {
         logger.error(`Error occurred while trying to return unread logs: ${err.stack}`);
         res.status(500).json({
@@ -311,18 +358,21 @@ app.get('/admin/getUnreadLogs', async (req, res) => {
     }
 })
 
-app.post('/admin/acknowledgeUnreadLogs', async (req, res) => {
+app.post('/admin/markLogs', async (req, res) => {
     try {
         await LogModel.transaction(async (trx) => {
             // Admin interface should just return array of IDs of what to acknowledge
-            const numRead = await LogModel.query(trx).findByIds(req.body.data).patch({ adminHasRead: true });
+            const numRead = await LogModel.query(trx).findByIds(req.body.data).patch({ adminHasRead: req.body.read});
             res.json({
                 result: true,
-                message: `Marked read ${numRead} logs.`
+                message: `Marked ${req.body.read} ${numRead} logs.`
             });
+            logger.log(`Marked ${req.body.read} ${numRead} logs.`)
         })
+
+
     } catch(err) {
-        logger.error(`Error occurred while trying to acknowledge unread logs: ${err.stack}`)
-        res.status(500).json({result: false, message: `An error occurred while trying to acknowledge unread logs!`});
+        logger.error(`Error occurred while trying to mark logs: ${err.stack}`)
+        res.status(500).json({result: false, message: `An error occurred while trying to mark logs!`});
     }
 })
