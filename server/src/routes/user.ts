@@ -2,20 +2,20 @@ import Logger from '../logger';
 import { app } from '../';
 import bcrypt from 'bcryptjs';
 import { UserModel } from '../database/models/UserModel';
-import {validateDate, validateEmail, validateNumber, validateUsername} from "../validation";
+import {userValidator} from "../validation";
 
-const logger = Logger('User-Route');
+const logger = Logger('User Route');
 
 // Registration route
-app.post('/user', async (req, res) => {
+app.post('/user', async (request, response) => {
   try {
 
     // const match = await (await UserModel.query()).find(user => user.username === req.body.username)
-    const match = await UserModel.query().findOne({username: req.body.username})
+    const match = await UserModel.query().findOne({username: request.body.username})
     if (match) {
-      res.status(200);
-      res.json({ result: false, message: `Username ${match.username} is already taken. Try another one!` });
-      logger.log(`Registration request for ${req.ip} failed - username taken`);
+      response.status(200);
+      response.json({ result: false, message: `Username ${match.username} is already taken. Try another one!` });
+      logger.log(`Registration request for ${request.ip} failed - username taken`);
 
     } else {
       try {
@@ -23,36 +23,24 @@ app.post('/user', async (req, res) => {
         // Username must not have spaces in it
         // Email must be valid
         // date of birth and covid date must be valid dates
-        if (!validateUsername(req.body.username)) {
-          res.status(400).json({result: false, message: "Your username is invalid."});
-          return;
-        } else if (!validateEmail(req.body.email)) {
-          res.status(400).json({result: false, message: "Your email is invalid."});
-          return;
-        } else if (!validateDate(req.body.dateOfBirth)) {
-          res.status(400).json({result: false, message: "Your birth date is invalid."});
-          return;
-        } else if ((req.body.covidDate !== null || true) && !validateDate(req.body.covidDate)) {
-          res.status(400).json({result: false, message: "Your COVID date is invalid."});
-          return;
-        } else if (!validateNumber(req.body.contactNumber) || !validateNumber(req.body.employerContactNumber)) {
-          res.status(400).json({result: false, message: "Contact numbers are invalid."});
+        const [isValid, message] = userValidator(request.body as UserModel, "register");
+        if (!isValid) {
+          response.status(400).json({result: false, message});
           return;
         }
 
-        req.body.password = await bcrypt.hash(req.body.password, await bcrypt.genSalt());
+        request.body.password = await bcrypt.hash(request.body.password, await bcrypt.genSalt());
 
         await UserModel.query().insert({
-          ...req.body
+          ...request.body
         });
 
       } catch(err) {
 
         // Something's wrong with the user's request.
-        logger.log(`Registration request for ${req.ip} failed - ${err}`);
+        logger.log(`Registration request for ${request.ip} failed - ${err}`);
 
-        res.status(400);
-        res.json({
+        response.status(400).json({
           result: false,
           message: 'There was something wrong with your request while trying to register you.'
         })
@@ -60,19 +48,17 @@ app.post('/user', async (req, res) => {
 
       }
 
-      res.status(200);
-      res.json({result: true, message: 'Registration successful!'});
-      logger.log(`Registration request for ${req.ip} succeeded`);
+      response.status(200).json({result: true, message: 'Registration successful!'});
+      logger.log(`Registration request for ${request.ip} succeeded`);
 
     }
   } catch(err) {
 
-    res.status(500);
-    res.json({
+    response.status(500).json({
       result: false,
       message: 'Something happened while trying to register you.'
     })
-    logger.error(`Registration request for ${req.ip} failed - ${err}`);
+    logger.error(`Registration request for ${request.ip} failed - ${err}`);
 
   }
 })
@@ -89,20 +75,14 @@ app.patch('/user', async (request, response) => {
   }
 
   // We don't want them to inadvertently (or intentionally) change their username, password or email
-  if (request.body.username) delete request.body.username;
-  if (request.body.password) delete request.body.password;
-  if (request.body.email) delete request.body.email;
+  delete request.body.username;
+  delete request.body.password;
+  delete request.body.email;
 
+  const [isValid, message] = userValidator(request.body as UserModel, 'update');
 
-  if (!validateDate(request.body.dateOfBirth)) {
-    response.status(400).json({result: false, message: "Your birth date is invalid."});
-    return;
-  } else if ((request.body.covidDate !== null || true) && !validateDate(request.body.covidDate)) {
-    response.status(400).json({result: false, message: "Your COVID date is invalid."});
-    return;
-  } else if (!validateNumber(request.body.contactNumber) || !validateNumber(request.body.employerContactNumber)) {
-    response.status(400).json({result: false, message: "Contact numbers are invalid."});
-    return;
+  if (!isValid) {
+    response.status(400).json({result: false, message});
   }
 
   try {

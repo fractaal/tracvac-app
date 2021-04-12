@@ -1,24 +1,31 @@
 import Logger from '../logger';
 import { dbStatusCheck } from './migration';
 import Knex from 'knex';
+import { getDbConfig } from "../db-config";
 
 const logger = Logger('Database');
 
 // Init knex
 logger.log('Initializing SQL query builder...')
-/**
+
+const dbConfig = getDbConfig();
+
 export const knex = Knex({
   client: 'pg',
   useNullAsDefault: true,
   connection: {
-    host     : '127.0.0.1',
-    user     : 'postgres',
-    port     : 35432,
-    password : 'postgres',
+    host     : dbConfig.host,
+    user     : dbConfig.user,
+    port     : dbConfig.port,
+    password : dbConfig.password,
     database : 'tracvac-db',
   },
-});*/
+  pool: {
+    max: 5,
+  }
+});
 
+/**
 export const knex = Knex({
   client: 'sqlite3',
   connection: {
@@ -26,8 +33,9 @@ export const knex = Knex({
   },
   useNullAsDefault: true,
 })
+*/
 
 export async function connect() {
-  logger.log('Connecting to database..');
+  logger.log('Connecting to database...');
   await dbStatusCheck();
 }

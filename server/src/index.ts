@@ -1,39 +1,48 @@
+// @ts-ignore
 const start = Date.now();
-
-// Constants
 
 // Libraries
 import http from 'http';
 import https from 'https';
-import open from 'open';
 import express, {NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
 import Logger from './logger';
 import { getConfig } from "./config";
-import * as database from './database';
-
-// Middleware
+import cluster from "cluster";
 import { json } from 'body-parser';
 import fileUpload from "express-fileupload";
 import cors from 'cors';
 
-const logger = Logger('Main');
+const logger = Logger(`Worker Main`);
 export const app = express();
-export const staticPath = path.resolve(process.cwd(), 'static');
+export const staticPath = path.resolve(process.cwd(), 'public');
 export const internalStaticPath = path.resolve(__dirname, '../', 'static')
+
+let isHTTPSAvailable = true;
+
+// Write exception logs to disk
+const exceptionLogger = (error: Error) => {
+  fs.writeFileSync(path.resolve(process.cwd(), `${Date.now()}-error.log`), error.stack as string, {encoding: 'utf-8'});
+  process.exit(1);
+}
+
+process.on('uncaughtException', exceptionLogger)
+process.on('unhandledRejection', exceptionLogger)
 
 // Use middleware
 app.use(cors());
 app.use(json());
 app.use(fileUpload({
-  limits: { fileSize: 1024 * 1024 }
+  limits: { fileSize: 1024 * 1024 },
+  abortOnLimit: true
 }))
 
-// Static
+// Create static folder if it doesn't exist already
 if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
 
+// Block index.html and / paths
 const blocker = (_: Request, res: Response) => {
   res.status(401).send("You are not authorized");
 }
@@ -41,19 +50,43 @@ const blocker = (_: Request, res: Response) => {
 app.get('/index.html', blocker);
 app.get('/', blocker);
 
-app.use(express.static(staticPath));
-app.use(express.static(internalStaticPath));
+// Public paths
+app.use('/public', express.static(staticPath));
+app.use('/public', express.static(path.join(__dirname, '../public')));
 
-logger.log(`Internal static files path: ${internalStaticPath}`);
+// Secure static path
+app.use('/secure', async (req, res, next) => {
+  if (req.socket.localAddress === req.socket.remoteAddress) {
+    next();
+  } else {
+    logger.warn(`An attempt to access secure static files was made from ${req.socket.remoteAddress}`)
+    res.status(401).json({result: false, message: "You are not authorized"});
+    return;
+  }
+})
+app.use('/secure', express.static(internalStaticPath));
+
 logger.log(`Static files path: ${staticPath}`);
 
 (async () => {
-  logger.log("Reading configuration...");
-  const config = await getConfig();
 
-  if (!config) {
-    await open(`http://localhost:${(await getConfig())?.httpPort ?? 80}/admin`);
-  }
+  logger.log("Checking configuration...");
+  const config = await getConfig()
+
+  // HTTPS middleware
+  const protocolIsSecure = (req: Request) => req.secure || req.get("X-Forwarded-Proto") === 'https';
+  app.use(async (req, res, next) => {
+    logger.log(`${req.method} ${req.url} ${req.ip}`)
+    if (!protocolIsSecure(req) && !isHTTPSAvailable) {
+      logger.warn(`This request (${req.ip}) is not secure. Sensitive data such as login credentials or access tokens can be intercepted.`)
+      next()
+    } else if (!protocolIsSecure(req) && isHTTPSAvailable) {
+      logger.log(`Redirecting ${req.ip}'s insecure request to ${req.headers.host} to HTTPS... (${'https://' + req.headers.host + req.url})`)
+      res.redirect(307, 'https://' + req.headers.host + req.url)
+    } else {
+      next()
+    }
+  });
 
   // JWT Middleware
   logger.log("Initializing JWT middleware");
@@ -75,20 +108,7 @@ logger.log(`Static files path: ${staticPath}`);
     next();
   });
 
-  /**
-  // HTTPS middleware
-  app.use(async (req, _, next) => {
-    if (!req.secure) {
-      logger.warn(`This request (${req.ip}) is not secure. Sensitive data such as login credentials or access tokens can be intercepted.
-      To silence this warning, access your administrative interface at http://localhost:${(await getConfig())?.httpPort ?? 80}/admin or turn it off in settings.json.`)
-    }
-    next()
-  });*/
-
-  logger.log("Initializing database...");
-  await database.connect();
-
-  // API endpoints are stored in the routes folder. This should auto
+  // API endpoints are stored in the routes folder. This should auto-import all of them.
   logger.log("Initializing API endpoints...")
   const routePath = path.join(__dirname, "/routes");
   for (const filename of fs.readdirSync(routePath)) await import(path.join(routePath, path.basename(filename)));
@@ -102,20 +122,28 @@ logger.log(`Static files path: ${staticPath}`);
 
   // HTTPS / HTTP server starts
   logger.log(`HTTP - Binding to port ${process.env.PORT ?? config?.httpPort ?? 80}.`)
-  http.createServer(app).listen(process.env.PORT ?? config?.httpPort ?? 80).on('error', (err) => {
-    logger.error(`Failed to bind to port ${config?.httpPort ?? 80}: ` + err);
+  http.createServer(app).listen(config?.httpPort).on('error', (err) => {
+    logger.error(`Failed to bind to port ${config?.httpPort}: ` + err);
   });
 
+  const privkeyLocation = path.join(process.env.CERT_PATH ?? '', 'privkey.pem')
+  const certLocation = path.join(process.env.CERT_PATH ?? '', 'cert.pem')
 
-  if (fs.existsSync('key.pem') && fs.existsSync('cert.pem')) {
-    logger.log(`HTTPS certificates detected! Binding to port ${config?.httpsPort ?? 443}.`)
+  if (fs.existsSync(privkeyLocation) && fs.existsSync(certLocation)) {
+    logger.log(`HTTPS certificates detected! Binding to port ${config?.httpsPort}.`)
     https.createServer({
-      key: fs.readFileSync('key.pem'),
-      cert: fs.readFileSync('cert.pem'),
-    }, app).listen(config?.httpsPort ?? 443).on('error', (err) => {
-      logger.error(`Failed to bind to port ${config?.httpsPort ?? 443}: ` + err);
-    });
+      key: fs.readFileSync(privkeyLocation),
+      cert: fs.readFileSync(certLocation),
+    }, app)
+      .listen(config?.httpsPort).on('error', (err) => {
+        logger.error(`Failed to bind to port ${config?.httpsPort}: ` + err);
+        isHTTPSAvailable = false;
+      });
+  } else {
+    isHTTPSAvailable = false;
   }
 
   logger.success("Server start complete! Startup took " + (Date.now() - start) + "ms");
+  cluster.emit(`worker-${cluster.worker.id}-ready`);
+
 })();

@@ -1,3 +1,4 @@
+import {UserModel} from "./database/models/UserModel";
 
 export function validateUsername (username: string) {
     const re = /\s+/;
@@ -24,4 +25,19 @@ export function validateNumber (number: string) {
         }
     }
     return false
+}
+
+export function userValidator (user: UserModel, type: 'register' | 'update'): [result: boolean, message: string] {
+    if (!validateUsername(user.username) && type === 'register') {
+        return [false, "Your username is invalid."];
+    } else if (!validateEmail(user.email) && type === 'register') {
+        return [false, "Your email is invalid."]
+    } else if (!validateDate(user.dateOfBirth)) {
+        return [false, "Your birth date is invalid."]
+    } else if (Object.prototype.hasOwnProperty.call(user, "covidDate") && !validateDate(user.covidDate)) {
+        return [false, "Your COVID date is invalid."]
+    } else if (!validateNumber(user.contactNumber) || !validateNumber(user.employerContactNumber)) {
+        return [false, "Contact numbers are invalid."]
+    }
+    return [true, "Validation passed!"]
 }

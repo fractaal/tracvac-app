@@ -1,21 +1,20 @@
 import { app } from "../index"
 import path from 'path'
 import Logger from '../logger'
-import {Request, Response, NextFunction} from "express"
+import { Request, Response, NextFunction } from "express"
 import { raw } from 'objection'
-import {NotificationModel} from "../database/models/NotificationModel"
+import { NotificationModel } from "../database/models/NotificationModel"
 import { UserModel } from "../database/models/UserModel"
-import {LogModel} from "../database/models/LogModel"
-import {getConfig, setConfig} from "../config"
+import { LogModel } from "../database/models/LogModel"
+import { getConfig, isProperlyConfigured, setConfig } from "../config"
 import Config from "../interfaces/config"
 import { internalStaticPath } from '../'
 import open from 'open'
 import os from 'os'
-
 import ExcelJS from 'exceljs'
 import registrationFormTemplate from "../database/templates/registrationFormTemplate";
 
-const logger = Logger("admin");
+const logger = Logger("Administrator Route");
 
 const adminCheckerMiddleware = (request: Request, response: Response, next: NextFunction) => {
     if (request.socket.localAddress === request.socket.remoteAddress) {
@@ -32,7 +31,8 @@ app.use('/admin/*', adminCheckerMiddleware)
 app.use('/admin', adminCheckerMiddleware)
 
 app.get('/admin', (request, response) => {
-    response.sendFile(path.resolve(internalStaticPath, 'index.html'));
+    response.redirect('/secure')
+    // response.sendFile(path.resolve(internalStaticPath, 'index.html'));
 })
 
 app.post('/admin/setup', async (request, response) => {
@@ -63,12 +63,10 @@ app.post('/admin/setup', async (request, response) => {
 })
 
 app.get('/admin/setup', async (request, response) => {
-    const config = await getConfig();
+    const config: Partial<Config> = await getConfig();
+    const isConfigured = await isProperlyConfigured();
 
-    if (config) {
-        // @ts-ignore
-        delete config.password;
-
+    if (isConfigured) {
         response.json({
             isConfigured: true,
             ...config
@@ -76,20 +74,40 @@ app.get('/admin/setup', async (request, response) => {
     } else {
         response.json({
             isConfigured: false,
+            ...config
         })
     }
 })
 
+app.get('/admin/getUser/:id', async (req, res) => {
+    try {
+        const user = await UserModel.query().findById(req.params.id) as UserModel | null
+
+        if (user) {
+            res.json({result: true, data: user})
+        } else {
+            res.status(400).json({result: false, message: `User doesn't exist.`})
+        }
+    } catch(err) {
+        logger.error(err)
+        res.status(500).json({result: false, message: `Server error occurred while trying to get user`})
+    }
+})
 
 app.post('/admin/getUsers', async (request, response) => {
     if (request.body.pageSize === 0) request.body.pageSize = 1000;
-    if (request.body.pageSize !== undefined && request.body.page !== undefined) {
+    if (
+        request.body.pageSize !== undefined &&
+        request.body.page !== undefined &&
+        request.body.orderBy !== undefined &&
+        request.body.ascending !== undefined
+    ) {
         let result;
         if (request.body.filter) {
             result = await UserModel.query()
                 .select('*')
                 .where(
-                    raw("firstName || ' ' || middleName || ' ' || lastName"),
+                    raw("CONCAT(\"firstName\", \"middleName\", \"lastName\")"),
                     'LIKE',
                     `%${request.body.filter}%`
                 ).where(
@@ -99,7 +117,7 @@ app.post('/admin/getUsers', async (request, response) => {
                         if (request.body.showPUIs) where.isPUI = true;
                         return where
                     })()
-                )
+                ).orderBy(request.body.orderBy, request.body.ascending ? 'asc' : 'desc')
                 .page(parseInt(request.body.page), parseInt(request.body.pageSize));
         } else {
             result = await UserModel.query()
@@ -110,12 +128,12 @@ app.post('/admin/getUsers', async (request, response) => {
                         if (request.body.showPUIs) where.isPUI = true;
                         return where
                     })()
-                )
+                ).orderBy(request.body.orderBy, request.body.ascending ? 'asc' : 'desc')
                 .page(parseInt(request.body.page), parseInt(request.body.pageSize));
         }
         response.json(result);
     } else {
-        response.status(400).json({result: false, message: 'Missing page/pageSize params'})
+        response.status(400).json({result: false, message: 'Missing params'})
     }
 })
 
@@ -128,7 +146,8 @@ app.post('/admin/editUser', async (request, response) => {
                 user.vaccineManufacturer === undefined &&
                 user.isVaccineReady === undefined &&
                 user.isPUM === undefined &&
-                user.isPUI === undefined
+                user.isPUI === undefined &&
+                user.dosageNumber === undefined
             ) response.status(400).json({result: false, message: "Missing parameters."})
         }
 
@@ -141,9 +160,11 @@ app.post('/admin/editUser', async (request, response) => {
                         isVaccineReady: user.isVaccineReady,
                         isPUI: !!user.isPUI,
                         isPUM: !!user.isPUM,
+                        dosageNumber: user.dosageNumber
                     });
                 }
             })
+            logger.log(`Committed changes to ${request.body.data.length} people`)
             response.json({result: true, message: "Changes committed!"})
         } catch (err) {
             logger.error(`Error occurred while updating users: ${err}`)
@@ -174,8 +195,9 @@ app.post('/admin/postNotification', async (request, response) => {
                 content: request.body.content,
             }
             if (request.body.subtitle) notifToAdd.subtitle = request.body.subtitle;
-
             await NotificationModel.query().insert(notifToAdd);
+
+            logger.log(`New notification ${notifToAdd.title} added`)
             response.json({result: true, message: 'Notification posted!'});
         } catch (e) {
             response.status(500).json({result: false, message: `Server side error: ${e}`});
@@ -189,6 +211,7 @@ app.post('/admin/deleteNotification', async (request, response) => {
     if (request.body.notificationId) {
         try {
             await NotificationModel.query().deleteById(request.body.notificationId);
+            logger.log(`Deleted notification ${request.body.notificationId}`)
             response.json({result: true});
         } catch(e) {
             response.status(500).json({result: false, message: 'Something happened while trying to delete the notification.'});
@@ -290,3 +313,69 @@ app.get('/admin/export', async (request, response) => {
     }
 
 });
+
+app.post('/admin/getUnreadLogsCount', async (req, res) => {
+    try {
+        res.json({result: true, count: (await LogModel.query().select('*').where({adminHasRead: false})).length})
+    } catch {
+        res.status(500).json({result: false})
+    }
+})
+
+app.post('/admin/getLogs', async (req, res) => {
+    if (req.body.pageSize == 0) req.body.pageSize = 999;
+    try {
+        interface UserLogModel extends LogModel {
+            user: UserModel
+        }
+
+        let unreadLogs = await LogModel.query()
+            .select('*')
+            .orderBy('createdAt', 'desc')
+            .where(
+                (() => {
+                    if (req.body.showOnlyUnread) {
+                        return {adminHasRead: false}
+                    } else return {}
+                })()
+            )
+            .page(parseInt(req.body.page), parseInt(req.body.pageSize));
+
+        unreadLogs.results = await Promise.all((unreadLogs.results as UserLogModel[]).map(async unreadLog => {
+            unreadLog.user = await UserModel.query().findById(unreadLog.userId);
+            return unreadLog;
+        }));
+
+        res.json({
+            result: true,
+            data: unreadLogs
+        });
+        logger.log(`Returning ${unreadLogs.results.length} logs`);
+
+    } catch(err) {
+        logger.error(`Error occurred while trying to return unread logs: ${err.stack}`);
+        res.status(500).json({
+            result: false,
+            message: `An error happened while trying to return unread logs!`
+        })
+    }
+})
+
+app.post('/admin/markLogs', async (req, res) => {
+    try {
+        await LogModel.transaction(async (trx) => {
+            // Admin interface should just return array of IDs of what to acknowledge
+            const numRead = await LogModel.query(trx).findByIds(req.body.data).patch({ adminHasRead: req.body.read});
+            res.json({
+                result: true,
+                message: `Marked ${req.body.read} ${numRead} logs.`
+            });
+            logger.log(`Marked ${req.body.read} ${numRead} logs.`)
+        })
+
+
+    } catch(err) {
+        logger.error(`Error occurred while trying to mark logs: ${err.stack}`)
+        res.status(500).json({result: false, message: `An error occurred while trying to mark logs!`});
+    }
+})
