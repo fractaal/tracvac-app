@@ -31,7 +31,8 @@ app.use('/admin/*', adminCheckerMiddleware)
 app.use('/admin', adminCheckerMiddleware)
 
 app.get('/admin', (request, response) => {
-    response.sendFile(path.resolve(internalStaticPath, 'index.html'));
+    response.redirect('/secure')
+    // response.sendFile(path.resolve(internalStaticPath, 'index.html'));
 })
 
 app.post('/admin/setup', async (request, response) => {
