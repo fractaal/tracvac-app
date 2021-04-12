@@ -30,7 +30,6 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 (async () => {
     app.use('/admin/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
     app.use('/admin', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
-
     app.get('/admin', (request, response) => {
         response.redirect('/secure')
         // response.sendFile(path.resolve(internalStaticPath, 'index.html'));

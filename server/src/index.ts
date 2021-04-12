@@ -14,6 +14,7 @@ import cluster from "cluster";
 import { json } from 'body-parser';
 import fileUpload from "express-fileupload";
 import cors from 'cors';
+import expressBasicAuth from "express-basic-auth";
 
 const logger = Logger(`Worker Main`);
 export const app = express();
@@ -53,22 +54,26 @@ app.get('/', blocker);
 // Public paths
 app.use('/public', express.static(staticPath));
 app.use('/public', express.static(path.join(__dirname, '../public')));
-
-// Secure static path
-app.use('/secure', async (req, res, next) => {
-  if (req.socket.localAddress === req.socket.remoteAddress) {
-    next();
-  } else {
-    logger.warn(`An attempt to access secure static files was made from ${req.socket.remoteAddress}`)
-    res.status(401).json({result: false, message: "You are not authorized"});
-    return;
-  }
-})
-app.use('/secure', express.static(internalStaticPath));
-
-logger.log(`Static files path: ${staticPath}`);
-
 (async () => {
+
+  // Secure static patha
+  app.use('/secure', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
+  app.use('/secure/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
+  /**
+  app.use('/secure', async (req, res, next) => {
+    if (req.socket.localAddress === req.socket.remoteAddress) {
+      next();
+    } else {
+      logger.warn(`An attempt to access secure static files was made from ${req.socket.remoteAddress}`)
+      res.status(401).json({result: false, message: "You are not authorized"});
+      return;
+    }
+  })
+   */
+  app.use('/secure', express.static(internalStaticPath));
+
+  logger.log(`Static files path: ${staticPath}`);
+
 
   logger.log("Checking configuration...");
   const config = await getConfig()
