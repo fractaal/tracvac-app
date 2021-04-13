@@ -1,6 +1,6 @@
 import { app } from "../index"
+import { mkdtemp } from 'fs/promises'
 import path from 'path'
-import open from 'open'
 import os from 'os'
 import Logger from '../logger'
 import { raw } from 'objection'
@@ -255,16 +255,15 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                 sheet.addRow(user);
             }
 
-            const pathToWrite = path.resolve(os.homedir(), 'Desktop', 'export.xlsx');
+            const folder = await mkdtemp(path.join(os.tmpdir(), 'tracvac-export-'))
+            const filePath = path.join(folder, `export-${Date.now()}.xlsx`)
+            await workbook.xlsx.writeFile(filePath);
 
-            await workbook.xlsx.writeFile(pathToWrite);
-            await open(pathToWrite)
-
-            response.json({result: true, message: `Export complete!`});
             logger.success(`User data export complete.`)
             logger.success(`Took ${Date.now() - start}ms for ${allUsers.length} users`)
-            logger.success(`Export path: ${pathToWrite}`)
-            logger.success(`Auto-opening for convenience.`)
+            logger.success(`Export path: ${filePath}`)
+
+            response.download(filePath);
         } catch(err) {
             logger.error(`Error occurred while exporting data: ${err}`);
             response.status(500).json({
