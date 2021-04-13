@@ -16,15 +16,14 @@ export async function getConfig(): Promise<Config> {
         location: process.env.LOCATION ,
         lguUrl: process.env.LGUURL ,
         secret: process.env.SECRET ,
-        httpsPort: process.env.PORT_SECURE ?? 443 ,
-        httpPort: process.env.PORT ?? 80 ,
+        httpsPort: process.env.PORT_SECURE ?? '443' ,
+        httpPort: process.env.PORT ?? '80' ,
         adminPassword: process.env.ADMIN_PASSWORD ,
     } as Partial<Config>;
 
     if (typeof config.httpPort === 'string' &&
         typeof config.httpsPort === 'string' &&
         typeof config.secret === 'string' &&
-        typeof config.lguUrl === 'string' &&
         typeof config.location === 'string' &&
         typeof config.adminPassword === 'string') {
         return config as Config;
