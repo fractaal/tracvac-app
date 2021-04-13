@@ -151,7 +151,7 @@ export default Vue.extend({
         descending: false,
       },
       columns: peopleColumns,
-      visibleColumns: ["username", "firstName", "middleName", "lastName"],
+      visibleColumns: ['username', 'firstName', 'middleName', 'lastName'],
     }
   },
   methods: {
@@ -198,30 +198,31 @@ export default Vue.extend({
     },
     exportToExcel() {
       this.$q.dialog({
-        title: "Export user data to an excel file?",
-        message: `You will be exporting all user data.`,
+        title: 'Export user data to an excel file?',
+        message: 'You will be exporting all user data.',
         cancel: true,
       }).onOk(async () => {
         try {
-          const response = await this.$axios.get('/admin/export');
+          const response = await this.$axios({
+            url: '/admin/export',
+            method: 'GET',
+            responseType: 'blob'
+          });
 
-          if (response.data.result) {
-            this.$q.notify({
-              message: 'Export successful! Export file located on the Desktop.',
-              type: 'positive',
-            })
-          } else {
-            this.$q.notify({
-              message: 'Export failed! Check server console for details.',
-              type: 'negative',
-            })
-          }
+          const url = window.URL.createObjectURL(new Blob([response.data]))
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'export.xlsx');
+          document.body.appendChild(link)
+          link.click()
+
         } catch(err) {
           this.$q.notify({
-            message: `Export failed! ${err}`,
+            message: `Export failed! ${err.message}`,
             type: 'negative',
           })
         }
+
       })
     }
   },
