@@ -1,4 +1,3 @@
-// @ts-ignore
 const start = Date.now();
 
 // Libraries
@@ -10,7 +9,6 @@ import fs from 'fs';
 import path from 'path';
 import Logger from './logger';
 import { getConfig } from "./config";
-import cluster from "cluster";
 import { json } from 'body-parser';
 import fileUpload from "express-fileupload";
 import cors from 'cors';
@@ -149,6 +147,4 @@ app.use('/public', express.static(path.join(__dirname, '../public')));
   }
 
   logger.success("Server start complete! Startup took " + (Date.now() - start) + "ms");
-  cluster.emit(`worker-${cluster.worker.id}-ready`);
-
 })();
