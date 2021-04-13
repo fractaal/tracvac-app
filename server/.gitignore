@@ -10,6 +10,7 @@ objection-generator/*
 tmp_migrations
 
 # database and node binding
+*.log
 tracvac-config
 .env
 tracvac-db.sqlite3
