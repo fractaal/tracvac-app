@@ -10,24 +10,28 @@
 </template>
 
 <script lang="ts">
+import { Notification } from 'src/api/notification'
+import Vue from 'vue'
 import { format, formatDistance } from 'date-fns'
 
-export default {
-  name: 'NotificationCard.vue',
-  props: {
-    notification: {
-      type: Object as () => Notification
-    }
-  },
+export default Vue.extend({
+  name: 'NotificationCard',
   data () {
     return {
       formattedDate: `
-      Posted ${formatDistance(Date.parse(this.notification.createdAt as string), Date.now(), { addSuffix: true })}
-      on ${format(Date.parse(this.notification.createdAt as string), 'MMMM d, yyyy')}
+      Posted ${formatDistance(Date.parse(this.notification.createdAt), Date.now(), { addSuffix: true })}
+      on ${format(Date.parse(this.notification.createdAt), 'MMMM d, yyyy')}
       `
     }
+  },
+  props: {
+    notification: {
+      type: Object as () => Notification,
+      required: true
+    }
   }
-}
+
+})
 </script>
 
 <style scoped>
