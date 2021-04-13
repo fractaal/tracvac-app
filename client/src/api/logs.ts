@@ -52,7 +52,7 @@ export async function getLogs (index: number) {
     if (response.result) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       store.logs.push(...response.logs.results)
-      return [true, response.logs.results.length === 0]
+      return [true, response.logs.results.length === 0 || response.logs.results.length <= response.logs.total]
     } else {
       notify.negative('Getting logs failed.')
       return [false]
