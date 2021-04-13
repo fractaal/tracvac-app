@@ -1,6 +1,6 @@
 {
   "name": "tracvac-admin",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "User-friendly management interface for Tracvac's backend",
   "productName": "Tracvac Administrator",
   "author": "fractaal <sonoroustwo@gmail.com>",
