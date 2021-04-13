@@ -1,7 +1,7 @@
 {
-  "name": "hestia-backend",
+  "name": "tracvac-server",
   "version": "1.4.1",
-  "description": "Backend for Hestia App",
+  "description": "Server software for Tracvac",
   "main": "./src/index.ts",
   "bin": "dist/cluster.js",
   "author": "benedict.jude.rocat@gmail.com",
