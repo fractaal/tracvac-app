@@ -51,7 +51,8 @@
     ],
     "assets": [
       "static/**/*",
-      "public/**/*"
+      "public/**/*",
+      "app/**/*"
     ]
   }
 }
