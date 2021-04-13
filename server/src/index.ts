@@ -16,8 +16,9 @@ import expressBasicAuth from "express-basic-auth";
 
 const logger = Logger(`Worker Main`);
 export const app = express();
-export const staticPath = path.resolve(process.cwd(), 'public');
-export const internalStaticPath = path.resolve(__dirname, '../', 'static')
+export const staticPath = path.resolve(process.cwd(), 'public')
+export const internalStaticPath = path.join(__dirname, '../static')
+export const frontEndPath = path.join(__dirname, '../app')
 
 let isHTTPSAvailable = true;
 
@@ -47,15 +48,21 @@ const blocker = (_: Request, res: Response) => {
   res.status(401).send("You are not authorized");
 }
 
+/*
 app.get('/index.html', blocker);
 app.get('/', blocker);
+*/
 
 // Public paths
 app.use('/public', express.static(staticPath));
 app.use('/public', express.static(path.join(__dirname, '../public')));
+
+// Application path
+app.use('/app', express.static(frontEndPath));
+
 (async () => {
 
-  // Secure static patha
+  // Secure static paths
   app.use('/secure', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
   app.use('/secure/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
   /**
