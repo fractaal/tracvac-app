@@ -110,7 +110,7 @@ export const migrations = [
           '16 - Barangay Health Worker',
           '17 - Maintenance Staff',
           '18 - Administrative Staff',
-          '19 - Other Workers in Frontline Health Services',
+          '19 - Others',
         ]);
 
         t.string('otherProfession').nullable();

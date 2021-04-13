@@ -1,5 +1,16 @@
 import { TypeMap } from './baseTemplate'
 
+function numberValidator (number: string) {
+  const _number = String(number)
+  if (!(/^\d+$/.test(_number))) return false
+  if (_number[0] === '0') {
+    if (_number.length === 11) {
+      return true
+    }
+  }
+  return false
+}
+
 const template = [
   {
     title: 'Personal Information',
@@ -27,7 +38,8 @@ const template = [
         name: 'suffix',
         displayName: 'Suffix',
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        description: 'If none, write "N/A"'
       },
       {
         name: 'contactNumber',
@@ -36,7 +48,7 @@ const template = [
         format: 'Text',
         limit: 12,
         rules: [
-          (val: string) => /^\d+$/.test(val) || 'Must be a number.'
+          (val: string) => numberValidator(val) || 'Must be a valid contact number.'
         ]
       },
       {
@@ -69,7 +81,7 @@ const template = [
         options: [
           '01 - Female',
           '02 - Male',
-          '03 - Not To Disclose'
+          '03 - Not to Disclose'
         ],
         type: 'string',
         format: 'Dropdown'
@@ -126,14 +138,16 @@ const template = [
         name: 'categoryID',
         displayName: 'Category ID',
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        description: 'If none, write "N/A"'
       },
       {
         name: 'philHealthID',
         displayName: 'Philhealth ID',
         type: 'number',
         format: 'Text',
-        limit: 12
+        limit: 12,
+        description: 'If none, write "N/A"'
       },
 
       {
@@ -171,7 +185,7 @@ const template = [
           '16 - Barangay Health Worker',
           '17 - Maintenance Staff',
           '18 - Administrative Staff',
-          '19 - Other Workers in Frontline Health Services'
+          '19 - Others'
         ],
         type: 'string',
         format: 'Dropdown'
@@ -182,7 +196,7 @@ const template = [
         type: 'string',
         format: 'Text',
         conditionalFunction (data: Record<string, any>) {
-          return data.profession === '19 - Other Workers in Frontline Health Services'
+          return data.profession === '19 - Others'
         }
       },
       {
@@ -210,7 +224,7 @@ const template = [
         format: 'Text',
         limit: 12,
         rules: [
-          (val: string) => /^\d+$/.test(val) || 'Must be a number.'
+          (val: string) => numberValidator(val) || 'Must be a valid contact number.'
         ]
       }
     ]
@@ -219,6 +233,13 @@ const template = [
     title: 'Medical History',
     description: 'All information regarding your medical history goes here.',
     formItems: [
+      {
+        name: 'preexistingCondition',
+        displayName: 'Pre-existing Condition?',
+        description: 'Do you have an existing medical condition? If none, write "N/A."',
+        type: 'string',
+        format: 'Text'
+      },
       {
         name: 'directCOVID',
         displayName: 'Providing care?',
@@ -238,7 +259,7 @@ const template = [
         type: 'string',
         format: 'Text',
         conditionalFunction (data: Record<string, any>) {
-          return !!data.withAllergy?.value
+          return data.withAllergy === 'Yes'
         }
       },
       {
@@ -264,7 +285,7 @@ const template = [
         ],
         format: 'Dropdown',
         conditionalFunction (data: Record<string, any>) {
-          return !!(data.withComorbidities && data.withComorbidities.value)
+          return data.withComorbidities === 'Yes'
         }
       },
       {
@@ -281,7 +302,7 @@ const template = [
         type: 'date',
         format: 'DatePicker',
         conditionalFunction (data: Record<string, any>) {
-          if (data.covidHistory && data.covidHistory.value) return true; else return false
+          return data.covidHistory === 'Yes'
         }
       },
       {
@@ -295,7 +316,10 @@ const template = [
           '04 - Severe',
           '05 - Critical'
         ],
-        format: 'Dropdown'
+        format: 'Dropdown',
+        conditionalFunction (data: Record<string, any>) {
+          return data.covidHistory === 'Yes'
+        }
       }
     ]
   },
