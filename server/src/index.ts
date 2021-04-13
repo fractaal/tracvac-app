@@ -23,6 +23,7 @@ let isHTTPSAvailable = true;
 
 // Write exception logs to disk
 const exceptionLogger = (error: Error) => {
+  logger.error(error.stack)
   fs.writeFileSync(path.resolve(process.cwd(), `${Date.now()}-error.log`), error.stack as string, {encoding: 'utf-8'});
   process.exit(1);
 }
