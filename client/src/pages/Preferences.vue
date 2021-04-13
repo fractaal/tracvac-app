@@ -7,6 +7,11 @@
       <p class="m-0">at <b>{{store.serverInfo.address}}</b></p>
       <hr>
       <q-btn outline label="Disconnect" @click="disconnect"/>
+      <div
+        class="text-subtitle2 mt-4 font-bold m-0 p-0 text-gray-500"
+      >
+        APP VERSION {{require('../../package.json').version}}
+      </div>
     </div>
   </q-page>
 </template>
