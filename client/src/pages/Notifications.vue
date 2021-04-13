@@ -34,7 +34,7 @@ import NotificationCard from 'components/NotificationCard.vue'
 
 export default (Vue as VueConstructor<Vue & { $refs: {list: InstanceType<typeof LoadMore>}}>).extend({
   name: 'Notifications',
-  components: { NotificationCard, CustomHeader, LoadMore, EmptyPlaceholder, NotificationCard },
+  components: { NotificationCard, CustomHeader, LoadMore, EmptyPlaceholder },
   data () {
     return {
       isLoading: false,
