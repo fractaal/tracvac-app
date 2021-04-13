@@ -1,22 +1,20 @@
 import { app } from "../index"
 import path from 'path'
+import open from 'open'
+import os from 'os'
 import Logger from '../logger'
-import { Request, Response, NextFunction } from "express"
 import { raw } from 'objection'
 import { NotificationModel } from "../database/models/NotificationModel"
 import { UserModel } from "../database/models/UserModel"
 import { LogModel } from "../database/models/LogModel"
-import { getConfig, isProperlyConfigured, setConfig } from "../config"
-import Config from "../interfaces/config"
-import { internalStaticPath } from '../'
-import expressBasicAuth from "express-basic-auth";
-import open from 'open'
-import os from 'os'
+import { getConfig, Config } from "../config"
+import expressBasicAuth from "express-basic-auth"
 import ExcelJS from 'exceljs'
-import registrationFormTemplate from "../database/templates/registrationFormTemplate";
+import registrationFormTemplate from "../database/templates/registrationFormTemplate"
 
 const logger = Logger("Administrator Route");
 
+/**
 const adminCheckerMiddleware = (request: Request, response: Response, next: NextFunction) => {
     if (request.socket.localAddress === request.socket.remoteAddress) {
         // logger.log('Admin routes have been accessed.');
@@ -26,57 +24,20 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         response.status(401).json({result: false, message: "You are not authorized"});
     }
 };
+*/
 
 (async () => {
     app.use('/admin/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
     app.use('/admin', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
     app.get('/admin', (request, response) => {
         response.redirect('/secure')
-        // response.sendFile(path.resolve(internalStaticPath, 'index.html'));
-    })
-
-    app.post('/admin/setup', async (request, response) => {
-
-        if (
-            request.body.location &&
-            request.body.lguUrl &&
-            request.body.secret &&
-            request.body.httpPort &&
-            request.body.httpsPort
-        ) {
-            if (request.body.isConfigured) delete request.body.isConfigured;
-            try {
-                if (await setConfig(request.body as Config)) {
-                    logger.success(`Configuration was updated: ${request.body}`);
-                    response.json({result: true});
-                } else {
-                    response.status(500).json({result: false, message: "Something happened while updating the config"});
-                }
-            } catch(e) {
-                logger.error('While updating config: ' + e);
-                response.status(500).json({result: false, message: "Something happened while updating the config"});
-            }
-        } else {
-            logger.warn('Admin sent invalid setup');
-            response.status(400).json({result: false, message: "You sent an invalid setup configuration."});
-        }
     })
 
     app.get('/admin/setup', async (request, response) => {
         const config: Partial<Config> = await getConfig();
-        const isConfigured = await isProperlyConfigured();
-
-        if (isConfigured) {
-            response.json({
-                isConfigured: true,
-                ...config
-            })
-        } else {
-            response.json({
-                isConfigured: false,
-                ...config
-            })
-        }
+        response.json({
+            ...config
+        })
     })
 
     app.get('/admin/getUser/:id', async (req, res) => {
