@@ -30,7 +30,7 @@ export default Vue.extend({
   },
   created () {
     this.formattedDate = format(Date.parse(this.log.createdAt as string), 'MMMM d, yyyy')
-    this.formattedTime = format(Date.parse(this.log.createdAt as string), 'h:mmbbb')
+    this.formattedTime = format(Date.parse(this.log.createdAt as string), 'h:mm bbb')
 
     const symptoms = []
 
