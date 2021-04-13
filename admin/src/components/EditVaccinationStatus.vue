@@ -41,6 +41,7 @@
                 <q-btn outline label='Mark as Under Monitoring' @click='togglePUM(user, !user.isPUM)'/>
                 <div class='my-4'/>
                 <q-input debounce='500' @input='computeDiscrepancies' class="w-full mt-2" outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
+                <q-input debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
               </div>
             </q-card-section>
           </q-card>
@@ -132,14 +133,24 @@ export default Vue.extend({
         if (!(user.isVaccineReady === 'Ready') && user.isVaccinated) {
           this.discrepancies.push({
             title: `${user.firstName} is apparently vaccinated, but vaccine status is ${user.isVaccineReady}`,
-            subtitle: `Change ${user.firstName}'s vaccination status to <b>Not Vaccinated</b>, or set the vaccine status to <b>Ready.</b>`
+            subtitle: `
+                      <ul>
+                        <li>Change ${user.firstName}'s vaccination status to <b>Not Vaccinated</b></li>
+                        <li>Set the vaccine status to <b>Ready.</b></li>
+                      </ul>
+                      `
           })
           user.hasDiscrepancy = true;
         }
         if (user.isVaccineReady === 'Ready' && !user.vaccineManufacturer) {
           this.discrepancies.push({
             title: `${user.firstName}'s vaccine is Ready, but no vaccine manufacturer is set`,
-            subtitle: `Set a vaccine manufacturer, or set vaccine status to <b>Not Ready</b> / <b>Pending.</b>`
+            subtitle: `
+                      <ul>
+                       <li> Set a vaccine manufacturer </li>
+                       <li> Set vaccine status to <b>Not Ready</b> / <b>Pending.</b> </li>
+                      </ul>
+                      `
           })
           user.hasDiscrepancy = true;
         }
@@ -204,6 +215,7 @@ export default Vue.extend({
                 vaccineManufacturer: user.vaccineManufacturer ?? '',
                 isPUI: user.isPUI,
                 isPUM: user.isPUM,
+                dosageNumber: user.dosageNumber,
               }
             })
           })
@@ -250,7 +262,7 @@ export default Vue.extend({
     },
     setAllVaccineManufacturer() {
       this.$q.dialog({
-        title: "Set all vaccine manufacturer",
+        title: 'Set all vaccine manufacturer',
         message: "Batch set all of these user's vaccine manufacturer fields.",
         prompt: {
           model: '',
