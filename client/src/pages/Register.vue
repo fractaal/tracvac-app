@@ -124,7 +124,8 @@ export default Vue.extend({
       activeSection: 0,
       isPassword: false,
       formData: {} as FormData,
-      forceRouteLeave: false
+      forceRouteLeave: false,
+      isLoading: false
     }
   },
   activated () {
@@ -213,6 +214,7 @@ export default Vue.extend({
       }
     },
     async submit () {
+      this.$q.loading.show({ message: 'Communicating with the server...' })
       const dataToSubmit: Record<string, any> = {}
       for (const itemName in this.formData) {
         for (const section of registrationFormTemplate) {
@@ -267,6 +269,7 @@ export default Vue.extend({
         // @ts-ignore
         if (await setUserInfo(dataToSubmit)) { this.$router.back() }
       }
+      this.$q.loading.hide()
     },
     navigate (n: number) {
       this.activeSection = (this.activeSection + n) === -1 ? (this.template.length - 1) : (this.activeSection + n) % this.template.length
