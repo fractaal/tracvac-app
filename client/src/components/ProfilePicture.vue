@@ -26,11 +26,7 @@ export default Vue.extend({
   },
   methods: {
     getProfilePicturePath () {
-      this.errored = false
-      // @ts-ignore
-      this.fullPath = this.errored ? '/profile-placeholder.png' : store.userInfo?.profilePicturePath
-        ? new URL(store.userInfo?.profilePicturePath, LocalStorage.getItem('server') as string)
-        : '/profile-placeholder.png'
+      this.fullPath = new URL(store.userInfo?.profilePicturePath as string, LocalStorage.getItem('server') as string).toString()
     }
   },
   data () {
