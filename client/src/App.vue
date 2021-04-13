@@ -22,8 +22,18 @@ export default Vue.extend({
     // Show splash screen
     await this.$router.push('/')
 
-    // Check whether or not user has already set an address to connect to
-    const server: string|null = this.$q.localStorage.getItem('server')
+    let server: string|null
+
+    // If Tracvac is in PWA mode, the server connected to is the server to use.
+    try {
+      if (process.env.MODE === 'pwa') {
+        server = document.location.host
+        this.$q.localStorage.set('server', document.location.host)
+      }
+    } catch (err) {
+      // Check whether or not user has already set an address to connect to
+      server = this.$q.localStorage.getItem('server')
+    }
 
     // Artificial delay to show the logo
     await new Promise((resolve) => setTimeout(resolve, 1500))
