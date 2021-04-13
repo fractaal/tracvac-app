@@ -185,7 +185,7 @@ const template = [
           '16 - Barangay Health Worker',
           '17 - Maintenance Staff',
           '18 - Administrative Staff',
-          '19 - Other Workers in Frontline Health Services'
+          '19 - Others'
         ],
         type: 'string',
         format: 'Dropdown'
@@ -196,7 +196,7 @@ const template = [
         type: 'string',
         format: 'Text',
         conditionalFunction (data: Record<string, any>) {
-          return data.profession === '19 - Other Workers in Frontline Health Services'
+          return data.profession === '19 - Others'
         }
       },
       {
