@@ -66,4 +66,25 @@ export default [
       field: 'vaccineManufacturer',
       sortable: true,
     },
-  ]
+    {
+      name: 'profession',
+      required: false,
+      label: 'Profession',
+      field: 'profession',
+      sortable: true,
+    },
+    {
+      name: 'otherProfession',
+      required: false,
+      label: 'Profession (Other)',
+      field: 'otherProfession',
+      sortable: true,
+    },
+    {
+      name: 'dosageNumber',
+      required: false,
+      label: 'Dosage Number',
+      field: 'dosageNumber',
+      sortable: true,
+    }
+]
