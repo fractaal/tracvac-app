@@ -8,12 +8,6 @@
     >
       <h5 class="px-8 mt-12 m-0 font-bold truncate">{{store.serverConfig.location}}</h5>
       <p class="px-8 mb-2">TRACVAC ADMINISTRATOR</p>
-      <p class="px-8 font-semibold" :class="!store.serverConfig.isConfigured ? 'text-red-500' : 'text-green-700'">
-        {{!store.serverConfig.isConfigured ?
-          'SERVER NOT CONFIGURED' :
-          'SERVER READY'
-        }}
-      </p>
       <q-list class="my-auto blo">
         <q-item clickable v-ripple class="p-12" @click="$router.push('/')">
           <q-item-section avatar>
@@ -55,7 +49,7 @@
 
           <q-item-section class="text-lg">
             <b>Configuration</b>
-            <i class="text-sm">Set some very important options for Tracvac to run.</i>
+            <i class="text-sm">View Tracvac Server configuration.</i>
            </q-item-section>
         </q-item>
       </q-list>
