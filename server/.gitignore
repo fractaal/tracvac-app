@@ -3,6 +3,7 @@ yarn-error.log
 dist
 index.exe
 hestia-backend.exe
+tracvac-server.exe
 
 objection-generator/*
 !objection-generator/schema.yaml
