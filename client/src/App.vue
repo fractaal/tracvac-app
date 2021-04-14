@@ -22,7 +22,7 @@ export default Vue.extend({
     // Show splash screen
     await this.$router.push('/')
 
-    let server: string|null
+    let server: string|null = ''
 
     // If Tracvac is in PWA mode, the server connected to is the server to use.
     try {
