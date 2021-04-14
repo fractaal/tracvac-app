@@ -43,26 +43,17 @@ app.use(fileUpload({
 // Create static folder if it doesn't exist already
 if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
 
-// Block index.html and / paths
-const blocker = (_: Request, res: Response) => {
-  res.status(401).send("You are not authorized");
-}
-
-/*
-app.get('/index.html', blocker);
-app.get('/', blocker);
-*/
-
-// Public paths
-app.use('/public', express.static(staticPath));
-app.use('/public', express.static(path.join(__dirname, '../public')));
-
-// Application path
-app.use('/app', express.static(frontEndPath));
 
 (async () => {
+  // Public paths
+  app.use('/public', express.static(staticPath));
+  app.use('/public', express.static(path.join(__dirname, '../public')));
 
-  // Secure static paths
+  // Application path
+  app.use('/app', express.static(frontEndPath));
+  app.use('/', express.static(frontEndPath));
+
+  // Secure static paths to admin interface
   app.use('/secure', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
   app.use('/secure/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
   /**
