@@ -7,6 +7,7 @@ export interface FormItem {
   options: string[];
   format: string;
   limit?: number;
+  isRequired: boolean | undefined;
   /**
    * Conditionally render this item based on current form data
    * @param data Current form data.
