@@ -39,7 +39,8 @@ const template = [
         displayName: 'Suffix',
         type: 'string',
         format: 'Text',
-        description: 'If none, write "N/A"'
+        // description: 'If none, write "N/A"',
+        isNotRequired: true
       },
       {
         name: 'contactNumber',
@@ -139,7 +140,8 @@ const template = [
         displayName: 'Category ID',
         type: 'string',
         format: 'Text',
-        description: 'If none, write "N/A"'
+        // description: 'If none, write "N/A"'
+        isNotRequired: true
       },
       {
         name: 'philHealthID',
@@ -147,7 +149,8 @@ const template = [
         type: 'number',
         format: 'Text',
         limit: 12,
-        description: 'If none, write "N/A"'
+        // description: 'If none, write "N/A"'
+        isNotRequired: true
       },
 
       {
@@ -203,19 +206,28 @@ const template = [
         name: 'employerName',
         displayName: 'Employer Name',
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.employed !== '03 - Self Employed'
+        }
       },
       {
         name: 'employerLGU',
         displayName: 'Employer LGU',
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.employed !== '03 - Self Employed'
+        }
       },
       {
         name: 'employerAddress',
         displayName: 'Employer Address',
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.employed !== '03 - Self Employed'
+        }
       },
       {
         name: 'employerContactNumber',
@@ -225,7 +237,10 @@ const template = [
         limit: 12,
         rules: [
           (val: string) => numberValidator(val) || 'Must be a valid contact number.'
-        ]
+        ],
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.employed !== '03 - Self Employed'
+        }
       }
     ]
   },
@@ -234,24 +249,42 @@ const template = [
     description: 'All information regarding your medical history goes here.',
     formItems: [
       {
-        name: 'preexistingCondition',
+        name: '__preexistingCondition',
         displayName: 'Pre-existing Condition?',
-        description: 'Do you have an existing medical condition? If none, write "N/A."',
+        description: 'Do you have an existing medical condition?"',
+        type: 'boolean',
+        format: 'Dropdown'
+      },
+      {
+        name: 'preexistingCondition',
+        displayName: 'Pre-existing Conditions',
+        description: `
+          <b>Test</b>
+        `,
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.__preexistingCondition === 'Yes'
+        }
       },
       {
         name: 'directCOVID',
         displayName: 'Providing care?',
         description: 'Are you providing direct COVID care to a patient?',
         type: 'boolean',
-        format: 'Dropdown'
+        format: 'Dropdown',
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.__preexistingCondition === 'Yes'
+        }
       },
       {
         name: 'withAllergy',
         displayName: 'With Allergy?',
         type: 'boolean',
-        format: 'Dropdown'
+        format: 'Dropdown',
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.__preexistingCondition === 'Yes'
+        }
       },
       {
         name: 'allergy',
@@ -267,7 +300,10 @@ const template = [
         displayName: 'With Comorbidities?',
         description: 'A comorbidity is the simultaneous presence of two or more diseases or medical conditions in a patient.',
         type: 'boolean',
-        format: 'Dropdown'
+        format: 'Dropdown',
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.__preexistingCondition === 'Yes'
+        }
       },
       {
         name: 'comorbidity',
