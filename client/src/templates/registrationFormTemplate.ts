@@ -283,8 +283,8 @@ const template = [
         name: 'preexistingCondition',
         displayName: 'Pre-existing Conditions',
         description: `
-          Please indicate your previous/existing medical conditions<br>
-          <i>i.e. Athritis, Erectile Dysfunction</i>
+          Please indicate your previous/existing medical conditions.<br>
+          <i>i.e. Hypertension, Diabetes, Multiple Sclerosis</i>
         `,
         type: 'string',
         format: 'Text',
