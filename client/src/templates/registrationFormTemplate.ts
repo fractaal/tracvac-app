@@ -138,6 +138,31 @@ const template = [
       {
         name: 'categoryID',
         displayName: 'Category ID',
+        options: [
+          'PRC ID',
+          'OSCA ID',
+          'Facility ID',
+          'PWD ID',
+          'Senior Citizen ID',
+          'Postal ID',
+          'SSS ID',
+          'Other'
+        ],
+        type: 'string',
+        format: 'Dropdown'
+      },
+      {
+        name: 'otherCategoryID',
+        displayName: 'Category ID (Other)',
+        type: 'string',
+        format: 'Text',
+        conditionalFunction (data: Record<string, any>): boolean {
+          return data.categoryID === 'Other'
+        }
+      },
+      {
+        name: 'categoryIDNumber',
+        displayName: 'ID Number',
         type: 'string',
         format: 'Text',
         // description: 'If none, write "N/A"'
@@ -414,6 +439,11 @@ const template = [
       {
         name: 'password',
         displayName: 'Password',
+        description: `
+            Please <b>remember your password.</b> write it down on a piece of paper you won't lose, or use a password manager.
+            <br><br>
+            <b class="text-red-500">Losing your password means losing access to this account permanently.</b>
+        `,
         type: 'string',
         format: 'Password'
       }
