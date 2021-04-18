@@ -140,10 +140,9 @@ const template = [
         displayName: 'Category ID',
         options: [
           'PRC ID',
-          'OSCA ID',
+          'OSCA / Senior Citizen ID',
           'Facility ID',
           'PWD ID',
-          'Senior Citizen ID',
           'Postal ID',
           'SSS ID',
           'Other'
@@ -284,7 +283,8 @@ const template = [
         name: 'preexistingCondition',
         displayName: 'Pre-existing Conditions',
         description: `
-          <b>Test</b>
+          Please indicate your previous/existing medical conditions<br>
+          <i>i.e. Athritis, Erectile Dysfunction</i>
         `,
         type: 'string',
         format: 'Text',
