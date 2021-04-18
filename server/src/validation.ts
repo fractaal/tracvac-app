@@ -38,7 +38,7 @@ export function userValidator (user: UserModel, type: 'register' | 'update'): [r
         return [false, "Your COVID date is invalid."]
     } else if (!validateNumber(user.contactNumber)) {
         return [false, "Your contact number is invalid."]
-    } else if (!user.employerContactNumber || !validateNumber(user.employerContactNumber)) {
+    } else if (user.employerContactNumber && !validateNumber(user.employerContactNumber)) {
         return [false, "Your employer contact number is invalid."]
     }
     return [true, "Validation passed!"]
