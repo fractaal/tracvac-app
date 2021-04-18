@@ -14,7 +14,7 @@ const logger = Logger('Config')
 export async function getConfig(): Promise<Config> {
     const config = {
         location: process.env.LOCATION ,
-        lguUrl: process.env.LGUURL ,
+        lguUrl: process.env.LGUURL ?? '',
         secret: process.env.SECRET ,
         httpsPort: process.env.PORT_SECURE ?? '443' ,
         httpPort: process.env.PORT ?? '80' ,
