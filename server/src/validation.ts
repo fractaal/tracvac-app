@@ -1,8 +1,8 @@
 import {UserModel} from "./database/models/UserModel";
 
 export function validateUsername (username: string) {
-    const re = /\s+/;
-    return !re.test(String(username).toLowerCase());
+    const re = /^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/;
+    return re.test(String(username));
 }
 
 export function validateEmail (email: string) {
