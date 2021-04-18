@@ -36,8 +36,10 @@ export function userValidator (user: UserModel, type: 'register' | 'update'): [r
         return [false, "Your birth date is invalid."]
     } else if (Object.prototype.hasOwnProperty.call(user, "covidDate") && !validateDate(user.covidDate)) {
         return [false, "Your COVID date is invalid."]
-    } else if (!validateNumber(user.contactNumber) || !validateNumber(user.employerContactNumber)) {
-        return [false, "Contact numbers are invalid."]
+    } else if (!validateNumber(user.contactNumber)) {
+        return [false, "Your contact number is invalid."]
+    } else if (!user.employerContactNumber || !validateNumber(user.employerContactNumber)) {
+        return [false, "Your employer contact number is invalid."]
     }
     return [true, "Validation passed!"]
 }
