@@ -29,6 +29,8 @@ export default Vue.extend({
       if (process.env.MODE === 'pwa') {
         server = document.location.host
         this.$q.localStorage.set('server', document.location.host)
+      } else {
+        server = this.$q.localStorage.getItem('server')
       }
     } catch (err) {
       // Check whether or not user has already set an address to connect to
