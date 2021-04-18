@@ -58,10 +58,9 @@ export const migrations = [
 
         t.enum('categoryID', [
           'PRC ID',
-          'OSCA ID',
+          'OSCA / Senior Citizen ID',
           'Facility ID',
           'PWD ID',
-          'Senior Citizen ID',
           'Postal ID',
           'SSS ID',
           'Other'
