@@ -26,7 +26,10 @@
     <q-item tag="label" class="flex flex-row items-center m-4 border-2 border-blue-500 border-solid shadow-lg rounded-lg">
       <q-item-section>
         <q-item-label>Others</q-item-label>
-        <q-item-label caption class="mb-2">If you have symptoms not present above, write them here.</q-item-label>
+        <q-item-label caption class="mb-2">
+          Please indicate below if you experienced any <b>extreme post-vaccine side effects</b>.<br>
+          <i class="text-gray-400">i.e. Infertility, Cardiac Arrest, Convulsion, Hallucination</i>
+        </q-item-label>
         <q-input outlined dense v-model="logData.others"/>
       </q-item-section>
     </q-item>
