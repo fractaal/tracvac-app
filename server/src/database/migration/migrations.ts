@@ -25,9 +25,9 @@ export const migrations = [
         t.increments('id').primary();
 
         // User data needed for stuff like this
-        t.string('username').notNullable().index();
+        t.string('username').notNullable().unique().index();
         t.string('password').notNullable();
-        t.string('email').notNullable();
+        t.string('email').notNullable().unique();
         t.string('profilePicturePath').defaultTo('public/placeholder.png');
 
         // Dosage no.
