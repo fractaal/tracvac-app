@@ -55,7 +55,20 @@ export const migrations = [
           '06 - Other',
         ]).notNullable();
 
-        t.string('categoryID');
+
+        t.enum('categoryID', [
+          'PRC ID',
+          'OSCA ID',
+          'Facility ID',
+          'PWD ID',
+          'Senior Citizen ID',
+          'Postal ID',
+          'SSS ID',
+          'Other'
+        ]);
+        t.string('otherCategoryID')
+        t.string('categoryIDNumber')
+
         t.string('philHealthID');
         t.string('lastName').notNullable();
         t.string('firstName').notNullable();
