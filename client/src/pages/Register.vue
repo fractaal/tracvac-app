@@ -50,8 +50,8 @@
                     v-model="formData[data.name]"
                     :maxlength="data.limit || 999"
                     :rules="[
-                      val => !!val || data.displayName + ' can\'t be empty.',
-                      ...data.rules || []
+                      val => (!!val || data.isNotRequired) || data.displayName + ' can\'t be empty.',
+                      ...(data.rules || [])
                     ]"
                     />
                   <q-input dense v-else-if="data.format == 'Password'" v-model="formData[data.name]" :type="isPassword? 'password' : 'text'" label="Password" :rules="[
@@ -82,7 +82,7 @@
                   </div>
                   <div v-if="data.description">
                     <br>
-                    <p class="text-xs -mt-3">{{data.description}}</p>
+                    <p class="text-xs -mt-4" v-html="data.description"/>
                   </div>
                 </div>
               </div>
@@ -144,6 +144,7 @@ export default Vue.extend({
         for (const formItem of section.formItems) {
           // console.log(store.userInfo)
           if (formItem.name === 'password' || formItem.name === 'username' || formItem.name === 'email') continue
+          // @ts-ignore
           if (formItem.type === 'boolean') this.$set(this.formData, formItem.name, store.userInfo![formItem.name] ? 'Yes' : 'No')
           else if (formItem.type === 'date') this.$set(this.formData, formItem.name, format(new Date(store.userInfo![formItem.name]), 'yyyy/MM/dd'))
           // @ts-ignore
@@ -220,17 +221,26 @@ export default Vue.extend({
         for (const section of registrationFormTemplate) {
           for (const formItem of section.formItems) {
             if (formItem.name === itemName) {
+              if (formItem.name.startsWith('__')) continue
               const templateItem = formItem
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // If there is a conditional function, and if the conditional function passes OR if there is no conditional function
               // @ts-ignore
               if ((templateItem.conditionalFunction && templateItem.conditionalFunction(this.formData)) || !templateItem.conditionalFunction) {
-                if (this.formData[itemName] === undefined || this.formData[itemName] === null || this.formData[itemName] === '') {
+                // If the values of the form items are nonexistent OR if isNotRequired is true...
+                if (
+                  (this.formData[itemName] === undefined ||
+                  this.formData[itemName] === null ||
+                  this.formData[itemName] === '') &&
+                  // @ts-ignore
+                  !formItem?.isNotRequired
+                ) {
                   this.$q.notify({
                     message: `${templateItem.displayName} in ${section.title} needs to be completed.`,
                     type: 'negative',
                     position: 'center',
                     timeout: 2500
                   })
+                  this.$q.loading.hide()
                   return
                 } else {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
