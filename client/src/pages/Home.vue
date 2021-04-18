@@ -21,7 +21,7 @@
       -->
       <div v-for="menuItem in store.menu" :key="menuItem.name">
         <p v-if="menuItem.isSeparator" class="font-bold mt-8 mb-2 p-0 text-gray-500">{{menuItem.name}}</p>
-        <button-card v-else :title="menuItem.name" :icon="menuItem.icon" @click="menuItem.action" :show-badge="menuItem.showBadge"/>
+        <button-card v-else-if="!menuItem.hidden" :title="menuItem.name" :icon="menuItem.icon" @click="menuItem.action" :show-badge="menuItem.showBadge"/>
       </div>
     </q-pull-to-refresh>
   </q-page>
