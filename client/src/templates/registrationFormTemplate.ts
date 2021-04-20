@@ -258,6 +258,7 @@ const template = [
         displayName: 'Employer Contact Number',
         type: 'number',
         format: 'Text',
+        isNotRequired: true,
         limit: 12,
         rules: [
           (val: string) => numberValidator(val) || 'Must be a valid contact number.'
