@@ -31,6 +31,12 @@
         >
           <template v-slot:top>
             <div class='flex flex-row items-center content-center'>
+              <q-btn
+                outline class='mx-2'
+                label='Select amount of people...'
+                icon='fas fa-plus'
+                @click='selectAmountOfPeople'
+              />
               <q-input
                 dense
                 outlined
@@ -160,7 +166,7 @@ export default Vue.extend({
       this.loading = true;
       const response = await store.axios.post('/admin/getUsers', {
         page: this.pagination.page-1,
-        pageSize: this.pagination.rowsPerPage,
+        pageSize: this.pagination.rowsPerPage === 0 ? this.pagination.rowsNumber : this.pagination.rowsPerPage,
         filter: this.searchFilter,
         showPUIs: this.showPUIs,
         showPUMs: this.showPUMs,
@@ -181,6 +187,7 @@ export default Vue.extend({
       this.getData({pagination: this.pagination, filter: this.searchFilter, showPUIs: this.showPUIs, showPUMs: this.showPUMs});
     },
     addSelectionToEdit() {
+      console.log(this.selected);
       itemLoop: for (const item of this.selected) {
         for (const existingItem of store.usersToModify) {
           if (item.id === existingItem.id) {
@@ -192,6 +199,21 @@ export default Vue.extend({
         store.usersToModify.push(Object.assign({}, item));
       }
       this.selected = [];
+    },
+    selectAmountOfPeople() {
+      this.$q.dialog({message: 'Input amount of people to select', prompt: {model: '', type: 'number'}}).onOk(async (amount: number) => {
+        if (amount > this.pagination.rowsNumber) {
+          this.$q.notify({message: 'Amount selected is more than amount currently loaded.', type: 'warn'});
+        }
+        const response = await this.store.axios.post('/admin/selectAmountOfPeople', {limit: amount})
+        if (response.data.result) {
+          this.selected = response.data.data;
+        } else {
+          this.$q.notify({message: `Could not get amount of people - ${response.data.message}`, type: 'negative'})
+        }
+
+        this.addSelectionToEdit();
+      })
     },
     async viewLogs() {
       await this.$router.push(`/view-logs/${this.selected[0].id}`);
