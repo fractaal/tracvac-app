@@ -3,8 +3,13 @@
     <div class="overflow-x-visible grid grid-cols-2 gap-4">
       <div>
         <div class='text-h6 mb-8'>EDIT VACCINATION STATUSES</div>
-        <transition-group v-if='store.usersToModify.length !== 0' name="transition" mode="out-in">
-          <q-card v-for="(user, idx) in store.usersToModify" :class='user.hasDiscrepancy ? "ring-4 ring-red-500" : ""' class="mb-8 shadow-none border border-solid border-gray-400" :key="user.id">
+        <div class='flex mx-auto'>
+          <q-input dense debounce='500' v-model='searchFilter' label='Search...' class='w-1/2 mr-2'/>
+          <q-pagination v-model='pageIndex' :max='Math.ceil(filteredUsers.length/usersPerPage)' input/>
+        </div>
+        <br/>
+        <!-- <transition-group v-if='store.usersToModify.length !== 0' name="transition" mode="out-in"> -->
+          <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "ring-4 ring-red-500" : ""' class="mb-8 shadow-none border border-solid border-gray-400" :key="user.id">
             <q-card-section>
               <div class="flex flex-nowrap justify-between">
                 <q-btn class="absolute -mt-8 -ml-8" round color="negative" icon="close" @click="store.usersToModify.splice(idx, 1)"/>
@@ -30,23 +35,25 @@
               </div>
               <br>
               <div>
-                <q-btn outline color="negative" label="Vaccine Not Ready" @click="toggleVaccineStatus(user, 'Not Ready')"/>
-                <q-btn outline color="primary" label="Vaccine Pending" @click="toggleVaccineStatus(user, 'Pending')"/>
-                <q-btn outline color="positive" label="Vaccine Ready" @click="toggleVaccineStatus(user, 'Ready')"/>
-                <div class='my-4'/>
-                <q-btn outline label="Mark as not vaccinated" @click="toggleVaccinated(user, false)"/>
-                <q-btn outline label="Mark as vaccinated" color="secondary" @click="toggleVaccinated(user, true)"/>
-                <div class='my-4'/>
-                <q-btn outline label='Mark as Under Investigation' @click='togglePUI(user, !user.isPUI)'/>
-                <q-btn outline label='Mark as Under Monitoring' @click='togglePUM(user, !user.isPUM)'/>
-                <div class='my-4'/>
-                <q-input debounce='500' @input='computeDiscrepancies' class="w-full mt-2" outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
-                <q-input debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
+                <q-btn dense outline color="negative" label="Vaccine Not Ready" @click="toggleVaccineStatus(user, 'Not Ready')"/>
+                <q-btn dense outline color="primary" label="Vaccine Pending" @click="toggleVaccineStatus(user, 'Pending')"/>
+                <q-btn dense outline color="positive" label="Vaccine Ready" @click="toggleVaccineStatus(user, 'Ready')"/>
+                <div class='my-1'/>
+                <q-btn dense outline label="Mark as not vaccinated" @click="toggleVaccinated(user, false)"/>
+                <q-btn dense outline label="Mark as vaccinated" color="secondary" @click="toggleVaccinated(user, true)"/>
+                <div class='my-1'/>
+                <q-btn dense outline label='Mark as Under Investigation' @click='togglePUI(user, !user.isPUI)'/>
+                <q-btn dense outline label='Mark as Under Monitoring' @click='togglePUM(user, !user.isPUM)'/>
+                <div class='my-1'/>
+                <div class='grid grid-cols-2 gap-2'>
+                  <q-input dense debounce='500' @input='computeDiscrepancies' outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
+                  <q-input dense debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
+                </div>
               </div>
             </q-card-section>
           </q-card>
-        </transition-group>
-        <empty-placeholder v-else icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
+        <!-- </transition-group> -->
+        <empty-placeholder v-if='paginatedUsers.length === 0' icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
       </div>
       <div>
         <div class='text-h6 mb-8'>DISCREPANCIES</div>
@@ -76,7 +83,13 @@
         direction="up"
         icon="expand_less"
       >
+        <q-fab-action @click='setAllDosageNumber' color='secondary' icon='fas fa-calculator' label='Set all dosage number'/>
         <q-fab-action @click="setAllVaccineManufacturer" color="primary" icon="fas fa-pen" label="Set all vaccine manufacturer"/>
+        <hr>
+        <q-fab-action @click="markAllPUI(true)" color="primary" icon="fas fa-pen" label="Mark all under investigation"/>
+        <q-fab-action @click="markAllPUI(false)" color="negative" icon="fas fa-pen" label="Mark all not under investigation"/>
+        <q-fab-action @click="markAllPUM(true)" color="primary" icon="fas fa-pen" label="Mark all under monitoring"/>
+        <q-fab-action @click="markAllPUM(false)" color="negative" icon="fas fa-pen" label="Mark all not under monitoring"/>
         <hr>
         <q-fab-action @click="markAllVaccineStatus('Not Ready')" color="negative" icon="fas fa-times" label="Mark all Vaccine not ready"/>
         <q-fab-action @click="markAllVaccineStatus('Pending')" color="primary" icon="fas fa-hourglass" label="Mark all Vaccine pending"/>
@@ -118,11 +131,30 @@ export default Vue.extend({
   data() {
     return {
       store,
+      searchFilter: '',
+      usersPerPage: 10,
+      pageIndex: 1,
       discrepancies: [] as {title: string, subtitle: string}[],
     }
   },
   activated() {
     this.computeDiscrepancies()
+  },
+  computed: {
+    filteredUsers (): Record<string,any>[] {
+      if (this.searchFilter === '') return this.store.usersToModify;
+      const result = [];
+      for (const user of store.usersToModify) {
+        const name = `${user.firstName} ${user.middleName} ${user.lastName}`;
+        if (name.indexOf(this.searchFilter) !== -1) {
+          result.push(user);
+        }
+      }
+      return result;
+    },
+    paginatedUsers () : Record<string,any>[] {
+      return this.filteredUsers.slice((this.pageIndex-1) * this.usersPerPage, ((this.pageIndex-1) * this.usersPerPage) + this.usersPerPage);
+    }
   },
   methods: {
     computeDiscrepancies() {
@@ -197,68 +229,21 @@ export default Vue.extend({
         store.usersToModify = [];
       })
     },
-    confirmSubmit() {
-      this.$q.dialog({
-        title: 'Commit changes?',
-        cancel: true,
-        message: `Commit the changes you're making on ${store.usersToModify.length} users?
-        ${this.discrepancies.length !== 0 ? 'There are still discrepancies as well.' : ''}`
-      }).onOk(async () => {
-
-        try {
-          const response = await this.$axios.post('/admin/editUser', {
-            data: store.usersToModify.map(user => {
-              return {
-                id: user.id,
-                isVaccinated: user.isVaccinated,
-                isVaccineReady: user.isVaccineReady,
-                vaccineManufacturer: user.vaccineManufacturer ?? '',
-                isPUI: user.isPUI,
-                isPUM: user.isPUM,
-                dosageNumber: user.dosageNumber,
-              }
-            })
-          })
-
-          if (!response.data.result) {
-            this.$q.notify({message: response.data.message, type: 'negative'})
-          } else {
-            this.$q.notify({message: 'Saved changes!'});
-            store.usersToModify = [];
-            this.computeDiscrepancies()
-          }
-        } catch(err) {
-          this.$q.notify({
-            message: `Commit failed: ${err}`,
-            type: 'negative',
-          })
-        }
-
-        /** Old very inefficient way of updating users
-        try {
-          await Promise.all(store.usersToModify.map(async user => {
-            await this.$axios.post('/admin/editUser', {
-              userId: user.id,
-              isVaccinated: user.isVaccinated,
-              isVaccineReady: user.isVaccineReady,
-              vaccineManufacturer: user.vaccineManufacturer,
-            })
-          }))
-          store.usersToModify = [];
-        } catch (e) {
-          this.$q.notify({
-              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-              message: `Commit failed - ${e}`
-          })
-        }
-         */
-      })
-    },
     togglePUI (user: Record<string,any>, value: boolean) {
       user.isPUI = value;
     },
     togglePUM (user: Record<string,any>, value: boolean) {
       user.isPUM = value;
+    },
+    markAllPUI (value: boolean) {
+      for (const user of store.usersToModify) {
+        this.togglePUI(user, value);
+      }
+    },
+    markAllPUM (value: boolean) {
+      for (const user of store.usersToModify) {
+        this.togglePUM(user, value);
+      }
     },
     setAllVaccineManufacturer() {
       this.$q.dialog({
@@ -274,6 +259,80 @@ export default Vue.extend({
           user.vaccineManufacturer = data;
         }
         this.computeDiscrepancies()
+      })
+    },
+    setAllDosageNumber() {
+      this.$q.dialog({
+        title: 'Set all dosage number',
+        message: "Batch set all of these user's dosage number fields.",
+        prompt: {
+          model: '',
+          type: 'number'
+        },
+        cancel: true,
+        persistent: true
+      }).onOk((data: string) => {
+        for (const user of store.usersToModify) {
+          user.dosageNumber = parseInt(data);
+        }
+        this.computeDiscrepancies();
+      })
+    },
+    confirmSubmit() {
+      this.$q.dialog({
+        title: 'Commit changes?',
+        cancel: true,
+        message: `Commit the changes you're making on ${store.usersToModify.length} users?
+        ${this.discrepancies.length !== 0 ? 'There are still discrepancies as well.' : ''}`
+      }).onOk(async () => {
+        this.$q.loading.show({message: 'Committing changes... This may take a while with lots of people...'});
+
+        const performRequest = async (data: Record<string,any>[]): Promise<[boolean, string]> => {
+          try {
+            const response = await this.$axios.post('/admin/editUser', {
+              data: data.map(user => {
+                return {
+                  id: user.id,
+                  isVaccinated: user.isVaccinated,
+                  isVaccineReady: user.isVaccineReady,
+                  vaccineManufacturer: user.vaccineManufacturer ?? '',
+                  isPUI: user.isPUI,
+                  isPUM: user.isPUM,
+                  dosageNumber: user.dosageNumber,
+                }
+              })
+            })
+
+            if (!response.data.result) {
+              return [false, response.data.message as string];
+            } else {
+              return [true, 'Saved changes!'];
+            }
+          } catch(err) {
+            return [false, `Commit failed: ${err}`]
+          }
+        }
+
+        const maxPerReq = 500;
+        let opIsSuccess = true;
+
+        for (let i = 0; i < (Math.ceil(store.usersToModify.length / maxPerReq)); i++) {
+          const [isSuccess, message] = await performRequest(store.usersToModify.slice(i * maxPerReq, (i * maxPerReq) + maxPerReq));
+          if (!isSuccess) {
+            this.$q.notify({message, type: 'negative'})
+            opIsSuccess = false;
+            break;
+          }
+        }
+
+        if (opIsSuccess) {
+          this.$q.notify({message: 'Saved changes!'});
+          store.usersToModify = [];
+          this.computeDiscrepancies();
+        }
+
+        this.$q.loading.hide();
+
       })
     }
   }
