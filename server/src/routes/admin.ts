@@ -339,4 +339,18 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             res.status(500).json({result: false, message: `An error occurred while trying to mark logs!`});
         }
     })
+
+    app.post('/admin/selectAmountOfPeople', async (req, res) => {
+        try {
+            if (req.body.limit) {
+                const selection = await UserModel.query().select('*').limit(req.body.limit);
+                res.json({result: true, data: selection});
+            } else {
+                res.json({result: false, message: "Missing amount parameter"});
+            }
+        } catch(err) {
+            logger.error(`Error occurred while trying to get amount of users: ${err.stack}`)
+            res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
+        }
+    })
 })();
