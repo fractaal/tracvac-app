@@ -19,7 +19,7 @@ app.post('/login', async (req, res) => {
         try {
           let token = jwt.sign({
             userId: user.id,
-          }, (await getConfig()).secret, {expiresIn: '168h'})
+          }, (await getConfig()).secret, {expiresIn: '48h'})
 
           logger.log(`Login for ${req.body.username} from ${req.ip} succeeded`);
           res.json({ result: true, message: 'Login successful!', token });
