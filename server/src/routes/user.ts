@@ -116,3 +116,26 @@ app.get('/user', async (req, res) => {
     res.status(400).json({ result: false, message: 'You are not authenticated' });
   }
 })
+
+app.post('/changePassword', async (req, res) => {
+  if (req.isAuthenticated) {
+    const match = await UserModel.query().findById(req.tokenData.userId);
+    if (req.body.oldPassword && req.body.newPassword) {
+      if (await bcrypt.compare(req.body.oldPassword, match.password)) {
+        await UserModel.query().patch({password: await bcrypt.hash(req.body.newPassword, await bcrypt.genSalt())});
+        logger.log(`User ${match.username} succeeded in a password change.`);
+        res.json({result: true, message: 'Password changed!'});
+        return;
+      } else {
+        logger.log(`User ${match.username} requested password change, but did not input the correct password.`);
+        res.status(400).json({result: false, message: 'Password incorrect!'});
+        return;
+      }
+    } else {
+      res.status(400).json({result: false, message: 'Missing params'});
+    }
+  } else {
+    logger.warn(`${req.ip} requested password change but is not logged in.`);
+    res.status(400).json({result: false, message: 'You are not authenticated'})
+  }
+})
