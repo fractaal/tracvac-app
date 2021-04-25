@@ -108,6 +108,7 @@ import Vue from 'vue'
 import { register } from '../api/auth'
 import { setUserInfo } from 'src/api/user'
 import { Dialog } from 'quasar'
+import UserCard from 'components/UserCard.vue'
 
 export default Vue.extend({
   name: 'Register',
@@ -266,6 +267,13 @@ export default Vue.extend({
 
         if (result) {
           this.forceRouteLeave = true
+          // Show user card
+          this.$q.dialog({
+            component: UserCard,
+            username: this.formData.username,
+            password: this.formData.password
+          })
+
           await this.$router.push('/home')
         } else {
           this.$q.notify({
