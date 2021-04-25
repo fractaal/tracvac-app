@@ -17,10 +17,7 @@ app.post('/login', async (req, res) => {
       if (await bcrypt.compare(req.body.password, user.password)) {
         // Create JWT and send back to person
         try {
-          let token = jwt.sign({
-            userId: user.id,
-          }, (await getConfig()).secret, {expiresIn: '48h'})
-
+          let token = jwt.sign({userId: user.id}, user.password, {expiresIn: '48h'});
           logger.log(`Login for ${req.body.username} from ${req.ip} succeeded`);
           res.json({ result: true, message: 'Login successful!', token });
 

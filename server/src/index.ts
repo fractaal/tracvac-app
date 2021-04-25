@@ -13,6 +13,7 @@ import { json } from 'body-parser';
 import fileUpload from "express-fileupload";
 import cors from 'cors';
 import expressBasicAuth from "express-basic-auth";
+import { UserModel } from './database/models/UserModel';
 
 const logger = Logger(`Worker Main`);
 export const app = express();
@@ -97,15 +98,28 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
     if (!token) {
       req.isAuthenticated = false;
     } else {
-      jwt.verify(token, (await getConfig()).secret, (error, decoded) => {
-        if (error) {
-          logger.warn('Error occurred whilst trying to verify user JWT: ', error);
-          req.isAuthenticated = false
+      const unverifiedToken = jwt.decode(token) as Partial<Request['tokenData']>;
+      if (unverifiedToken.userId) {
+        const secret = (await UserModel.query().select('password').where({id: unverifiedToken.userId}))[0]?.password;
+        if (secret) {
+          jwt.verify(token, secret, (error, decoded) => {
+            if (error) {
+              logger.warn('Error occurred whilst trying to verify user JWT: ', error);
+              req.isAuthenticated = false
+            } else {
+              req.isAuthenticated = true
+              req.tokenData = decoded as Request['tokenData']
+            }
+          })
         } else {
-          req.isAuthenticated = true
-          req.tokenData = decoded as Request['tokenData']
+          logger.warn(`JWT contains a user ID (${unverifiedToken.userId}) key but that user is not present in database.`)
+          req.isAuthenticated = false;
         }
-      })
+      } else {
+        logger.warn(`JWT from ${req.ip} does not contain user ID!`)
+        req.isAuthenticated = false;
+      }
+
     }
     next();
   });
