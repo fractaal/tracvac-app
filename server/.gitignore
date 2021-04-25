@@ -11,6 +11,7 @@ objection-generator/*
 tmp_migrations
 
 # database and node binding
+public/users/*
 *.log
 tracvac-config
 .env
