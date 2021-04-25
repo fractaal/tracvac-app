@@ -98,7 +98,7 @@ export class UserModel extends BaseModel {
   philHealthID!: string
   lastName!: string
   firstName!: string
-  middleName!: string
+  middleName?: string
   suffix!: string
   contactNumber!: string
   fullAddress!: string
@@ -139,7 +139,7 @@ export class UserModel extends BaseModel {
         'category',
         'lastName',
         'firstName',
-        'middleName',
+        // 'middleName',
         'fullAddress',
         'province',
         'municipalityOrCity',

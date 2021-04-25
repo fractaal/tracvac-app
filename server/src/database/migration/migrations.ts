@@ -71,7 +71,7 @@ export const migrations = [
         t.string('philHealthID');
         t.string('lastName').notNullable();
         t.string('firstName').notNullable();
-        t.string('middleName').notNullable();
+        t.string('middleName');
         t.string('suffix');
         t.string('contactNumber');
         t.string('fullAddress').notNullable();
