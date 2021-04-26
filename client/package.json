@@ -13,6 +13,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "axios": "^0.18.1",
+    "convert-vapid-public-key": "^1.0.2",
     "core-js": "^3.6.5",
     "date-fns": "^2.19.0",
     "fastclick": "^1.0.6",
