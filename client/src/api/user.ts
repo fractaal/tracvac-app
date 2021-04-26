@@ -2,6 +2,8 @@ import { api } from './server'
 import { store } from './store'
 import notify from 'src/api/notify'
 import { logout } from 'src/api/auth'
+import { Dialog } from 'quasar'
+import ChangePasswordDialog from 'components/ChangePasswordDialog.vue'
 // import { FormData } from 'src/templates/registrationFormTemplate'
 
 interface UserInfoResponse {
@@ -15,7 +17,7 @@ export interface User {
   email: string;
   createdAt: string;
   profilePicturePath: string;
-  updatedAt?: any;
+  updatedAt?: string;
   isVaccinated: boolean;
   isVaccineReady: string;
   category: string;
@@ -74,7 +76,7 @@ export async function getUserInfo (): Promise<boolean> {
 
 export async function setUserInfo (data: FormData): Promise<boolean> {
   try {
-    const response = await api.patch('/user', data)
+    const response = await api.patch<{message: string, result: boolean}>('/user', data)
 
     if (response.data.result) {
       await getUserInfo()
@@ -109,5 +111,26 @@ export async function uploadProfilePicture (file: File) {
   } catch (err) {
     notify.negative(`Profile picture upload failed: ${(err as unknown as Error).message}`)
     return false
+  }
+}
+
+export function changePassword () {
+  try {
+    Dialog.create({
+      component: ChangePasswordDialog
+    }).onOk(async (data: {oldPassword: string; newPassword: string;}) => {
+      const response = await api.post<{result: boolean, message: string}>('/changePassword', {
+        oldPassword: data.oldPassword, newPassword: data.newPassword
+      })
+
+      if (response.data.result) {
+        notify.positive('Password changed! Please log in again with the new password.')
+        logout(true)
+      } else {
+        notify.negative(`Password change failed: ${response.data.message}`)
+      }
+    })
+  } catch (err) {
+    notify.negative(`Password change failed: ${err}`)
   }
 }
