@@ -231,5 +231,21 @@ export const migrations = [
     down: async (knex: Knex) => {
       await knex.schema.dropTable('notifications');
     }
+  },
+  {
+    version: 5,
+    description: 'Create push subscriptions table',
+    up: async (knex) => {
+      await knex.schema.createTable('pushSubscriptions', table => {
+        table.increments('id').primary();
+        table.integer('userId').notNullable();
+        table.foreign('userId').references('id').inTable('users');
+        table.json('subscription').notNullable();
+        table.string('token').notNullable();
+      });
+    },
+    down: async (knex) => {
+      await knex.schema.dropTable('pushSubscriptions');
+    }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
