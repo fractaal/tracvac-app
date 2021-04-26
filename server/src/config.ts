@@ -7,6 +7,7 @@ export interface Config {
     httpPort: string;
     httpsPort: string;
     adminPassword: string;
+    email: string;
 }
 
 const logger = Logger('Config')
@@ -19,13 +20,15 @@ export async function getConfig(): Promise<Config> {
         httpsPort: process.env.PORT_SECURE ?? '443' ,
         httpPort: process.env.PORT ?? '80' ,
         adminPassword: process.env.ADMIN_PASSWORD ,
+        email: process.env.EMAIL 
     } as Partial<Config>;
 
     if (typeof config.httpPort === 'string' &&
         typeof config.httpsPort === 'string' &&
         typeof config.secret === 'string' &&
         typeof config.location === 'string' &&
-        typeof config.adminPassword === 'string') {
+        typeof config.adminPassword === 'string' &&
+        typeof config.email === 'string') {
         return config as Config;
     } else {
         logger.error('Server is improperly configured! Check configuration and try again.')
