@@ -2,7 +2,7 @@
   <q-dialog persistent ref="dialog" @hide="onDialogHide">
     <q-card
       class="q-dialog-plugin p-4"
-      style="background-image: url('/color.png'); background-attachment: fixed;"
+      style="background-image: url('/color.png'); background-repeat: no-repeat; background-attachment: fixed; background-position: center;"
     >
       <q-card-section >
         <div class="mt-8 text-h5">HEADS UP!</div>
