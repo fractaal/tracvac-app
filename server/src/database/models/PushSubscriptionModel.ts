@@ -5,4 +5,6 @@ export class PushSubscriptionModel extends BaseModel {
   userId!: number;
   subscription!: PushSubscriptionJSON;
   token!: string;
+  
+  static tableName = "pushSubscriptions"
 }
