@@ -22,6 +22,8 @@ export async function initialize() {
     // Keys must not exist, therefore must generate new ones
     logger.log("Generating VAPID keys...");
     const keys = webpush.generateVAPIDKeys()
+    vapidPublicKey = keys.publicKey;
+    vapidPrivateKey = keys.privateKey;
     await knex.insert({key: 'vapidPublicKey', value: keys.publicKey}).into('metadata');
     await knex.insert({key: 'vapidPrivateKey', value: keys.privateKey}).into('metadata');
   }
