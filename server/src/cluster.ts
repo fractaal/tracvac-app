@@ -6,6 +6,7 @@ import cluster from 'cluster';
 import os from 'os';
 import Logger from './logger';
 import * as database from './database';
+import * as vapid from './vapid';
 
 let forksBeforeStop = 5;
 
@@ -16,6 +17,9 @@ let forksBeforeStop = 5;
         await getConfig()
         logger.log("Initializing database...")
         await database.connect()
+
+        // Init VAPID / Push notif stuff
+        await vapid.initialize()
 
         const cpuCount = os.cpus().length
         logger.log(`Forking ${(process.env.THREAD_COUNT ?? cpuCount)} worker processes...`)
