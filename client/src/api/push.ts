@@ -6,7 +6,7 @@ import convertVapidKey from 'convert-vapid-public-key'
 export async function initialize () {
   if ('serviceWorker' in navigator) {
     const reg = await navigator.serviceWorker.ready
-    const sub = reg.pushManager.getSubscription()
+    const sub = await reg.pushManager.getSubscription()
 
     if (sub === null && !LocalStorage.getItem('initialNotificationPromptShown')) {
       LocalStorage.set('initialNotificationPromptShown', true)
@@ -30,9 +30,11 @@ export async function subscribe () {
   if ('serviceWorker' in navigator) {
     const reg = await navigator.serviceWorker.ready
     try {
+      const applicationServerKeyString: string = (await (await api.get('/getVAPIDPublicKey')).data).publicKey
+      console.log(applicationServerKeyString)
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: convertVapidKey((await (await api('/getVAPIDPublicKey')).data).publicKey as string)
+        applicationServerKey: applicationServerKeyString
       })
       console.log('Endpoint URL: ', sub.endpoint)
       saveSubscriptionToServer(sub)
