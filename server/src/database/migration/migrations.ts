@@ -242,6 +242,9 @@ export const migrations = [
         table.foreign('userId').references('id').inTable('users');
         table.json('subscription').notNullable();
         table.string('token').notNullable();
+
+        table.dateTime('createdAt');
+        table.dateTime('updatedAt');
       });
     },
     down: async (knex) => {
