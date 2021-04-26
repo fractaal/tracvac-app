@@ -7,9 +7,25 @@
       <q-card-section >
         <div class="mt-8 text-h5">CHANGE PASSWORD</div>
         <div class="mt-4 text-subtitle2 content-center">OLD PASSWORD</div>
-        <q-input type="password"/>
+        <q-input v-model="oldPassword" :type="showOldPassword ? 'password' : 'text'">
+          <template v-slot:append>
+            <q-icon
+              :name="showOldPassword ? 'visibility_off' : 'visibility'"
+              class="cursor-pointer"
+              @click="showOldPassword = !showOldPassword "
+            />
+          </template>
+        </q-input>
         <div class="mt-2 text-subtitle2 content-center">NEW PASSWORD</div>
-        <q-input type="password"/>
+        <q-input v-model="newPassword" :type="showNewPassword ? 'password' : 'text'">
+          <template v-slot:append>
+            <q-icon
+              :name="showNewPassword ? 'visibility_off' : 'visibility'"
+              class="cursor-pointer"
+              @click="showNewPassword = !showNewPassword "
+            />
+          </template>
+        </q-input>
       </q-card-section>
       <q-card-actions align="center">
         <q-btn :disable="!canClickOK" icon="fas fa-check" flat class="p-4" label="Change My Password" @click="onOKClick"/>
@@ -27,8 +43,14 @@ export default Vue.extend({
   data () {
     return {
       showNewPassword: false,
+      newPassword: '',
       showOldPassword: false,
-      canClickOK: false
+      oldPassword: ''
+    }
+  },
+  computed: {
+    canClickOK (): boolean {
+      return (this.newPassword !== '' && this.oldPassword !== '')
     }
   },
   methods: {
@@ -42,7 +64,7 @@ export default Vue.extend({
       this.$emit('hide')
     },
     onOKClick () {
-      this.$emit('ok')
+      this.$emit('ok', { oldPassword: this.oldPassword, newPassword: this.newPassword })
       this.hide()
     },
     onCancelClick () {
