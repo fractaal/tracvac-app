@@ -38,7 +38,7 @@ initialize().then(() => {
         await PushSubscriptionModel.query().insert({
           subscription: pushSubscription, 
           userId: req.tokenData.userId, 
-          token: req.headers['X-Access-Token']
+          token: req.header('x-access-token')
         })      
       } else {
         logger.log(`Updating existing subscription for user ${req.tokenData.userId}`)
@@ -67,5 +67,7 @@ initialize().then(() => {
         logger.error(`web push failed! ${err}`);
       }
     }
+
+    res.send('done');
   })
 })
