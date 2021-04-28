@@ -54,20 +54,4 @@ initialize().then(() => {
       res.status(400).json({result: false, message: `You are not authenticated.`})
     }
   })
-
-  // Test endpoint ! ! !
-  app.get('/test', async (req, res) => {
-    const subs = await PushSubscriptionModel.query().select('*');
-
-    for (const sub of subs) {
-      try {
-        await webpush.sendNotification(sub.subscription as webpush.PushSubscription, JSON.stringify({type: 'vaccine'}));
-        logger.log(`web push successful for ${sub.userId}`);
-      } catch(err) {
-        logger.error(`web push failed! ${err}`);
-      }
-    }
-
-    res.send('done');
-  })
 })
