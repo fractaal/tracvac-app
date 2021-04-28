@@ -48,6 +48,20 @@ export async function subscribe () {
   }
 }
 
+export async function unsubscribe () {
+  if ('serviceWorker' in navigator) {
+    console.log('Unsubscribing from push...')
+    const reg = await navigator.serviceWorker.ready
+    try {
+      await (await reg.pushManager.getSubscription())?.unsubscribe()
+    } catch (err) {
+      console.warn(`Unsubscribing from push notifs failed: ${err}`)
+    }
+    console.log('Set showNotifications to false')
+    store.showNotifications = false
+  }
+}
+
 export async function saveSubscriptionToServer (subscriptionObject: PushSubscription) {
   console.log('Saving subscription to server!')
   await api.post('/saveSubscription', subscriptionObject)
