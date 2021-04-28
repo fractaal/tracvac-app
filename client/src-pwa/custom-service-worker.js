@@ -5,7 +5,6 @@
  */
 
 import { precacheAndRoute } from 'workbox-precaching'
-import { LocalStorage } from 'quasar'
 
 precacheAndRoute(
   self.__WB_MANIFEST
@@ -19,25 +18,7 @@ function displayNotification (title, message) {
 }
 
 self.addEventListener('push', function (e) {
-  const data = e.data.json()
-
-  console.log('new data!', data)
-
-  let title
-  let message = ''
-
-  if (data.type === 'vaccine') {
-    title = 'Your vaccine status was changed!'
-  } else if (data.type === 'vaccination') {
-    title = 'Your vaccination status was changed!'
-  } else if (data.type === 'lgu') {
-    title = 'LGU announcement'
-    message = data.message
-  }
-
+  const { title, message } = e.data.json()
+  console.log('new data!', title, message)
   displayNotification(title, message)
-})
-
-self.addEventListener('notificationclick', function (e) {
-  window.open(LocalStorage.getItem('server'))
 })
