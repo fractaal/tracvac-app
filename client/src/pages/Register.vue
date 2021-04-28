@@ -260,6 +260,12 @@ export default Vue.extend({
           }
         }
       }
+
+      // Go over the entire thing one last time and delete null keys.
+      for (const key in dataToSubmit) {
+        if (dataToSubmit[key] === null) delete dataToSubmit[key]
+      }
+
       console.log('data to submit: ', dataToSubmit)
       // If the code reaches here, it is successfully verified that every field is filled properly.
       if (this.$props.mode === 'register') {
