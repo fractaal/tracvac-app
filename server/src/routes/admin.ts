@@ -125,7 +125,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             dosageNumber: user.dosageNumber
                         });
                         // TEMP!!!!
-                        await notifyUser(user.id, {title: "Your vaccine/vaccination status has changed!", message: "You might want to check it out!"});
+                        await notifyUser(user.id as number, {title: "Your vaccine/vaccination status has changed!", message: "You might want to check it out!"});
                     }
                 })
                 logger.log(`Committed changes to ${request.body.data.length} people`)
