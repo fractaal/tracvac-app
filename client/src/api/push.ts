@@ -1,7 +1,6 @@
 import { store } from 'src/api/store'
 import { api } from 'src/api/server'
 import { LocalStorage, Dialog } from 'quasar'
-import convertVapidKey from 'convert-vapid-public-key'
 
 export async function initialize () {
   if ('serviceWorker' in navigator) {
