@@ -25,7 +25,7 @@ export function addHttp (url: string) {
 
 export async function recept (address: string): Promise<boolean> {
   try {
-    address = addHttp(address.trim())
+    address = address.trim() // addHttp(address.trim())
     const response = await api.get(address + '/reception')
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (response.data?.version) {
