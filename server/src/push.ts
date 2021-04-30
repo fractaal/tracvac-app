@@ -11,12 +11,22 @@ export async function notifyUser(id: number, data: Record<string,any>) {
   for (const sub of subs) {
     try {
       await webpush.sendNotification(sub.subscription as webpush.PushSubscription, JSON.stringify(data));
-      logger.log(`Web push successful for ${id} at subscription id ${sub.id}`);
+      logger.log(`Web push successful for user ${id} at sub id ${sub.id}`);
     } catch(err) {
-      logger.warn(`Web push failed - ${err}`);
-      success = false;
+      logger.warn(`Web push failed for user ${id} at sub id ${sub.id}: ${err}`);
+      await deleteSubscription(sub.id)
+      success = false
     }
   }
 
   return success;
+}
+
+export async function deleteSubscription(subscriptionId: number) {
+  try {
+    const numDeleted = await PushSubscriptionModel.query().deleteById(subscriptionId)
+    logger.log(`Delete sub id ${subscriptionId}: Deleted ${numDeleted} subscriptions`)
+  } catch(err) {
+    logger.warn(`Delete sub id ${subscriptionId} failed: ${err}`)
+  }
 }
