@@ -16,16 +16,17 @@ export const api = axios.create({
 
 export let server: string
 
-export function addHttp (url: string) {
+export function addHttp (url: string, secure?: boolean) {
   if (!/^(?:f|ht)tps?:\/\//.test(url)) {
-    url = 'http://' + url
+    url = (secure ? 'https://' : 'http://') + url
   }
   return url
 }
 
 export async function recept (address: string): Promise<boolean> {
   try {
-    address = address.trim() // addHttp(address.trim())
+    // If app is in pwa mode, use https (because it won't work otherwise - if not, use http only)
+    address = process.env.MODE === 'pwa' ? addHttp(address.trim(), true) : addHttp(address.trim())
     const response = await api.get(address + '/reception')
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (response.data?.version) {
