@@ -31,6 +31,7 @@
 import Vue from 'vue'
 import { uploadProfilePicture } from '../api/user'
 import { store } from '../api/store'
+import * as push from 'src/api/push'
 
 import ButtonCard from '../components/ButtonCard.vue'
 import ProfilePicture from 'components/ProfilePicture.vue'
@@ -44,6 +45,7 @@ export default Vue.extend({
   components: { LargeButtonCard, ButtonCard, ProfilePicture },
   activated () {
     startup()
+    push.initialize()
   },
   beforeRouteLeave (to, from, next) {
     if (to.path === '/register') {

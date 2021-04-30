@@ -5,12 +5,39 @@
       <p class="font-bold m-0 p-0 text-gray-500">YOU'RE CONNECTED TO</p>
       <p class="text-h5 m-0">{{store.serverInfo.location}}</p>
       <p class="m-0">at <b>{{store.serverInfo.address}}</b></p>
-      <q-btn class="mt-4" v-if="showDisconnectButton" outline label="Disconnect" @click="disconnect"/>
-      <hr>
-      <q-btn outline label="Change Password" @click="changePassword"/>
-      <div class="text-subtitle2 mt-4 font-bold m-0 p-0 text-gray-500">
-        APP VERSION {{require('../../package.json').version}}
-      </div>
+      <br>
+      <q-list class="space-y-4">
+        <q-item v-if="showDisconnectButton" tag="label" class="ring ring-gray-200 rounded-xl" v-ripple @click="disconnect">
+          <q-item-section>
+            <q-item-label class="mt-2">
+              <b> Disconnect </b>
+              <p> Disconnect from the current Tracvac server you're connected to. </p>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item tag="label" class="ring ring-gray-200 rounded-xl" v-ripple @click="changePassword">
+          <q-item-section>
+            <q-item-label class="mt-2">
+              <b> Change Password </b>
+              <p> Old password compromised, or you has it just outgrown you? </p>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item tag="label" class="ring ring-gray-200 rounded-xl" v-ripple>
+          <q-item-section>
+            <q-item-label class="mt-2">
+              <b> Notifications </b>
+              <p> Notifications allow us to tell you about vaccine updates or LGU updates without you needing to have Tracvac open. </p>
+            </q-item-label>
+          </q-item-section>
+          <q-item-section avatar>
+            <q-toggle color="blue" v-model="store.showNotifications"/>
+          </q-item-section>
+        </q-item>
+        <div class="text-subtitle2 mt-4 font-bold m-0 p-0 text-gray-500">
+          APP VERSION {{require('../../package.json').version}}
+        </div>
+      </q-list>
     </div>
   </q-page>
 </template>
@@ -20,6 +47,7 @@ import Vue from 'vue'
 import { store } from 'src/api/store'
 import { disconnect } from 'src/api/server'
 import { changePassword } from 'src/api/user'
+import { subscribe, unsubscribe } from 'src/api/push'
 import CustomHeader from 'components/CustomHeader.vue'
 
 export default Vue.extend({
@@ -34,6 +62,15 @@ export default Vue.extend({
     return {
       showDisconnectButton: true,
       store
+    }
+  },
+  watch: {
+    'store.showNotifications': function (val: boolean) {
+      if (val) {
+        subscribe()
+      } else {
+        unsubscribe()
+      }
     }
   },
   methods: { disconnect, changePassword }

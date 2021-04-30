@@ -4,6 +4,7 @@ import notify from 'src/api/notify'
 import { logout } from 'src/api/auth'
 import { Dialog } from 'quasar'
 import ChangePasswordDialog from 'components/ChangePasswordDialog.vue'
+import UserCard from 'components/UserCard.vue'
 // import { FormData } from 'src/templates/registrationFormTemplate'
 
 interface UserInfoResponse {
@@ -124,8 +125,14 @@ export function changePassword () {
       })
 
       if (response.data.result) {
-        notify.positive('Password changed! Please log in again with the new password.')
-        logout(true)
+        Dialog.create({
+          component: UserCard,
+          username: store.userInfo?.username,
+          password: data.newPassword
+        }).onOk(() => {
+          notify.positive('Password changed! Please log in again with the new password.')
+          logout(true)
+        })
       } else {
         notify.negative(`Password change failed: ${response.data.message}`)
       }

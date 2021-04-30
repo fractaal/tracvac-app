@@ -5,6 +5,7 @@ import { Notification } from 'src/api/notification'
 
 export const store = {
   userInfo: {} as unknown as User | null,
+  showNotifications: false as boolean,
   logs: [] as Log[],
   recentlyViewed: {} as MenuItem,
   activeRoute: '',

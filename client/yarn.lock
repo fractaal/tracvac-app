@@ -3188,6 +3188,11 @@ convert-source-map@^1.7.0:
   dependencies:
     safe-buffer "~5.1.1"
 
+convert-vapid-public-key@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/convert-vapid-public-key/-/convert-vapid-public-key-1.0.2.tgz#2174293be5c74d3912f30af0d3190e462b006258"
+  integrity sha512-b5dCCgzxX/ZXV2cOqVm5oEYgJRq02aYCWcY2/fQOHOmr05x8wetBwkd1Sm+geKzWhVjmfNGA/SYEkHkfY0wfNA==
+
 cookie-signature@1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/cookie-signature/-/cookie-signature-1.0.6.tgz#e303a882b342cc3ee8ca513a79999734dab3ae2c"

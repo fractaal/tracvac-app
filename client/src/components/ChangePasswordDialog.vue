@@ -29,6 +29,7 @@
       </q-card-section>
       <q-card-actions align="center">
         <q-btn :disable="!canClickOK" icon="fas fa-check" flat class="p-4" label="Change My Password" @click="onOKClick"/>
+        <q-btn icon="fas fa-times" flat class="p-4" label="Cancel" @click="onCancelClick"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -68,7 +69,7 @@ export default Vue.extend({
       this.hide()
     },
     onCancelClick () {
-      // nothing..
+      this.hide()
     }
   }
 })
