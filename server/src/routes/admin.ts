@@ -161,6 +161,12 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                 if (request.body.subtitle) notifToAdd.subtitle = request.body.subtitle;
                 await NotificationModel.query().insert(notifToAdd);
 
+                // Notify all users
+                const userIds = await UserModel.query().select('id')
+                for (const user of userIds) {
+                    PushScheduler.enqueue(user.id, {title: request.body.title, message: "New LGU notification"});
+                }
+
                 logger.log(`New notification ${notifToAdd.title} added`)
                 response.json({result: true, message: 'Notification posted!'});
             } catch (e) {
