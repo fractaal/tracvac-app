@@ -11,7 +11,7 @@ import { getConfig, Config } from "../config"
 import expressBasicAuth from "express-basic-auth"
 import ExcelJS from 'exceljs'
 import registrationFormTemplate from "../database/templates/registrationFormTemplate"
-import { notifyUser } from "../push"
+import * as PushScheduler from '../push-scheduler'
 
 const logger = Logger("Administrator Route");
 
@@ -124,8 +124,8 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             isPUM: !!user.isPUM,
                             dosageNumber: user.dosageNumber
                         });
-                        // TEMP!!!!
-                        await notifyUser(user.id as number, {title: "Your vaccine/vaccination status has changed!", message: "You might want to check it out!"});
+                        // Queue a push to be handled by the push scheduler 
+                        PushScheduler.enqueue(user.id as number, {title: "Your vaccine/vaccination status has changed!", message: "You might want to check it out!"})
                     }
                 })
                 logger.log(`Committed changes to ${request.body.data.length} people`)
