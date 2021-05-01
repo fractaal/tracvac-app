@@ -3,6 +3,7 @@
   "version": "1.5.0",
   "description": "Vaccine tracking application",
   "scripts": {
+    "build": "node build.js",
     "start": "cd server && yarn start"
   },
   "repository": "https://github.com/fractaal/tracvac-app.git",
