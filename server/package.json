@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "distributable-build": "pkg package.json -t node14-win",
-    "build": "tsc",
+    "build": "yarn compile && yarn distributable-build",
+    "compile": "tsc && cd ../client && quasar build -m pwa && cd ../admin && quasar build -m spa",
     "start": "node dist/cluster",
     "generate-models": "objection-generator generate ./objection-generator/schema.yaml ./src/database",
     "generate-migrations": "objection-generator knex ./objection-generator/schema.yaml ./tmp_migrations",
