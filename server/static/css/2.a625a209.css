@@ -1,1 +1,0 @@
-.sticky{height:700px}.sticky .q-table__bottom,.sticky .q-table__top,.sticky thead tr:first-child th{background-color:#fff}.sticky thead tr th{position:-webkit-sticky;position:sticky;z-index:1}.sticky thead tr:first-child th{top:0}.sticky.q-table--loading thead tr:last-child th{top:48px}
