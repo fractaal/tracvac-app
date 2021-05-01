@@ -4,7 +4,7 @@
   "description": "Vaccine tracking application",
   "scripts": {
     "build": "node build.js",
-    "heroku-postbuild": "bash heroku-build.sh",
+    "heroku-postbuild": "bash build.sh",
     "start": "cd server && yarn start"
   },
   "repository": "https://github.com/fractaal/tracvac-app.git",
