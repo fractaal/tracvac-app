@@ -5,6 +5,9 @@ index.exe
 hestia-backend.exe
 tracvac-server.exe
 
+app
+static
+
 objection-generator/*
 !objection-generator/schema.yaml
 
