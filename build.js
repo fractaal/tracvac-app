@@ -12,9 +12,6 @@ const cmd = command => {
 */
 
 const cmd = (command) => {
-  try {
-    console.log(execSync('echo $PWD', {encoding: "utf-8"}));
-  } catch(err) { }
   return new Promise((resolve, reject) => {
     const thing = exec(command, (err, stdout) => {
       if (err) reject(err); else resolve(stdout)
