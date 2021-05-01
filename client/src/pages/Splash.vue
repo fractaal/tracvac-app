@@ -10,12 +10,6 @@
 import Vue from 'vue'
 
 export default Vue.extend({
-  name: 'Splash',
-  created () {
-    if (window.StatusBar && window.NavigationBar) {
-      StatusBar.styleLightContent()
-      StatusBar.backgroundColorByHexString('#1e3a8a')
-    }
-  }
+  name: 'Splash'
 })
 </script>

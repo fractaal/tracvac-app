@@ -29,12 +29,6 @@ export default Vue.extend({
       address: ''
     }
   },
-  created () {
-    if (window.StatusBar) {
-      StatusBar.backgroundColorByHexString('#fff')
-      StatusBar.styleDefault()
-    }
-  },
   computed: {
     isDisabled: function (): boolean {
       return !this.siteValidator(this.address)
