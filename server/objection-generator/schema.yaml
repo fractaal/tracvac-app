@@ -1,0 +1,12 @@
+models:
+  Notification:
+    tableName: notifications
+    jsonSchema:
+      required: ['title', 'content']
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        content:
+          type: string
