@@ -1,5 +1,6 @@
-const { execSync } = require('child_process')
+const { exec, execSync } = require('child_process')
 
+/*
 const cmd = command => {
   try {
     console.log(execSync(command, {encoding: "utf-8"}).toString())
@@ -8,31 +9,42 @@ const cmd = command => {
     throw new Error("Command failed");
   }
 }
+*/
 
-try {
-  cmd ("quasar -v")
-} catch(err) {
-  installQuasar();
+const cmd = (command) => {
+  return new Promise((resolve, reject) => {
+    const thing = exec(command, (err, stdout) => {
+      if (err) reject(err); else resolve(stdout)
+    })
+    thing.stdout.pipe(process.stdout)
+  })
 }
 
-build();
+(async () => {
+  try {
+    await cmd ("quasar -v")
+  } catch(err) {
+    installQuasar();
+  }
+  build();
+})()
 
-function installQuasar() {
+async function installQuasar() {
   console.log("Installing Quasar ... ")
-  cmd ("yarn global add @quasar/cli")
+  await cmd ("yarn global add @quasar/cli")
 }
 
-function build() {
+async function build() {
   console.log ("Building server software...")
   console.log("Compiling TypeScript")
-  cmd ("cd server && tsc")
+  await cmd ("cd server && tsc")
 
   console.log("Building front end application")
-  cmd("cd client && quasar build -m pwa") 
+  await cmd("cd client && quasar build -m pwa") 
   
   console.log("Building administrative interface")
-  cmd("cd admin && quasar build -m spa")
+  await cmd("cd admin && quasar build -m spa")
   
   console.log("Packaging into executable...")
-  cmd ("yarn distributable-build") 
+  await cmd ("cd server && yarn distributable-build") 
 }
