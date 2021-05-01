@@ -22,17 +22,29 @@ const cmd = (command) => {
 
 (async () => {
   try {
+    await cmd ("yarn -v")
+  } catch(err) {
+    console.log("Installing Yarn...")
+    await cmd ("npm install --global yarn")
+  }
+
+  try {
+    await cmd ("tsc -v")
+  } catch(err) {
+    console.log("Installing TypeScript Compiler...")
+    await cmd ("yarn global add typescript")
+  }
+
+  try {
     await cmd ("quasar -v")
   } catch(err) {
-    installQuasar();
+    console.log("Installing Quasar ... ")
+    await cmd ("yarn global add @quasar/cli")
   }
-  build();
-})()
 
-async function installQuasar() {
-  console.log("Installing Quasar ... ")
-  await cmd ("yarn global add @quasar/cli")
-}
+  build();
+  
+})()
 
 async function build() {
   console.log ("Building server software...")
