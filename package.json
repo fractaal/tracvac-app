@@ -4,7 +4,7 @@
   "description": "Vaccine tracking application",
   "scripts": {
     "build": "node build.js",
-    "heroku-postbuild": "npm install --global yarn && yarn global add typescript && yarn global add @quasar/cli && cd client && yarn install && quasar build -m pwa && cd ../server && yarn install && tsc && cd ../admin && yarn install && quasar build",
+    "heroku-postbuild": "./heroku-build.sh",
     "start": "cd server && yarn start"
   },
   "repository": "https://github.com/fractaal/tracvac-app.git",
