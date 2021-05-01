@@ -42,9 +42,19 @@ const cmd = (command) => {
     await cmd ("yarn global add @quasar/cli")
   }
 
+  install();
   build();
-  
+
 })()
+
+async function install() {
+  console.log("Installing dependencies for client...")
+  await cmd ("cd client && yarn install")
+  console.log("Installing dependencies for server...")
+  await cmd ("cd server && yarn install")
+  console.log("Installing dependencies for admin...")
+  await cmd ("cd admin && yarn install")
+}
 
 async function build() {
   console.log ("Building server software...")
