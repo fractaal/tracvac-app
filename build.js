@@ -1,6 +1,13 @@
-import { execSync } from 'child_process'
+const { execSync } = require('child_process')
 
-const cmd = command => execSync(command, (err, stdout, stderr) => console.log(err, stdout, stderr));
+const cmd = command => {
+  try {
+    console.log(execSync(command, {encoding: "utf-8"}).toString())
+  } catch(err) {
+    err.output.map(val => console.error(val))
+    throw new Error("Command failed");
+  }
+}
 
 try {
   cmd ("quasar -v")
@@ -17,18 +24,14 @@ function installQuasar() {
 
 function build() {
   console.log ("Building server software...")
-  cmd ("cd server")
-  
   console.log("Compiling TypeScript")
-  cmd ("tsc")
+  cmd ("cd server && tsc")
 
   console.log("Building front end application")
-  cmd("cd ../client")
-  cmd("quasar build -m pwa") 
+  cmd("cd client && quasar build -m pwa") 
   
   console.log("Building administrative interface")
-  cmd("cd ../admin")
-  cmd("quasar build -m spa")
+  cmd("cd admin && quasar build -m spa")
   
   console.log("Packaging into executable...")
   cmd ("yarn distributable-build") 
