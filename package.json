@@ -3,7 +3,6 @@
   "version": "1.5.0",
   "description": "Vaccine tracking application",
   "scripts": {
-    "install": "cd client && yarn install && cd ../server && yarn install && cd ../admin && yarn install",
     "build": "node build.js",
     "start": "cd server && yarn start"
   },
