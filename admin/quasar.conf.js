@@ -49,7 +49,7 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v1.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
-      distDir: '../hestia-backend/static',
+      distDir: '../server/static',
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
       // transpile: false,
