@@ -42,8 +42,8 @@ const cmd = (command) => {
     await cmd ("yarn global add @quasar/cli")
   }
 
-  install();
-  build();
+  await install();
+  await build();
 
 })()
 
