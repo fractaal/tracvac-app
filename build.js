@@ -49,11 +49,11 @@ const cmd = (command) => {
 
 async function install() {
   console.log("Installing dependencies for client...")
-  await cmd ("cd client && yarn install")
+  await cmd ("cd client && yarn install --production=false")
   console.log("Installing dependencies for server...")
-  await cmd ("cd server && yarn install")
+  await cmd ("cd server && yarn install --production=false")
   console.log("Installing dependencies for admin...")
-  await cmd ("cd admin && yarn install")
+  await cmd ("cd admin && yarn install --production=false")
 }
 
 async function build() {
