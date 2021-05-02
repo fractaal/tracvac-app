@@ -35,7 +35,7 @@
           </q-item-section>
         </q-item>
         <div class="text-subtitle2 mt-4 font-bold m-0 p-0 text-gray-500">
-          APP VERSION {{require('../../package.json').version}}
+          APP VERSION {{require('../../../package.json').version}}
         </div>
       </q-list>
     </div>
