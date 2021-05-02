@@ -19,7 +19,7 @@
           <q-item-section>
             <q-item-label class="mt-2">
               <b> Change Password </b>
-              <p> Old password compromised, or you has it just outgrown you? </p>
+              <p> Easily change your password here. <br/> You'll need to input your old password to do so first. </p>
             </q-item-label>
           </q-item-section>
         </q-item>
