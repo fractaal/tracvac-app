@@ -7,7 +7,7 @@ import { routerInstance } from 'boot/router'
 import { menuLayout } from 'src/api/menu'
 
 export const api = axios.create({
-  timeout: 5000,
+  timeout: 60000,
   baseURL: '',
   validateStatus (status) {
     return status < 500
