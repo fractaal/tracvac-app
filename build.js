@@ -36,6 +36,13 @@ const cmd = (command) => {
   }
 
   try {
+    await cmd ("pkg -v")
+  } catch(err) {
+    console.log("Installing pkg (Executable bundler)")
+    await cmd("yarn global add pkg")
+  }
+
+  try {
     await cmd ("quasar -v")
   } catch(err) {
     console.log("Installing Quasar ... ")
