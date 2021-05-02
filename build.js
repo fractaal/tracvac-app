@@ -1,15 +1,9 @@
 const { exec, execSync } = require('child_process')
+const args = process.argv.slice(2);
 
-/*
-const cmd = command => {
-  try {
-    console.log(execSync(command, {encoding: "utf-8"}).toString())
-  } catch(err) {
-    err.output.map(val => console.error(val))
-    throw new Error("Command failed");
-  }
+function herokuFlagIsPresent() {
+  return args[0] === '--heroku'
 }
-*/
 
 const cmd = (command) => {
   return new Promise((resolve, reject) => {
@@ -35,6 +29,7 @@ const cmd = (command) => {
     await cmd ("yarn global add typescript")
   }
 
+  if (!herokuFlagIsPresent())
   try {
     await cmd ("pkg -v")
   } catch(err) {
@@ -74,6 +69,8 @@ async function build() {
   console.log("Building administrative interface")
   await cmd("cd admin && quasar build -m spa")
   
-  console.log("Packaging into executable...")
-  await cmd ("cd server && yarn distributable-build") 
+  if (!herokuFlagIsPresent()) {
+    console.log("Packaging into executable...")
+    await cmd ("cd server && yarn distributable-build") 
+  }
 }
