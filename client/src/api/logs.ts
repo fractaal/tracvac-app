@@ -80,3 +80,20 @@ export async function postLog (logData: Log) {
     return false
   }
 }
+
+export async function deleteLog (id: number) {
+  try {
+    const response = await (await api.delete(`/log/${id}`)).data
+
+    if (response.result) {
+      notify.positive('Log deleted!')
+      return true
+    } else {
+      notify.negative(`Log delete failed: ${response.message}`)
+      return false
+    }
+  } catch (err) {
+    notify.negative(`Log delete failed: ${err}`)
+    return false
+  }
+}
