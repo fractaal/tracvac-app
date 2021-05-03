@@ -13,7 +13,7 @@
       <div>
         <load-more @load="onLoad" ref="list">
           <transition-group name="transition" mode="out-in">
-            <log-card v-for="log in store.logs" :log="log" :key="log.createdAt"/>
+            <log-card v-for="log in store.logs" :log="log" :key="log.createdAt" @delete="onDelete"/>
           </transition-group>
         </load-more>
       </div>
@@ -41,11 +41,17 @@ export default (Vue as VueConstructor<Vue & { $refs: {list: InstanceType<typeof 
     }
   },
   activated () {
-    resetLogs()
-    this.$refs.list.reset()
-    this.$refs.list.load()
+    this.reset()
   },
   methods: {
+    onDelete () {
+      this.reset()
+    },
+    reset () {
+      resetLogs()
+      this.$refs.list.reset()
+      this.$refs.list.load()
+    },
     async onLoad (index: number, done: Function) {
       this.isLoading = true
       const [success, isEnd] = await getLogs(index)
