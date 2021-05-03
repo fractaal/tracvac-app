@@ -30,6 +30,19 @@ app.get('/log/:index', async (request, response, next) => {
   } catch (err) { next(err); }
 })
 
+app.delete('/log/:id', async (request, response, next) => {
+  try {
+    const numDeleted = await LogModel.query().deleteById(request.params.id)
+    if (numDeleted === 1) {
+      logger.log('Deleted log', request.params.id, numDeleted)
+      response.json({ result: true, message: "Deleted log!" })
+    } else {
+      logger.log('Not deleting nonexistent log', request.params.id, numDeleted)
+      response.status(400).json({ result: false, message: "Log not found in database! "})
+    }
+  } catch(err) { next(err) }
+})
+
 app.post('/log', async (request, response, next) => {
   try {
 
