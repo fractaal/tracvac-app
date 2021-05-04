@@ -2,15 +2,27 @@
   <div class="border border-solid border-gray-200 mb-5 p-4 rounded-lg">
     <div class="flex flex-row items-center justify-between">
       <p class="font-bold">{{formattedDate}}</p>
-      <p>{{formattedTime}}</p>
+      <p class="m-0 pr-2">{{formattedTime}}</p>
     </div>
     <p class="text-sm"><i>{{previewString}}</i></p>
+    <div class="flex flex-row items-center justify-end">
+      <q-btn
+        icon="delete"
+        size="12px"
+        color="black"
+        flat
+        class="py-2"
+        :loading="isProcessingDelete"
+        @click="deleteLog"
+        label="Delete"
+        />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { format } from 'date-fns'
-import { Log, displayNameMappings } from '../api/logs'
+import { Log, displayNameMappings, deleteLog } from '../api/logs'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -25,7 +37,8 @@ export default Vue.extend({
     return {
       formattedDate: '',
       formattedTime: '',
-      previewString: ''
+      previewString: '',
+      isProcessingDelete: false
     }
   },
   created () {
@@ -55,6 +68,16 @@ export default Vue.extend({
         this.previewString += value
       }
     })
+  },
+
+  methods: {
+    async deleteLog () {
+      this.isProcessingDelete = true
+      if (await deleteLog(this.log.id)) {
+        this.$emit('delete')
+      }
+      this.isProcessingDelete = false
+    }
   }
 })
 </script>
