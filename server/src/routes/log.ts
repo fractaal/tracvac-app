@@ -32,7 +32,7 @@ app.get('/log/:index', async (request, response, next) => {
 
 app.delete('/log/:id', async (request, response, next) => {
   try {
-    const numDeleted = await LogModel.query().deleteById(request.params.id)
+    const numDeleted = await LogModel.query().where({userId: request.tokenData.userId, id: request.params.id}).delete()
     if (numDeleted === 1) {
       logger.log('Deleted log', request.params.id, numDeleted)
       response.json({ result: true, message: "Deleted log!" })
@@ -45,7 +45,6 @@ app.delete('/log/:id', async (request, response, next) => {
 
 app.post('/log', async (request, response, next) => {
   try {
-
     // Disallow post if no symptoms
     try {
       if (!Object.values(request.body).reduce((acc, curr) => curr || acc)) {
