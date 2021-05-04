@@ -122,10 +122,15 @@ app.post('/changePassword', async (req, res) => {
     const match = await UserModel.query().findById(req.tokenData.userId);
     if (req.body.oldPassword && req.body.newPassword) {
       if (await bcrypt.compare(req.body.oldPassword, match.password)) {
-        await UserModel.query().patch({password: await bcrypt.hash(req.body.newPassword, await bcrypt.genSalt())});
+        // Fix: Don't update password for everyone
+        await UserModel.query()
+          .where({id: req.tokenData.userId})
+          .patch({password: await bcrypt.hash(req.body.newPassword, await bcrypt.genSalt())});
+        
         logger.log(`User ${match.username} succeeded in a password change.`);
         res.json({result: true, message: 'Password changed!'});
         return;
+
       } else {
         logger.log(`User ${match.username} requested password change, but did not input the correct password.`);
         res.status(400).json({result: false, message: 'Password incorrect!'});
