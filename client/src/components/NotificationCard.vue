@@ -5,7 +5,7 @@
     <p class="text-h6 m-0 font-bold">{{notification.title}}</p>
     <p class="m-0"><i>{{formattedDate}}</i></p>
     <hr>
-    <p class="m-0" v-html="notification.content"></p>
+    <p class="m-0" v-html="sanitizeHtml(notification.content)"></p>
   </div>
 </template>
 
@@ -13,6 +13,7 @@
 import { Notification } from 'src/api/notification'
 import Vue from 'vue'
 import { format, formatDistance } from 'date-fns'
+import sanitizeHtml from 'sanitize-html'
 
 export default Vue.extend({
   name: 'NotificationCard',
@@ -29,8 +30,8 @@ export default Vue.extend({
       type: Object as () => Notification,
       required: true
     }
-  }
-
+  },
+  methods: { sanitizeHtml }
 })
 </script>
 
