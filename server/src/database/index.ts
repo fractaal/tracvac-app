@@ -10,17 +10,19 @@ logger.log('Initializing SQL query builder...')
 
 const dbConfig = getDbConfig();
 
+const connection = typeof dbConfig === 'string' ? dbConfig : {
+  host     : dbConfig.host,
+  user     : dbConfig.user,
+  port     : dbConfig.port,
+  password : dbConfig.password,
+  database : dbConfig.database,
+  ssl      : dbConfig.useSSL ? { rejectUnauthorized: false } : false,
+}
+
 export const knex = Knex({
   client: 'pg',
   useNullAsDefault: true,
-  connection: {
-    host     : dbConfig.host,
-    user     : dbConfig.user,
-    port     : dbConfig.port,
-    password : dbConfig.password,
-    database : dbConfig.database,
-    ssl      : dbConfig.useSSL ? { rejectUnauthorized: false } : false,
-  },
+  connection,
   pool: {
     max: 5,
   }
