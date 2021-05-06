@@ -250,5 +250,19 @@ export const migrations = [
     down: async (knex) => {
       await knex.schema.dropTable('pushSubscriptions');
     }
+  },
+  {
+    version: 6,
+    description: 'Add lastVaccinationTime field to users table',
+    up: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.dateTime('lastVaccinationTime')
+      })
+    },
+    down: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.dropColumn('lastVaccinationTime')
+      })
+    }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
