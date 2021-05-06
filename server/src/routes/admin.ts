@@ -116,6 +116,13 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             try {
                 await UserModel.transaction(async (trx) => {
                     for (const user of request.body.data as Partial<UserModel>[]) {
+
+                        // Updating lastVaccinationTime
+                        const oldUser = await UserModel.query(trx).where({ id: user.id }).select('isVaccinated')
+                        if (!oldUser[0].isVaccinated && user.isVaccinated) {
+                            await UserModel.query(trx).where({ id: user.id }).patch({lastVaccinationTime: new Date().toUTCString()})
+                        }
+
                         await UserModel.query(trx).where({ id: user.id }).patch({
                             isVaccinated: !!user.isVaccinated,
                             vaccineManufacturer: user.vaccineManufacturer,
