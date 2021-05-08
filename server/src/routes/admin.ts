@@ -12,6 +12,7 @@ import expressBasicAuth from "express-basic-auth"
 import ExcelJS from 'exceljs'
 import registrationFormTemplate from "../database/templates/registrationFormTemplate"
 import * as PushScheduler from '../push-scheduler'
+import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 
 const logger = Logger("Administrator Route");
 
@@ -116,6 +117,13 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             try {
                 await UserModel.transaction(async (trx) => {
                     for (const user of request.body.data as Partial<UserModel>[]) {
+
+                        // Updating lastVaccinationTime
+                        const oldUser = await UserModel.query(trx).where({ id: user.id }).select('isVaccinated')
+                        if (!oldUser[0].isVaccinated && user.isVaccinated) {
+                            await UserModel.query(trx).where({ id: user.id }).patch({lastVaccinationTime: new Date().toUTCString()})
+                        }
+
                         await UserModel.query(trx).where({ id: user.id }).patch({
                             isVaccinated: !!user.isVaccinated,
                             vaccineManufacturer: user.vaccineManufacturer,
@@ -361,5 +369,108 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             logger.error(`Error occurred while trying to get amount of users: ${err.stack}`)
             res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
         }
+    })
+
+    app.get('/admin/insight', async (req, res) => {
+        const totalUserCount = parseInt((await UserModel.query()
+            .select()
+            .count('*') as any[])[0].count)
+
+        const logsAfterVaccination = await LogModel.query()
+            .select()
+            .count('*', { as: 'count'})
+            .from('logs')
+            .where('logs.createdAt', '>', UserModel.query().select('lastVaccinationTime').where(raw('id = "userId"')))
+            .joinRelated('users')
+            .select('firstName', 'middleName', 'lastName', 'users.id')
+            .orderBy('count', 'desc')
+            .groupBy('firstName', 'middleName', 'lastName', 'users.id')
+            .where(raw('users.id = "userId"'))
+        
+        const professions: Record<string,any> = {};
+        (await UserModel.query()
+            .select('profession')
+            .count('profession')
+            .groupBy('profession')
+            .orderBy('profession', 'desc')
+        ).forEach((val: any) => professions[val.profession] = val.count)
+            
+
+        const sexes: Record<string,any> = {}; 
+        (await UserModel.query()
+            .select('sex')
+            .count('sex')
+            .groupBy('sex')
+        ).forEach((val: any) => sexes[val.sex] = val.count)
+
+        const pregnancies: Record<string,any> = {}; 
+        (await UserModel.query()
+            .select('pregnancyStatus')
+            .count('pregnancyStatus')
+            .groupBy('pregnancyStatus')
+        ).forEach((val: any) => pregnancies[val.pregnancyStatus === true ? "Yes" : "No"] = val.count)
+
+        const usersWithNotifsEnabled = parseInt((await PushSubscriptionModel.query()
+            .countDistinct("userId") as any[])[0].count)
+        
+        const vaccinationStatuses: Record<string,any> = {};
+        (await UserModel.query()
+            .select('isVaccinated')
+            .count('isVaccinated')
+            .groupBy('isVaccinated')
+        ).forEach((val: any) => vaccinationStatuses[val.isVaccinated === true ? "Yes" : "No"] = val.count)
+        
+        const vaccineStatuses: Record<string,any> = {};
+        (await UserModel.query()
+            .select('isVaccineReady')
+            .count('isVaccineReady')
+            .groupBy('isVaccineReady')
+        ).forEach((val: any) => vaccineStatuses[val.isVaccineReady] = val.count)
+
+        const vaccineManufacturers: Record<string,any> = {};
+        (await UserModel.query()
+            .select('vaccineManufacturer')
+            .count('vaccineManufacturer')
+            .groupBy('vaccineManufacturer')
+        ).forEach((val: any) => vaccineManufacturers[val.vaccineManufacturer] = val.count)
+
+        const alerts: {title: string; message?: string; type: string;}[] = []
+
+        alerts.push({title: `${totalUserCount} users registered`, type: 'info'})
+
+        if (totalUserCount < 30) {
+            alerts.push({
+                title: 'Insight data may not be accurate', 
+                type: 'warn',
+                message: 
+                `Only ${totalUserCount} samples are available.<br/>The more users register, the more representative this data is of the population.`
+            })
+        }
+        
+        const percentageNotifsEnabled = (usersWithNotifsEnabled / totalUserCount) * 100
+        if (percentageNotifsEnabled < 65) {
+            alerts.push({
+                title: `Only ${percentageNotifsEnabled.toFixed(2)}% have notifications enabled`,
+                type: 'warn',
+                message: `Information dissemination may suffer.`
+            })
+        }
+
+        res.json({
+            alerts,
+            miscItems: {
+                totalUserCount,
+                logsAfterVaccination,
+                usersWithNotifsEnabled, 
+            },
+            chartItems: {
+                "Professions": professions, 
+                "Sexes": sexes, 
+                "Pregnancies": pregnancies, 
+                "Vaccination Statuses": vaccinationStatuses, 
+                "Vaccine Statuses": vaccineStatuses,
+                "Vaccine Manufacturers": vaccineManufacturers
+            }
+        })
     })
 })();

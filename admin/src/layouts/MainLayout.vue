@@ -42,6 +42,16 @@
             <i class="text-sm">Logs users have created.</i>
           </q-item-section>
         </q-item>
+        <q-item clickable v-ripple class="p-12" @click="$router.push('/insight')">
+          <q-item-section avatar>
+            <q-icon color="primary" name="fas fa-lightbulb" size="lg" />
+          </q-item-section>
+
+          <q-item-section class="text-lg">
+            <b>Insight</b>
+            <i class="text-sm">Data analytics.</i>
+          </q-item-section>
+        </q-item>
         <q-item clickable v-ripple class="p-12" @click="$router.push('/config')">
           <q-item-section avatar>
             <q-icon color="primary" name="settings" size="lg"/>

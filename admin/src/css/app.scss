@@ -35,3 +35,16 @@
   transform: scale(1);
 }
 
+.insight-columns {
+  columns: 3;
+}
+
+.insight-columns>* {
+  break-inside: avoid;
+  break-after: avoid;
+  break-before: avoid;
+  page-break-inside: avoid;     
+  page-break-after: avoid;     
+  page-break-before: avoid;
+  margin-bottom: 15px;
+}

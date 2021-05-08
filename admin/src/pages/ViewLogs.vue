@@ -8,7 +8,7 @@
       <div>
         <div v-if='logs.length !== 0'>
           <div>
-            <q-card class='mb-2 shadow-3' v-for='log in logs' :key='log.createdAt'>
+            <q-card class='mb-2 rounded-2xl shadow-xl border-3 border-gray-300 border-solid' v-for='log in logs' :key='log.createdAt'>
               <q-card-section>
                 <div class='font-bold'>
                   Created {{formatDateAndTime(log.createdAt).formatted}}
@@ -62,7 +62,7 @@ const displayNameMappings = {
 } as const
 
 export default Vue.extend({
-  name: "ViewLogs",
+  name: 'ViewLogs',
   components: { EmptyPlaceholder, UserInfoCard },
   activated() {
     this.activeUser = null;
@@ -82,7 +82,7 @@ export default Vue.extend({
     formatDateAndTime(dateString: string) {
       const date = new Date(dateString);
       return {
-        formatted: format(date, "MMMM dd, yyyy - hh:mmaaa"),
+        formatted: format(date, 'MMMM dd, yyyy - hh:mmaaa'),
         formattedDistance: formatDistanceToNow(date, {addSuffix: true})
       }
     },
