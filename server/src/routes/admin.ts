@@ -378,11 +378,12 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 
         const logsAfterVaccination = await LogModel.query()
             .select()
-            .count('*')
+            .count('*', { as: 'count'})
             .from('logs')
             .where('logs.createdAt', '>', UserModel.query().select('lastVaccinationTime').where(raw('id = "userId"')))
             .joinRelated('users')
             .select('firstName', 'middleName', 'lastName', 'users.id')
+            .orderBy('count', 'desc')
             .groupBy('firstName', 'middleName', 'lastName', 'users.id')
             .where(raw('users.id = "userId"'))
         
@@ -407,7 +408,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             .select('pregnancyStatus')
             .count('pregnancyStatus')
             .groupBy('pregnancyStatus')
-        ).forEach((val: any) => pregnancies[val.pregnancyStatus] = val.count)
+        ).forEach((val: any) => pregnancies[val.pregnancyStatus === true ? "Yes" : "No"] = val.count)
 
         const usersWithNotifsEnabled = parseInt((await PushSubscriptionModel.query()
             .countDistinct("userId") as any[])[0].count)
@@ -417,7 +418,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             .select('isVaccinated')
             .count('isVaccinated')
             .groupBy('isVaccinated')
-        ).forEach((val: any) => vaccinationStatuses[val.isVaccinated] = val.count)
+        ).forEach((val: any) => vaccinationStatuses[val.isVaccinated === true ? "Yes" : "No"] = val.count)
         
         const vaccineStatuses: Record<string,any> = {};
         (await UserModel.query()
@@ -463,12 +464,12 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                 usersWithNotifsEnabled, 
             },
             chartItems: {
-                professions, 
-                sexes, 
-                pregnancies, 
-                vaccinationStatuses, 
-                vaccineStatuses,
-                vaccineManufacturers
+                "Professions": professions, 
+                "Sexes": sexes, 
+                "Pregnancies": pregnancies, 
+                "Vaccination Statuses": vaccinationStatuses, 
+                "Vaccine Statuses": vaccineStatuses,
+                "Vaccine Manufacturers": vaccineManufacturers
             }
         })
     })
