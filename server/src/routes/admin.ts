@@ -433,15 +433,14 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             .groupBy('vaccineManufacturer')
         ).forEach((val: any) => vaccineManufacturers[val.vaccineManufacturer] = val.count)
 
-        const info = []
-        const alerts = []
-        const errors: any[] = []
+        const alerts: {title: string; message?: string; type: string;}[] = []
 
-        info.push({title: `${totalUserCount} users registered`})
+        alerts.push({title: `${totalUserCount} users registered`, type: 'info'})
 
         if (totalUserCount < 30) {
             alerts.push({
                 title: 'Insight data may not be accurate', 
+                type: 'warn',
                 message: 
                 `Only ${totalUserCount} samples are available.<br/>The more users register, the more representative this data is of the population.`
             })
@@ -451,14 +450,13 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         if (percentageNotifsEnabled < 65) {
             alerts.push({
                 title: `Only ${percentageNotifsEnabled.toFixed(2)}% have notifications enabled`,
+                type: 'warn',
                 message: `Information dissemination may suffer.`
             })
         }
 
         res.json({
-            info,
             alerts,
-            errors,
             miscItems: {
                 totalUserCount,
                 logsAfterVaccination,
