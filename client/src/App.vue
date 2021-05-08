@@ -19,6 +19,9 @@ export default Vue.extend({
     }
   },
   async created () {
+    // Set LoadingBar defaults
+    this.$q.loadingBar.setDefaults({ size: '10px', color: 'blue' })
+
     // Show splash screen
     await this.$router.push('/')
 

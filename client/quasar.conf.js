@@ -123,7 +123,8 @@ module.exports = configure(function (ctx) {
         'SessionStorage',
         'Dialog',
         'Notify',
-        'Loading'
+        'Loading',
+        'LoadingBar'
       ]
     },
 
