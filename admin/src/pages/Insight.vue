@@ -50,13 +50,14 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue'
 import store from 'src/api/store'
-import NotificationCard from 'src/components/NotificationCard.vue';
-import VueApexChart from 'vue-apexcharts';
+import NotificationCard from 'src/components/NotificationCard.vue'
+import VueApexChart from 'vue-apexcharts'
 
 const timeout = 5
 
-export default {
+export default Vue.extend({
   components: { NotificationCard, VueApexChart },
   name: 'Insight',
   created() {
@@ -88,7 +89,7 @@ export default {
       this.isLoading = false
     }
   },
-};
+});
 </script>
 
 <style lang="scss" scoped></style>

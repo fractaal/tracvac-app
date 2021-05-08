@@ -9,11 +9,13 @@
 </template>
 
 <script lang="ts">
-export default {
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'NotificationCard',
   props: ['title', 'type'],
   computed: {
-    icon () : string {
+    icon: function (): string {
       if (this.type === 'info') {
         return 'fas fa-info'
       } else if (this.type === 'warn') {
@@ -24,7 +26,7 @@ export default {
         return 'fas fa-tag'
       }
     },
-    style (): string {
+    style: function (): string {
       if (this.type === 'info') {
         return 'text-black bg-white border-gray-200'
       } else if (this.type === 'warn') {
@@ -34,7 +36,7 @@ export default {
       } else return ''
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped></style>
