@@ -8,5 +8,8 @@ import Vue from 'vue';
 
 export default Vue.extend({
   name: 'App',
+  created() {
+    this.$q.loadingBar.setDefaults({size: '10px'})
+  }
 });
 </script>
