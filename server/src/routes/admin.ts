@@ -12,6 +12,7 @@ import expressBasicAuth from "express-basic-auth"
 import ExcelJS from 'exceljs'
 import registrationFormTemplate from "../database/templates/registrationFormTemplate"
 import * as PushScheduler from '../push-scheduler'
+import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 
 const logger = Logger("Administrator Route");
 
@@ -368,5 +369,53 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             logger.error(`Error occurred while trying to get amount of users: ${err.stack}`)
             res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
         }
+    })
+
+    app.get('/admin/insight', async (req, res) => {
+        const logsAfterVaccination = await LogModel.query()
+            .select('userId')
+            .count('*')
+            .from('logs')
+            .where('createdAt', '>', UserModel.query().select('lastVaccinationTime').where(raw('id = "userId"')))
+            .groupBy('userId')
+        
+        const professions = await UserModel.query()
+            .select('profession')
+            .count('profession')
+            .groupBy('profession')
+            .orderBy('profession', 'desc')
+
+        const sexes = await UserModel.query()
+            .select('sex')
+            .count('sex')
+            .groupBy('sex')
+        
+        const pregnancies = await UserModel.query()
+            .select('pregnancyStatus')
+            .count('pregnancyStatus')
+            .groupBy('pregnancyStatus')
+
+        const usersWithNotifsEnabled = await PushSubscriptionModel.query()
+            .distinct("userId")
+        
+        const vaccinationStatuses = await UserModel.query()
+            .select('isVaccinated')
+            .count('isVaccinated')
+            .groupBy('isVaccinated')
+        
+        const vaccineStatuses = await UserModel.query()
+            .select('isVaccineReady')
+            .count('isVaccineReady')
+            .groupBy('isVaccineReady')
+        
+        res.json({
+            logsAfterVaccination, 
+            professions, 
+            sexes, 
+            usersWithNotifsEnabled, 
+            pregnancies, 
+            vaccinationStatuses, 
+            vaccineStatuses
+        })
     })
 })();
