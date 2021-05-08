@@ -372,50 +372,106 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
     })
 
     app.get('/admin/insight', async (req, res) => {
+        const totalUserCount = parseInt((await UserModel.query()
+            .select()
+            .count('*') as any[])[0].count)
+
         const logsAfterVaccination = await LogModel.query()
-            .select('userId')
+            .select()
             .count('*')
             .from('logs')
-            .where('createdAt', '>', UserModel.query().select('lastVaccinationTime').where(raw('id = "userId"')))
-            .groupBy('userId')
+            .where('logs.createdAt', '>', UserModel.query().select('lastVaccinationTime').where(raw('id = "userId"')))
+            .joinRelated('users')
+            .select('firstName', 'middleName', 'lastName', 'users.id')
+            .groupBy('firstName', 'middleName', 'lastName', 'users.id')
+            .where(raw('users.id = "userId"'))
         
-        const professions = await UserModel.query()
+        const professions: Record<string,any> = {};
+        (await UserModel.query()
             .select('profession')
             .count('profession')
             .groupBy('profession')
             .orderBy('profession', 'desc')
+        ).forEach((val: any) => professions[val.profession] = val.count)
+            
 
-        const sexes = await UserModel.query()
+        const sexes: Record<string,any> = {}; 
+        (await UserModel.query()
             .select('sex')
             .count('sex')
             .groupBy('sex')
-        
-        const pregnancies = await UserModel.query()
+        ).forEach((val: any) => sexes[val.sex] = val.count)
+
+        const pregnancies: Record<string,any> = {}; 
+        (await UserModel.query()
             .select('pregnancyStatus')
             .count('pregnancyStatus')
             .groupBy('pregnancyStatus')
+        ).forEach((val: any) => pregnancies[val.pregnancyStatus] = val.count)
 
-        const usersWithNotifsEnabled = await PushSubscriptionModel.query()
-            .distinct("userId")
+        const usersWithNotifsEnabled = parseInt((await PushSubscriptionModel.query()
+            .countDistinct("userId") as any[])[0].count)
         
-        const vaccinationStatuses = await UserModel.query()
+        const vaccinationStatuses: Record<string,any> = {};
+        (await UserModel.query()
             .select('isVaccinated')
             .count('isVaccinated')
             .groupBy('isVaccinated')
+        ).forEach((val: any) => vaccinationStatuses[val.isVaccinated] = val.count)
         
-        const vaccineStatuses = await UserModel.query()
+        const vaccineStatuses: Record<string,any> = {};
+        (await UserModel.query()
             .select('isVaccineReady')
             .count('isVaccineReady')
             .groupBy('isVaccineReady')
+        ).forEach((val: any) => vaccineStatuses[val.isVaccineReady] = val.count)
+
+        const vaccineManufacturers: Record<string,any> = {};
+        (await UserModel.query()
+            .select('vaccineManufacturer')
+            .count('vaccineManufacturer')
+            .groupBy('vaccineManufacturer')
+        ).forEach((val: any) => vaccineManufacturers[val.vaccineManufacturer] = val.count)
+
+        const info = []
+        const alerts = []
+        const errors: any[] = []
+
+        info.push({title: `${totalUserCount} users registered`})
+
+        if (totalUserCount < 30) {
+            alerts.push({
+                title: 'Insight data may not be accurate', 
+                message: 
+                `Only ${totalUserCount} samples are available.<br/>The more users register, the more representative this data is of the population.`
+            })
+        }
         
+        const percentageNotifsEnabled = (usersWithNotifsEnabled / totalUserCount) * 100
+        if (percentageNotifsEnabled < 65) {
+            alerts.push({
+                title: `Only ${percentageNotifsEnabled.toFixed(2)}% have notifications enabled`,
+                message: `Information dissemination may suffer.`
+            })
+        }
+
         res.json({
-            logsAfterVaccination, 
-            professions, 
-            sexes, 
-            usersWithNotifsEnabled, 
-            pregnancies, 
-            vaccinationStatuses, 
-            vaccineStatuses
+            info,
+            alerts,
+            errors,
+            miscItems: {
+                totalUserCount,
+                logsAfterVaccination,
+                usersWithNotifsEnabled, 
+            },
+            chartItems: {
+                professions, 
+                sexes, 
+                pregnancies, 
+                vaccinationStatuses, 
+                vaccineStatuses,
+                vaccineManufacturers
+            }
         })
     })
 })();
