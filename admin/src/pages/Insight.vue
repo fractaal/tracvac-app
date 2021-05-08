@@ -1,21 +1,23 @@
 <template>
   <q-page class="p-8">
-    <div class="flex flex-row justify-between items-center">
+    <div class="flex flex-row items-center">
       <div>
         <p class="-my-2">TRACVAC</p>
         <h4 class="m-0 mb-4 font-light">INSIGHT</h4>
       </div>
-      <div>
-        <p class="m-0 p-0" v-if="timeUntilPoll !== 0">Updating data in {{timeUntilPoll}} seconds</p>
+      <div class="ml-4" v-if="isLoading">
+        <p class="m-0">UPDATING...</p>
+        <q-linear-progress indeterminate />
       </div>
     </div>
-    <div class="grid grid-cols-3 grid-rows-3 gap-4 grid-flow-row-dense">
+    <!--<div class="grid grid-cols-3 grid-rows-3 gap-4 grid-flow-row-dense">-->
+    <div class="insight-columns">
       <notification-card 
         v-for="alert in insightData.alerts" 
         :key="alert.title" 
         :title="alert.title" 
         :type="alert.type">
-        <p v-html="alert.message"/>
+        <span v-html="alert.message"/>
       </notification-card>  
       <notification-card 
         title="Some users report symptoms after vaccination" 
@@ -24,8 +26,14 @@
         class="p-4 rounded-md shadow-xl border-2 border-solid">
         <p><b>{{insightData.miscItems.logsAfterVaccination.length}}</b> user(s) are reporting symptoms<br>
         with a total of {{insightData.miscItems.logsAfterVaccination.reduce((acc, curr) => acc + parseInt(curr.count), 0)}} log(s) reported</p>
-        <q-list>
-          <q-item v-for="user in insightData.miscItems.logsAfterVaccination" clickable v-ripple :key="user.id" @click="$router.push(`/view-logs/${user.id}`)">
+        <q-list style="max-height: 250px; overflow-y: scroll;">
+          <q-item 
+            v-for="user in insightData.miscItems.logsAfterVaccination" 
+            class="rounded-xl"
+            clickable 
+            v-ripple 
+            :key="user.id" 
+            @click="$router.push(`/view-logs/${user.id}`)">
             <q-item-section>
               <q-item-label> {{user.firstName}} {{user.middleName}} {{user.lastName}} </q-item-label>
               <q-item-label caption> {{user.count}} log(s) </q-item-label>
@@ -33,19 +41,26 @@
           </q-item>
         </q-list>
       </notification-card>
-      <notification-card v-for="(chartItem, title) in insightData.chartItems" :title="title" :key="title" type="info">
-        <VueApexChart :series="Object.values(chartItem).map(val => parseInt(val))" :options="{chart: {type: 'pie'}, labels: Object.keys(chartItem)}"/>
+      <notification-card v-for="(chartItem, title) in chartItems" :title="title" :key="title" type="info">
+        <VueApexChart :series="chartItem.series" :options="{chart: {type: chartItem.type, fontFamily: 'Red Hat Display'}, labels: chartItem.labels}"/>
       </notification-card>
     </div>
-    <q-inner-loading :showing="isLoading" size="128px"/>
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
-      <q-btn 
-        fab 
-        :label="autoUpdate ? ' AUTOUPDATE ENABLED' : ' AUTOUPDATE DISABLED'" 
-        :icon="autoUpdate ? 'fas fa-check' : 'fas fa-times'"
+      <q-btn
+        class="mr-2"
+        fab
         :color="autoUpdate ? 'primary' : 'red'"
-        @click="autoUpdate = !autoUpdate"/>
+        :label="autoUpdate ? 'AUTO REFRESH ON' : 'AUTO REFRESH OFF'"
+        @click="autoUpdate = !autoUpdate"
+        />  
+      <q-btn
+        fab 
+        icon="sync"
+        color="green"
+        label="REFRESH DATA"
+        @click="poll"/>
     </q-page-sticky>
+    <q-inner-loading :showing="isLoading && Object.keys(insightData).length === 0" size="128px"/>
   </q-page>
 </template>
 
@@ -55,37 +70,40 @@ import store from 'src/api/store'
 import NotificationCard from 'src/components/NotificationCard.vue'
 import VueApexChart from 'vue-apexcharts'
 
-const timeout = 5
-
 export default Vue.extend({
   components: { NotificationCard, VueApexChart },
   name: 'Insight',
   created() {
-    void (async () => {
-      while (true) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        await this.poll()
-        for (this.timeUntilPoll = timeout; this.timeUntilPoll >= 0; this.timeUntilPoll--) {
-          if (!this.autoUpdate) this.timeUntilPoll++;
-          await new Promise(r => setTimeout(r, 1000))
-        }
-      }
-    })();
+    void this.poll()
+    setInterval(() => {if (this.autoUpdate) void this.poll()}, 10000)
   },
   data() {
     return {
+      autoUpdate: true,
       timeUntilPoll: 0,
-      autoUpdate: false,
       store,
       isLoading: false,
-      insightData: {},
+      insightData: {} as Record<string,any>,
+      chartItems: {} as Record<string,any>
     };
   },
   props: {},
   methods: {
     async poll() {
       this.isLoading = true
+
       this.insightData = Object.assign({}, this.insightData, (await this.store.axios.get('/admin/insight')).data)
+
+      if (this.insightData?.chartItems) {
+        for (const item in this.insightData.chartItems) {
+          this.chartItems[item] = {
+            type: 'pie',
+            series: Object.values(this.insightData.chartItems[item]).map((val) => parseInt(val as string)),
+            labels: Object.keys(this.insightData.chartItems[item])
+          }
+        }
+      }
+
       this.isLoading = false
     }
   },
