@@ -1,7 +1,7 @@
 <template>
-  <q-card>
+  <q-card class="shadow-xl border-3 border-solid border-gray-300 rounded-2xl">
     <q-card-section>
-      <q-avatar class='mx-auto block mb-4 rounded-full ring-4 w-16 h-16 ring-blue-500 shadow-5'>
+      <q-avatar class='mx-auto block mb-4 rounded-full ring-4 w-64 h-64 ring-blue-500'>
         <q-img ratio='1' :src='"http://localhost/" + user.profilePicturePath'/>
       </q-avatar>
       <div class='text-h6'>{{user.firstName}} {{user.middleName}} {{user.lastName}}</div>
@@ -15,9 +15,15 @@
         {{user.isPUI ? 'Under Investigation' : 'Not Under Investigation'}}
       </q-badge>
       <hr>
-      <div v-for='item in medicalHistory' :key='item.name'>
-        <p class='m-0 p-0'><b>{{item.displayName}}</b>: {{user[item.name]}}</p>
-      </div>
+      <q-list>
+        <q-item class="rounded-md" v-for='item in medicalHistory' :key='item.name' v-ripple>
+          <div class='text-lg flex flex-row justify-between w-full items-center'>
+            <p class="m-0 font-light"> {{item.displayName}} </p>
+            <p v-if="user[item.name] !== null" class="m-0 font-black">{{user[item.name]}}</p>
+            <p v-else class="m-0 text-gray-400 italic">NO DATA</p>
+          </div>
+        </q-item>
+      </q-list>
     </q-card-section>
   </q-card>
 </template>
