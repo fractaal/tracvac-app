@@ -1,7 +1,4 @@
 import { app } from "../index"
-import { mkdtemp } from 'fs/promises'
-import path from 'path'
-import os from 'os'
 import Logger from '../logger'
 import { raw } from 'objection'
 import { NotificationModel } from "../database/models/NotificationModel"
@@ -9,10 +6,9 @@ import { UserModel } from "../database/models/UserModel"
 import { LogModel } from "../database/models/LogModel"
 import { getConfig, Config } from "../config"
 import expressBasicAuth from "express-basic-auth"
-import ExcelJS from 'exceljs'
-import registrationFormTemplate from "../database/templates/registrationFormTemplate"
 import * as PushScheduler from '../push-scheduler'
 import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
+import { exportTable } from "../exporter"
 
 const logger = Logger("Administrator Route");
 
@@ -214,82 +210,23 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.get('/admin/export', async (request, response) => {
-        const start = Date.now();
-        logger.log(`Performing user data export!`)
-
-        let workbook: ExcelJS.Workbook;
-        let sheet: ExcelJS.Worksheet;
-
-        try {
-
-            workbook = new ExcelJS.Workbook();
-
-            workbook.creator = "Tracvac";
-            workbook.created = new Date();
-            workbook.modified = new Date();
-
-            sheet = workbook.addWorksheet("people");
-
-            const columns = [];
-
-            for (const section of registrationFormTemplate) {
-                for (const formItem of section.formItems) {
-                    if (formItem.name === 'password') continue;
-                    columns.push({
-                        header: formItem.displayName,
-                        key: formItem.name
-                    })
-                }
-            }
-
-            sheet.columns = columns; // Fix column.equivalentTo is undefined
-
-        } catch(err) {
-            logger.error(`Error occurred while initializing the workbook: ${err}`);
-            response.status(500).json({
-                result: false,
-                message: `Error occurred while initializing the workbook: ${err}`
-            })
-            return;
+    app.get('/admin/export', async (_, response) => {
+        const [result, data] = await exportTable(UserModel, 'users', ['password'])
+        if (result) {
+            response.download(data) 
+        } else {
+            response.json({result, message: data})
         }
-
-        let allUsers: UserModel[];
-
-        try {
-            allUsers = await UserModel.query().select('*');
-        } catch (err) {
-            logger.error(`Error occurred while querying the database: ${err}`);
-            response.status(500).json({
-                result: false,
-                message: `Error occurred while querying the database: ${err}`
-            })
-            return;
-        }
-
-        try {
-            for (const user of allUsers) {
-                sheet.addRow(user);
-            }
-
-            const folder = await mkdtemp(path.join(os.tmpdir(), 'tracvac-export-'))
-            const filePath = path.join(folder, `export-${Date.now()}.xlsx`)
-            await workbook.xlsx.writeFile(filePath);
-
-            logger.success(`User data export complete.`)
-            logger.success(`Took ${Date.now() - start}ms for ${allUsers.length} users`)
-            logger.success(`Export path: ${filePath}`)
-
-            response.download(filePath);
-        } catch(err) {
-            logger.error(`Error occurred while exporting data: ${err}`);
-            response.status(500).json({
-                result: false,
-                message: `Error occurred while exporting data: ${err}`
-            })
-        }
-
     });
+
+    app.get('/admin/export-logs', async(_, response) => {
+        const [result, data] = await exportTable(LogModel, 'logs', [])
+        if (result) {
+            response.download(data)
+        } else {
+            response.json({result, message: data})
+        }
+    })
 
     app.post('/admin/getUnreadLogsCount', async (req, res) => {
         try {
