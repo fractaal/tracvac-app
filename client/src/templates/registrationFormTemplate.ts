@@ -351,6 +351,15 @@ const template = [
         }
       },
       {
+        name: 'otherComorbidity',
+        displayName: 'Comorbidity (Others)',
+        type: 'string',
+        format: 'Text',
+        conditionalFunction (data: Record<string, any>) {
+          return data.comorbidity === '08 - Others' && data.withComorbidities === 'Yes'
+        }
+      },
+      {
         name: 'covidHistory',
         displayName: 'Diagnosed with COVID-19?',
         description: 'Were you at all diagnosed with COVID-19?',
