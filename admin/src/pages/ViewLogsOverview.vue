@@ -3,6 +3,14 @@
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
       <q-btn
         class="p-2 mx-2"
+        label="EXPORT LOGS"
+        color="green"
+        icon="fas fa-file-export"
+        @click="exportToExcel"
+        fab
+      />
+      <q-btn
+        class="p-2 mx-2"
         :disable="selected.length === 0"
         label="MARK UNREAD"
         color="red"
@@ -232,6 +240,34 @@ export default Vue.extend({
         return;
       }
       await this.getData({pagination: this.pagination});
+    },
+    exportToExcel() {
+      this.$q.dialog({
+        title: 'Export user data to an excel file?',
+        message: 'You will be exporting all user data.',
+        cancel: true,
+      }).onOk(async () => {
+        try {
+          const response = await this.$axios({
+            url: '/admin/export-logs',
+            method: 'GET',
+            responseType: 'blob'
+          });
+
+          const url = window.URL.createObjectURL(new Blob([response.data]))
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'export.xlsx');
+          document.body.appendChild(link)
+          link.click()
+
+        } catch(err) {
+          this.$q.notify({
+            message: `Export failed! ${err.message}`,
+            type: 'negative',
+          })
+        }
+      })
     }
   }
 });
