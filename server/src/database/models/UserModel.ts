@@ -110,6 +110,7 @@ export class UserModel extends BaseModel {
   employed!: UserEmployedEnum
   profession!: UserProfessionEnum
   otherProfession!: string
+  otherComorbidity!: string
   directCOVID!: boolean
   employerName!: string
   employerLGU!: string

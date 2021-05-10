@@ -264,5 +264,19 @@ export const migrations = [
         table.dropColumn('lastVaccinationTime')
       })
     }
+  },
+  {
+    version: 7,
+    description: 'Add otherComorbidityfield to users table',
+    up: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.string('otherComorbidity')
+      })
+    },
+    down: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.dropColumn('otherComorbidity')
+      })
+    }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
