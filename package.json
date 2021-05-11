@@ -1,6 +1,6 @@
 {
   "name": "tracvac-app",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "Vaccine tracking application",
   "scripts": {
     "build": "node build.js",
