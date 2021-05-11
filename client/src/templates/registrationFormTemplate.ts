@@ -318,7 +318,8 @@ const template = [
         type: 'string',
         format: 'Text',
         conditionalFunction (data: Record<string, any>) {
-          return data.withAllergy === 'Yes'
+          return data.withAllergy === 'Yes' &&
+            data.__preexistingCondition === 'Yes'
         }
       },
       {
@@ -347,7 +348,8 @@ const template = [
         ],
         format: 'Dropdown',
         conditionalFunction (data: Record<string, any>) {
-          return data.withComorbidities === 'Yes'
+          return data.withComorbidities === 'Yes' &&
+            data.__preexistingCondition === 'Yes'
         }
       },
       {
@@ -356,7 +358,9 @@ const template = [
         type: 'string',
         format: 'Text',
         conditionalFunction (data: Record<string, any>) {
-          return data.comorbidity === '08 - Others' && data.withComorbidities === 'Yes'
+          return data.comorbidity === '08 - Others' &&
+            data.withComorbidities === 'Yes' &&
+            data.__preexistingCondition === 'Yes'
         }
       },
       {
