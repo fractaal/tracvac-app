@@ -28,9 +28,9 @@ export const menuLayout = [
     }
   },
   {
-    name: 'Notifications from your LGU',
+    name: 'Notifications from Tracvac',
     showBadge: false,
-    description: 'View notifications sent to you from your Local Government Unit.',
+    description: 'View notifications sent to you from this Tracvac site.',
     icon: 'fas fa-university',
     action () {
       routerInstance.push('/notifications')
