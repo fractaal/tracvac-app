@@ -36,7 +36,7 @@ export async function recept (address: string): Promise<boolean> {
         store.serverInfo = Object.assign({}, store.serverInfo, response.data)
       }
       store.serverInfo = Object.assign({}, store.serverInfo, { address })
-      notify.positive(`Connected to ${response.data.location}!`)
+      notify.positive(`Connected to ${response.data.name}!`)
       LocalStorage.set('server', address)
       api.defaults.baseURL = address
       server = address
