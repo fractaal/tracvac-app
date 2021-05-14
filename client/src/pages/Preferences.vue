@@ -3,7 +3,8 @@
     <custom-header title="Preferences"/>
     <div class="px-8">
       <p class="font-bold m-0 p-0 text-gray-500">YOU'RE CONNECTED TO</p>
-      <p class="text-h5 m-0">{{store.serverInfo.location}}</p>
+      <p class="text-h5 m-0">{{store.serverInfo.name}}</p>
+      <p class="m-0">of <b>{{store.serverInfo.location}}</b></p>
       <p class="m-0">at <b>{{store.serverInfo.address}}</b></p>
       <br>
       <q-list class="space-y-4">
