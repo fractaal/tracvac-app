@@ -6,7 +6,8 @@
       bordered
       content-class="bg-grey-1"
     >
-      <h5 class="px-8 mt-12 m-0 font-bold truncate">{{store.serverConfig.location}}</h5>
+      <h6 class="px-8 mt-12 m-0 -my-2 font-bold truncate">{{store.serverConfig.name}}</h6>
+      <p class="px-8 m-0 mb-4">at <b>{{store.serverConfig.location}}</b></p>
       <p class="px-8 mb-2">TRACVAC ADMINISTRATOR</p>
       <q-list class="my-auto blo">
         <q-item clickable v-ripple class="p-12" @click="$router.push('/')">
