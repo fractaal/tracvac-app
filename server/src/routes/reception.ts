@@ -9,6 +9,7 @@ app.get('/reception', async (req, res) => {
     const config = await getConfig()
     res.json({
       version: require('../../package.json').version,
+      name: config.name,
       location: config.location,
       lguUrl: config.lguUrl
     });
