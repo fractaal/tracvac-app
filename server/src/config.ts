@@ -1,6 +1,8 @@
 import Logger from './logger';
 
 export interface Config {
+    [x: string]: string;
+    name: string;
     location: string;
     lguUrl: string;
     secret: string;
@@ -10,10 +12,13 @@ export interface Config {
     email: string;
 }
 
+const requiredConfigKeys = ['name', 'location', 'lguUrl', 'httpPort', 'httpsPort', 'adminPassword', 'email']
+
 const logger = Logger('Config')
 
 export async function getConfig(): Promise<Config> {
     const config = {
+        name: process.env.NAME ,
         location: process.env.LOCATION ,
         lguUrl: process.env.LGUURL ?? '',
         secret: process.env.SECRET ,
@@ -23,17 +28,15 @@ export async function getConfig(): Promise<Config> {
         email: process.env.EMAIL 
     } as Partial<Config>;
 
-    if (typeof config.httpPort === 'string' &&
-        typeof config.httpsPort === 'string' &&
-        typeof config.secret === 'string' &&
-        typeof config.location === 'string' &&
-        typeof config.adminPassword === 'string' &&
-        typeof config.email === 'string') {
-        return config as Config;
-    } else {
+    const missingKeys = requiredConfigKeys.filter(key => config[key] === undefined)
+
+    if (missingKeys.length !== 0) {
         logger.error('Server is improperly configured! Check configuration and try again.')
+        logger.error('Missing configuration keys : ', missingKeys)
         process.exit(1);
     }
+
+    return config as Config;
 }
 
 /**
