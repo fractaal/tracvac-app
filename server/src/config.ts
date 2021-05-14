@@ -1,10 +1,10 @@
 import Logger from './logger';
 
 export interface Config {
-    [x: string]: string;
+    // [x: string]: string;
     name: string;
     location: string;
-    lguUrl: string;
+    websiteUrl: string;
     secret: string;
     httpPort: string;
     httpsPort: string;
@@ -12,7 +12,7 @@ export interface Config {
     email: string;
 }
 
-const requiredConfigKeys = ['name', 'location', 'lguUrl', 'httpPort', 'httpsPort', 'adminPassword', 'email']
+const requiredConfigKeys = ['name', 'location', 'httpPort', 'httpsPort', 'adminPassword', 'email'] as const
 
 const logger = Logger('Config')
 
@@ -20,7 +20,7 @@ export async function getConfig(): Promise<Config> {
     const config = {
         name: process.env.NAME ,
         location: process.env.LOCATION ,
-        lguUrl: process.env.LGUURL ?? '',
+        websiteUrl: process.env.WEBSITE_URL ?? '',
         secret: process.env.SECRET ,
         httpsPort: process.env.PORT_SECURE ?? '443' ,
         httpPort: process.env.PORT ?? '80' ,
