@@ -36,13 +36,13 @@ export async function recept (address: string): Promise<boolean> {
         store.serverInfo = Object.assign({}, store.serverInfo, response.data)
       }
       store.serverInfo = Object.assign({}, store.serverInfo, { address })
-      notify.positive(`Connected to ${response.data.location}!`)
+      notify.positive(`Connected to ${response.data.name}!`)
       LocalStorage.set('server', address)
       api.defaults.baseURL = address
       server = address
 
-      // Show / hide LGU URL button depending on whether or not lguUrl is present
-      if (!(response.data.lguUrl)) {
+      // Show / hide LGU URL button depending on whether or not websiteUrl is present
+      if (!(response.data.websiteUrl)) {
         for (let i = 0; i < menuLayout.length; i++) {
           if (menuLayout[i].name === 'Go to the LGU website') {
             menuLayout[i].hidden = true

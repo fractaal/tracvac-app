@@ -28,9 +28,9 @@ export const menuLayout = [
     }
   },
   {
-    name: 'Notifications from your LGU',
+    name: 'Notifications from Tracvac',
     showBadge: false,
-    description: 'View notifications sent to you from your Local Government Unit.',
+    description: 'View notifications sent to you from this Tracvac site.',
     icon: 'fas fa-university',
     action () {
       routerInstance.push('/notifications')
@@ -42,12 +42,12 @@ export const menuLayout = [
     }
   },
   {
-    name: 'Go to the LGU website',
+    name: `Go to ${store.serverInfo.name}'s website`,
     icon: 'fas fa-globe-americas',
     hidden: false,
-    description: 'Connect to your local government\'s website, for local updates',
+    description: `Connect to the ${store.serverInfo.name} site.`,
     action () {
-      window.open(addHttp(LocalStorage.getItem('lguUrl') as string), '_system')
+      window.open(addHttp(LocalStorage.getItem('websiteUrl') as string), '_system')
     }
   },
   {

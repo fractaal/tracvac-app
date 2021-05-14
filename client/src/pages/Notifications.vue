@@ -6,8 +6,8 @@
         <empty-placeholder
           v-if="!isLoading && notifications.length === 0"
           icon="fas fa-question"
-          title="No notifications found"
-          subtitle='LGU Notifications are shown here.'
+          title="No notifications yet!"
+          subtitle='Tracvac Notifications are shown here.'
         />
       </transition>
       <load-more ref="list" @load="onLoad">
