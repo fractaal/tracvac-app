@@ -9,14 +9,14 @@ export default {
     isConfigured: false,
     secret: null,
     location: null,
-    lguUrl: null,
+    websiteUrl: null,
     httpPort: null,
     httpsPort: null,
   } as unknown as {
     isConfigured: boolean;
     secret: string;
     location: string;
-    lguUrl: string;
+    websiteUrl: string;
     httpPort: number;
     httpsPort: number;
   }
