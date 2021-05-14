@@ -6,7 +6,7 @@
       <p class="my-1">The name of this Tracvac site. It could be the company name, or the name of the LGU, so long as it's a good indicator of who's hosting this site.</p>
       <q-input class="mt-8" label="Location" v-model="store.serverConfig.location" disable/>
       <p class="my-1">Where is this Tracvac site physically situated in?</p>
-      <q-input class="mt-8" label="Local Government Unit Website" v-model="store.serverConfig.lguUrl" disable/>
+      <q-input class="mt-8" label="Local Government Unit Website" v-model="store.serverConfig.websiteUrl" disable/>
       <p class="my-1">Website address of this LGU.<br><i>Note: If you leave this blank, the button that leads to the LGU website in the app will not be shown.</i></p>
       <q-input class="mt-8" label="HTTP Port" v-model="store.serverConfig.httpPort" type="number" disable/>
       <p class="my-1">Port number that the server will listen to for HTTP requests. Defaults to 80.</p>

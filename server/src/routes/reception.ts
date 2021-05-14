@@ -11,7 +11,7 @@ app.get('/reception', async (req, res) => {
       version: require('../../package.json').version,
       name: config.name,
       location: config.location,
-      lguUrl: config.lguUrl
+      websiteUrl: config.websiteUrl
     });
   } catch(err) {
     logger.error(`Something happened while trying to send ${req.ip} reception data - ${err.stack}`);
