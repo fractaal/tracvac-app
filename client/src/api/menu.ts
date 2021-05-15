@@ -1,4 +1,5 @@
 import { logout } from 'src/api/auth'
+import { store } from 'src/api/store'
 import router, { routerInstance } from 'boot/router'
 import { LocalStorage } from 'quasar'
 import { addHttp } from 'src/api/server'
