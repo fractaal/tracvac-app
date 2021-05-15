@@ -58,32 +58,218 @@ const validRegistrationData = {
 }
 
 function findNested(obj, value) {
-  Object.keys(obj).map(key => {
-    if (typeof obj[key] !== "object" && obj[key] === value) {
+  for (const key of Object.keys(obj)) {
+    if (obj[key] === value) {
       return true
-    } else if (typeof obj[key] === "object") {
-      if (findNested(obj[key], value)) {
-        return true
-      }
+    } else if (typeof obj[key] === "object" && obj[key] !== null) {
+      const recursionResult = findNested(obj[key], value)
+      if (recursionResult) return true
     }
-  })
+  }
+  return false
 }
+
+const authorizedEndpoints = ["/user", "/log", "/notification", "/getVAPIDPublicKey"]
 
 const apiResponses = [];
 
-describe("General API Test", () => {
+describe("✨ Good luck, me!", () => {
+  const wait = new Promise(r => {
 
-  describe('Registration', () => {
+    describe('Registration', () => {
+      
+      describe("Applying invalid registration mutations", () => {
+        invalidRegistrationMutators.map((mutation, index) => {
+          const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
+          it(`Should return bad request if ${JSON.stringify(mutation)}`, (done) => {
+            chai.request("localhost")
+              .post("/user")
+              .send(invalidRegistrationData)
+              .end((err, res) => {
+                expect(res.body.result).to.equals(false)
+                apiResponses.push(res.body)
+                done()
+              })
+          })
+        })
+      })
+
+      it("Should allow valid registration", (done) => {
+        chai.request("localhost")
+          .post("/user")
+          .send(validRegistrationData)
+          .end((err, res) => {
+            expect(res.body).to.be.an('object');
+            expect(res.body.result).to.equals(true)
+            expect(res).to.have.status(200);
+            apiResponses.push(res.body)
+            done();
+          })
+      })
+    })
     
-    describe("Applying invalid registration mutations", () => {
-      invalidRegistrationMutators.map((mutation, index) => {
-        const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
-        it(`Should return bad request if ${JSON.stringify(mutation)}`, (done) => {
+    describe("Already Existing Checks", () => {
+      it("Should forbid registration with an existing username", done => {
+        chai.request("localhost")
+          .post("/user")
+          .send(Object.assign({}, validRegistrationData, {email: `${usernameGenerator.generateUsername()}@gmail.com`}))
+          .end((err, res) => {
+            expect(res.body).to.be.an('object');
+            expect(res.body.result).to.equals(false)
+            apiResponses.push(res.body)
+            done();
+          })
+      })
+      
+      it("Should forbid registration with an existing email", done => {
+        chai.request("localhost")
+          .post("/user")
+          .send(Object.assign({}, validRegistrationData, {username: usernameGenerator.generateUsername()}))
+          .end((err, res) => {
+            expect(res.body).to.be.an('object');
+            expect(res.body.result).to.equals(false)
+            apiResponses.push(res.body)
+            done();
+          })
+      })
+    })
+    
+    let token = "";
+    let currentUserInfo = {};
+    let logs = [];
+
+    describe("Logins", () => {
+      it("Should forbid log in with the wrong username but right password", done => {
+        chai.request("localhost")
+          .post("/login")
+          .send({ username: "WRONG_USER_NAME_HEHE", password })
+          .end((err, res) => {
+            expect(res.body.result).to.equals(false)
+            apiResponses.push(res.body)
+            done()
+          })
+      })
+      it("Should forbid log in with the right username but wrong password", done => {
+        chai.request("localhost")
+          .post("/login")
+          .send({ username, password: "123" })
+          .end((err, res) => {
+            expect(res.body.result).to.equals(false)
+            apiResponses.push(res.body)
+            done()
+          })
+      })
+      it("Should allow log in with the right username and right password", done => {
+        chai.request("localhost")
+          .post("/login")
+          .send({ username, password })
+          .end((err, res) => {
+            expect(res.body.result).to.equals(true)
+            token = res.body.token
+            apiResponses.push(res.body)
+            done()
+          })
+      })
+    })
+
+    describe("User Info", () => {
+      it("Should return user information", done => {
+        chai.request("localhost")
+          .get("/user")
+          .set("X-Access-Token", token)
+          .end((err, res) => {
+            expect(res.body.result).to.equals(true)
+            expect(res.body.user).to.be.an('object')
+            currentUserInfo = res.body.user
+            apiResponses.push(res.body)
+            done()
+          })
+      })
+
+
+      describe("Applying invalid registration mutations on update user info", done => {
+        invalidRegistrationMutators.map((mutation, index) => {
+          const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
+          it(`Should not change the user if invalid registration mutation ${JSON.stringify(mutation)} is applied`, (done) => {
+            chai.request("localhost")
+              .patch("/user")
+              .send(invalidRegistrationData)
+              .end((err, res) => {
+                expect(res.body.result).to.equals(false)
+                apiResponses.push(res.body)
+                chai.request("localhost")
+                  .get('/user')
+                  .set("X-Access-Token", token)
+                  .end((err, res) => {
+                    expect(res.body.user).to.deep.equals(currentUserInfo)
+                    apiResponses.push(res.body)
+                    done()
+                  })
+              })
+          })
+        })
+      })
+    })
+
+    describe("Logs", () => {
+      describe("Submission", () => {
+        it("Should not allow submission of logs that have no symptoms", done => {
           chai.request("localhost")
-            .post("/user")
-            .send(invalidRegistrationData)
+            .post("/log")
+            .send({})
             .end((err, res) => {
               expect(res.body.result).to.equals(false)
+              apiResponses.push(res.body)
+              done()
+            })
+        })
+        it("Should allow submission of logs that have symptoms", done => {
+          chai.request("localhost")
+            .post("/log")
+            .set("X-Access-Token", token)
+            .send({others: "I am dying", difficultyBreathing: true})
+            .end((err, res) => {
+              expect(res.body.result).to.equals(true)
+              apiResponses.push(res.body)
+              done()
+            })
+        })
+      })
+
+      describe("Retrieval", () => {
+        it("Should allow retrieval of all logs", done => {
+          chai.request("localhost")
+            .get(`/log/${0}`)
+            .set("X-Access-Token", token)
+            .end((err, res) => {
+              expect(res.body.result).to.equals(true)
+              expect(res.body.logs.results).to.be.an('array')
+              logs = res.body.logs.results
+              apiResponses.push(res.body)
+              done()
+            })
+        })
+      })
+
+      describe("Deletion", () => {
+        it("Should not allow deletion of logs that the user does not own", done => {
+          const lowestLogId = logs.reduce((acc, curr) => { acc = acc > curr ? curr : acc }, 9999999)
+          chai.request("localhost")
+            .delete(`/log/${lowestLogId-1}`)
+            .set("X-Access-Token", token)
+            .end((err, res) => {
+              expect(res.body.result).to.equals(false)
+              apiResponses.push(res.body)
+              done()
+            })
+        })
+
+        it("Should allow deletion of logs that this user owns", done => {
+          chai.request("localhost")
+            .delete(`/log/${logs[0].id}`)
+            .set("X-Access-Token", token)
+            .end((err, res) => {
+              expect(res.body.result).to.equals(true)
               apiResponses.push(res.body)
               done()
             })
@@ -91,195 +277,56 @@ describe("General API Test", () => {
       })
     })
 
-    it("Should allow valid registration", (done) => {
-      chai.request("localhost")
-        .post("/user")
-        .send(validRegistrationData)
-        .end((err, res) => {
-          expect(res.body).to.be.an('object');
-          expect(res.body.result).to.equals(true)
-          expect(res).to.have.status(200);
-          apiResponses.push(res.body)
-          done();
-        })
+    describe("VAPID", () => {
+      it("Should return the VAPID public key", done => {
+        chai.request("localhost")
+          .get("/getVAPIDPublicKey")
+          .set("X-Access-Token", token)
+          .end((err, res) => {
+            expect(res.body.result).to.equals(true)
+            expect(res.body.publicKey).to.be.a("string")
+            done()
+          })
+      })
     })
+
+    describe("Authorized Endpoints Security Audit", () => {
+      authorizedEndpoints.map((endpoint, index) => {
+        ["get", "post", "patch", "delete"].map(method => {
+          if (endpoint === '/user' && method === 'post') return
+          it(`Should forbid this ${method.toUpperCase()} request to endpoint ${endpoint}`, done => {
+            chai.request("localhost")
+              [method](endpoint)
+              .end((err, res) => {
+                console.log("\t", res.body)
+                expect(res.status).to.be.greaterThanOrEqual(400)
+                apiResponses.push(res.body)
+                if (index+1 === authorizedEndpoints.length) r();
+                done()
+              })
+          })
+        })
+      })
+
+    })
+
   })
   
-  describe("Already Existing Checks", () => {
-    it("Should forbid registration with an existing username", done => {
-      chai.request("localhost")
-        .post("/user")
-        .send(Object.assign({}, validRegistrationData, {email: `${usernameGenerator.generateUsername()}@gmail.com`}))
-        .end((err, res) => {
-          expect(res.body).to.be.an('object');
-          expect(res.body.result).to.equals(false)
-          apiResponses.push(res.body)
-          done();
-        })
-    })
-    
-    it("Should forbid registration with an existing email", done => {
-      chai.request("localhost")
-        .post("/user")
-        .send(Object.assign({}, validRegistrationData, {username: usernameGenerator.generateUsername()}))
-        .end((err, res) => {
-          expect(res.body).to.be.an('object');
-          expect(res.body.result).to.equals(false)
-          apiResponses.push(res.body)
-          done();
-        })
-    })
-  })
-  
-  let token = "";
-  let currentUserInfo = {};
-  let logs = [];
-
-  describe("Logins", () => {
-    it("Should forbid log in with the wrong username but right password", done => {
-      chai.request("localhost")
-        .post("/login")
-        .send({ username: "WRONG_USER_NAME_HEHE", password })
-        .end((err, res) => {
-          expect(res.body.result).to.equals(false)
-          apiResponses.push(res.body)
+  wait.then(() => {
+    describe("API Responses Security Audit", () => {
+      it(`Total of ${apiResponses.length} API responses`, done => { done() })
+      apiResponses.map((response, index) => {
+        it(`Should not have exposed sensitive information in API response #${index+1}`, done => {
+          var waitTill = new Date(new Date().getTime() + 0.05 * 1000);
+          while(waitTill > new Date()){}
+          expect(findNested(response, password), "Raw password should not be found").to.equal(false)
           done()
-        })
-    })
-    it("Should forbid log in with the right username but wrong password", done => {
-      chai.request("localhost")
-        .post("/login")
-        .send({ username, password: "123" })
-        .end((err, res) => {
-          expect(res.body.result).to.equals(false)
-          apiResponses.push(res.body)
-          done()
-        })
-    })
-    it("Should allow log in with the right username and right password", done => {
-      chai.request("localhost")
-        .post("/login")
-        .send({ username, password })
-        .end((err, res) => {
-          expect(res.body.result).to.equals(true)
-          token = res.body.token
-          apiResponses.push(res.body)
-          done()
-        })
-    })
-  })
-
-  describe("User Info", () => {
-    it("Should return user information", done => {
-      chai.request("localhost")
-        .get("/user")
-        .set("X-Access-Token", token)
-        .end((err, res) => {
-          expect(res.body.result).to.equals(true)
-          expect(res.body.user).to.be.an('object')
-          currentUserInfo = res.body.user
-          apiResponses.push(res.body)
-          done()
-        })
-    })
-
-
-    describe("Applying invalid registration mutations on update user info", done => {
-      invalidRegistrationMutators.map((mutation, index) => {
-        const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
-        it(`Should not change the user if invalid registration mutation ${JSON.stringify(mutation)} is applied`, (done) => {
-          chai.request("localhost")
-            .patch("/user")
-            .send(invalidRegistrationData)
-            .end((err, res) => {
-              expect(res.body.result).to.equals(false)
-              apiResponses.push(res.body)
-              chai.request("localhost")
-                .get('/user')
-                .set("X-Access-Token", token)
-                .end((err, res) => {
-                  expect(res.body.user).to.deep.equals(currentUserInfo)
-                  apiResponses.push(res.body)
-                  done()
-                })
-            })
         })
       })
     })
   })
 
-  describe("Logs", () => {
-    describe("Submission", () => {
-      it("Should not allow submission of logs that have no symptoms", done => {
-        chai.request("localhost")
-          .post("/log")
-          .send({})
-          .end((err, res) => {
-            expect(res.body.result).to.equals(false)
-            apiResponses.push(res.body)
-            done()
-          })
-      })
-      it("Should allow submission of logs that have symptoms", done => {
-        chai.request("localhost")
-          .post("/log")
-          .set("X-Access-Token", token)
-          .send({others: "I am dying", difficultyBreathing: true})
-          .end((err, res) => {
-            expect(res.body.result).to.equals(true)
-            apiResponses.push(res.body)
-            done()
-          })
-      })
-    })
-
-    describe("Retrieval", () => {
-      it("Should allow retrieval of all logs", done => {
-        chai.request("localhost")
-          .get(`/log/${0}`)
-          .set("X-Access-Token", token)
-          .end((err, res) => {
-            expect(res.body.result).to.equals(true)
-            expect(res.body.logs.results).to.be.an('array')
-            logs = res.body.logs.results
-            apiResponses.push(res.body)
-            done()
-          })
-      })
-    })
-
-    describe("Deletion", () => {
-      it("Should not allow deletion of logs that the user does not own", done => {
-        const lowestLogId = logs.reduce((acc, curr) => { acc = acc > curr ? curr : acc }, 9999999)
-        chai.request("localhost")
-          .delete(`/log/${lowestLogId-1}`)
-          .set("X-Access-Token", token)
-          .end((err, res) => {
-            expect(res.body.result).to.equals(false)
-            apiResponses.push(res.body)
-            done()
-          })
-      })
-
-      it("Should allow deletion of logs that this user owns", done => {
-        chai.request("localhost")
-          .delete(`/log/${logs[0].id}`)
-          .set("X-Access-Token", token)
-          .end((err, res) => {
-            expect(res.body.result).to.equals(true)
-            apiResponses.push(res.body)
-            done()
-          })
-      })
-    })
-  })
 })
 
-describe("Basic Security Audit", () => {
-  apiResponses.map((response, index) => {
-    it(`Should not have exposed sensitive information in API response #${index}`, done => {
-      expect(findNested(response, password)).to.equal(false)
-      done()
-    })
-  })
-})
+
+
