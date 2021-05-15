@@ -272,15 +272,14 @@ describe("General API Test", () => {
           })
       })
     })
-    
-  })
-
-  describe("Basic Security Audit", () => {
-    apiResponses.map(response, index => {
-      it(`Should not have exposed sensitive information in API response #${index}`, done => {
-        expect(findNested(response, password)).to.equal(false)
-      })
-    })
   })
 })
 
+describe("Basic Security Audit", () => {
+  apiResponses.map((response, index) => {
+    it(`Should not have exposed sensitive information in API response #${index}`, done => {
+      expect(findNested(response, password)).to.equal(false)
+      done()
+    })
+  })
+})
