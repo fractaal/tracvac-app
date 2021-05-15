@@ -1,5 +1,4 @@
 import { logout } from 'src/api/auth'
-import { store } from 'src/api/store'
 import router, { routerInstance } from 'boot/router'
 import { LocalStorage } from 'quasar'
 import { addHttp } from 'src/api/server'
@@ -42,10 +41,10 @@ export const menuLayout = [
     }
   },
   {
-    name: `Go to ${store.serverInfo.name}'s website`,
+    name: 'Go to website',
     icon: 'fas fa-globe-americas',
     hidden: false,
-    description: `Connect to the ${store.serverInfo.name} site.`,
+    description: 'Connect to the website associated with this Tracvac site.',
     action () {
       window.open(addHttp(LocalStorage.getItem('websiteUrl') as string), '_system')
     }
