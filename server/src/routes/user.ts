@@ -65,12 +65,12 @@ app.post('/user', async (request, response) => {
 
 app.patch('/user', async (request, response) => {
   if (!request.isAuthenticated) {
-    response.json({result: false, message: 'You are not authenticated'});
+    response.status(400).json({result: false, message: 'You are not authenticated'});
     return;
   }
 
   if (!request.tokenData?.userId) {
-    response.json({result: false, message: 'Please reauthenticate'});
+    response.status(400).json({result: false, message: 'Please reauthenticate'});
     return;
   }
 
