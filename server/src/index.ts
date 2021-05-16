@@ -27,7 +27,7 @@ let isHTTPSAvailable = true;
 const exceptionLogger = (error: Error) => {
   logger.error(error.stack)
   fs.writeFileSync(path.resolve(process.cwd(), `${Date.now()}-error.log`), error.stack as string, {encoding: 'utf-8'});
-  process.exit(1);
+  // process.exit(1);
 }
 
 process.on('uncaughtException', exceptionLogger)
