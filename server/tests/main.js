@@ -1,12 +1,28 @@
+require('dotenv').config()
+
+process.env.NODE_ENV = "TEST"
 const chai = require('chai');
 const chaiHttp = require('chai-http')
 const { expect } = chai;
 const usernameGenerator = require('username-generator')
+const { app } = require('../dist/index.js')
+const { knex } = require('../dist/database/')
+
+chai.use(chaiHttp)
+
 const username = usernameGenerator.generateUsername().substring(0, 20)
 const password = usernameGenerator.generateUsername()
 const email = `${username}@${password}.com`
+let vapidPrivateKey = ""
+let token = "";
+let currentUserInfo = {};
+let logs = [];
 
-chai.use(chaiHttp)
+// This is horrible, but by the time we'll check for the vapid private key, this promise should have resolved. 
+knex('metadata').where({key: 'vapidPrivateKey'}).first().then(obj => vapidPrivateKey = obj.value)
+
+// This is also horrible, but by 20 seconds, the test should be complete. So just exit by then.
+setTimeout(process.exit, 20000, 0)
 
 const invalidRegistrationMutators = [
   {
@@ -70,7 +86,6 @@ function findNested(obj, value) {
 }
 
 const authorizedEndpoints = ["/user", "/log", "/notification", "/getVAPIDPublicKey"]
-
 const apiResponses = [];
 
 describe("✨ Good luck, me!", () => {
@@ -82,7 +97,7 @@ describe("✨ Good luck, me!", () => {
         invalidRegistrationMutators.map((mutation, index) => {
           const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
           it(`Should return bad request if ${JSON.stringify(mutation)}`, (done) => {
-            chai.request("localhost")
+            chai.request(app)
               .post("/user")
               .send(invalidRegistrationData)
               .end((err, res) => {
@@ -95,7 +110,7 @@ describe("✨ Good luck, me!", () => {
       })
 
       it("Should allow valid registration", (done) => {
-        chai.request("localhost")
+        chai.request(app)
           .post("/user")
           .send(validRegistrationData)
           .end((err, res) => {
@@ -110,7 +125,7 @@ describe("✨ Good luck, me!", () => {
     
     describe("Already Existing Checks", () => {
       it("Should forbid registration with an existing username", done => {
-        chai.request("localhost")
+        chai.request(app)
           .post("/user")
           .send(Object.assign({}, validRegistrationData, {email: `${usernameGenerator.generateUsername()}@gmail.com`}))
           .end((err, res) => {
@@ -122,7 +137,7 @@ describe("✨ Good luck, me!", () => {
       })
       
       it("Should forbid registration with an existing email", done => {
-        chai.request("localhost")
+        chai.request(app)
           .post("/user")
           .send(Object.assign({}, validRegistrationData, {username: usernameGenerator.generateUsername()}))
           .end((err, res) => {
@@ -134,13 +149,10 @@ describe("✨ Good luck, me!", () => {
       })
     })
     
-    let token = "";
-    let currentUserInfo = {};
-    let logs = [];
 
     describe("Logins", () => {
       it("Should forbid log in with the wrong username but right password", done => {
-        chai.request("localhost")
+        chai.request(app)
           .post("/login")
           .send({ username: "WRONG_USER_NAME_HEHE", password })
           .end((err, res) => {
@@ -150,7 +162,7 @@ describe("✨ Good luck, me!", () => {
           })
       })
       it("Should forbid log in with the right username but wrong password", done => {
-        chai.request("localhost")
+        chai.request(app)
           .post("/login")
           .send({ username, password: "123" })
           .end((err, res) => {
@@ -160,7 +172,7 @@ describe("✨ Good luck, me!", () => {
           })
       })
       it("Should allow log in with the right username and right password", done => {
-        chai.request("localhost")
+        chai.request(app)
           .post("/login")
           .send({ username, password })
           .end((err, res) => {
@@ -174,7 +186,7 @@ describe("✨ Good luck, me!", () => {
 
     describe("User Info", () => {
       it("Should return user information", done => {
-        chai.request("localhost")
+        chai.request(app)
           .get("/user")
           .set("X-Access-Token", token)
           .end((err, res) => {
@@ -191,13 +203,13 @@ describe("✨ Good luck, me!", () => {
         invalidRegistrationMutators.map((mutation, index) => {
           const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
           it(`Should not change the user if invalid registration mutation ${JSON.stringify(mutation)} is applied`, (done) => {
-            chai.request("localhost")
+            chai.request(app)
               .patch("/user")
               .send(invalidRegistrationData)
               .end((err, res) => {
                 expect(res.body.result).to.equals(false)
                 apiResponses.push(res.body)
-                chai.request("localhost")
+                chai.request(app)
                   .get('/user')
                   .set("X-Access-Token", token)
                   .end((err, res) => {
@@ -214,7 +226,7 @@ describe("✨ Good luck, me!", () => {
     describe("Logs", () => {
       describe("Submission", () => {
         it("Should not allow submission of logs that have no symptoms", done => {
-          chai.request("localhost")
+          chai.request(app)
             .post("/log")
             .send({})
             .end((err, res) => {
@@ -224,7 +236,7 @@ describe("✨ Good luck, me!", () => {
             })
         })
         it("Should allow submission of logs that have symptoms", done => {
-          chai.request("localhost")
+          chai.request(app)
             .post("/log")
             .set("X-Access-Token", token)
             .send({others: "I am dying", difficultyBreathing: true})
@@ -238,7 +250,7 @@ describe("✨ Good luck, me!", () => {
 
       describe("Retrieval", () => {
         it("Should allow retrieval of all logs", done => {
-          chai.request("localhost")
+          chai.request(app)
             .get(`/log/${0}`)
             .set("X-Access-Token", token)
             .end((err, res) => {
@@ -253,9 +265,8 @@ describe("✨ Good luck, me!", () => {
 
       describe("Deletion", () => {
         it("Should not allow deletion of logs that the user does not own", done => {
-          const lowestLogId = logs.reduce((acc, curr) => { acc = acc > curr ? curr : acc }, 9999999)
-          chai.request("localhost")
-            .delete(`/log/${lowestLogId-1}`)
+          chai.request(app)
+            .delete(`/log/1`)
             .set("X-Access-Token", token)
             .end((err, res) => {
               expect(res.body.result).to.equals(false)
@@ -265,7 +276,7 @@ describe("✨ Good luck, me!", () => {
         })
 
         it("Should allow deletion of logs that this user owns", done => {
-          chai.request("localhost")
+          chai.request(app)
             .delete(`/log/${logs[0].id}`)
             .set("X-Access-Token", token)
             .end((err, res) => {
@@ -279,7 +290,7 @@ describe("✨ Good luck, me!", () => {
 
     describe("VAPID", () => {
       it("Should return the VAPID public key", done => {
-        chai.request("localhost")
+        chai.request(app)
           .get("/getVAPIDPublicKey")
           .set("X-Access-Token", token)
           .end((err, res) => {
@@ -294,8 +305,9 @@ describe("✨ Good luck, me!", () => {
       authorizedEndpoints.map((endpoint, index) => {
         ["get", "post", "patch", "delete"].map(method => {
           if (endpoint === '/user' && method === 'post') return
+          
           it(`Should forbid this ${method.toUpperCase()} request to endpoint ${endpoint}`, done => {
-            chai.request("localhost")
+            chai.request(app)
               [method](endpoint)
               .end((err, res) => {
                 console.log("\t", res.body)
@@ -307,21 +319,31 @@ describe("✨ Good luck, me!", () => {
           })
         })
       })
-
     })
-
   })
+
   
   wait.then(() => {
     describe("API Responses Security Audit", () => {
       it(`Total of ${apiResponses.length} API responses`, done => { done() })
       apiResponses.map((response, index) => {
-        it(`Should not have exposed sensitive information in API response #${index+1}`, done => {
-          var waitTill = new Date(new Date().getTime() + 0.05 * 1000);
-          while(waitTill > new Date()){}
+        it(`Should not have exposed sensitive information in API response ${JSON.stringify(response)}`, done => {
+          expect(findNested(response, vapidPrivateKey), "VAPID private key should not be found").to.equal(false)
           expect(findNested(response, password), "Raw password should not be found").to.equal(false)
           done()
         })
+      })
+    })
+
+    describe("Test Cleanup", () => {
+      it("Should remove the test user", done => {
+        knex('users')
+          .where('id', currentUserInfo.id)
+          .del()
+          .then(numAffected => {
+            expect(numAffected, "Number of rows affected should be 1").to.equal(1)
+            done()
+          })
       })
     })
   })
