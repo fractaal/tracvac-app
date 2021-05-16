@@ -1,8 +1,8 @@
 const { exec, execSync } = require('child_process')
 const args = process.argv.slice(2);
 
-function herokuFlagIsPresent() {
-  return args[0] === '--heroku'
+function noExeFlagIsPresent() {
+  return args[0] === '--noexe'
 }
 
 const cmd = (command) => {
@@ -29,7 +29,7 @@ const cmd = (command) => {
     await cmd ("yarn global add typescript")
   }
 
-  if (!herokuFlagIsPresent())
+  if (!noExeFlagIsPresent())
   try {
     await cmd ("pkg -v")
   } catch(err) {
@@ -69,7 +69,7 @@ async function build() {
   console.log("Building administrative interface")
   await cmd("cd admin && quasar build -m spa")
   
-  if (!herokuFlagIsPresent()) {
+  if (!noExeFlagIsPresent()) {
     console.log("Packaging into executable...")
     await cmd ("cd server && yarn distributable-build") 
   }
