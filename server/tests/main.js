@@ -13,66 +13,27 @@ chai.use(chaiHttp)
 const username = usernameGenerator.generateUsername().substring(0, 20)
 const password = usernameGenerator.generateUsername()
 const email = `${username}@${password}.com`
+const validRegistrationData = Object.assign({}, require("./validRegistrationData"), {username, password, email})
+const invalidRegistrationMutations = require("./invalidRegistrationMutations")
+
+// Add in the computed invalid username
+invalidRegistrationMutations[0].username = username.substring(0, 5)
+
 let vapidPrivateKey = ""
 let token = "";
 let currentUserInfo = {};
 let logs = [];
 
+const authorizedEndpoints = ["/user", "/log", "/notification", "/getVAPIDPublicKey"]
+const apiResponses = [];
+
 // This is horrible, but by the time we'll check for the vapid private key, this promise should have resolved. 
 knex('metadata').where({key: 'vapidPrivateKey'}).first().then(obj => vapidPrivateKey = obj.value)
 
 // This is also horrible, but by 20 seconds, the test should be complete. So just exit by then.
-setTimeout(process.exit, 20000, 0)
+setTimeout(process.exit, 60000, 0)
 
-const invalidRegistrationMutators = [
-  {
-    username: username.substring(0, 5)
-  },
-  {
-    email: "invalid-email-string"
-  },
-  {
-    contactNumber: "31265372543",
-  },
-  {
-    employerContactNumber: "3126537"
-  }
-]
-
-const validRegistrationData = {
-	"username": username,
-	"password": password,
-	"email": email,
-	"category": "01 - Health Care Worker",
-	"categoryID": "PRC ID",
-	"philHealthID": "string",
-	"lastName": "string",
-	"firstName": "string",
-	"middleName": "string",
-	"suffix": "string",
-	"contactNumber": "09260729017",
-	"fullAddress": "string",
-	"province": "string",
-	"municipalityOrCity": "string",
-	"barangay": "string",
-	"sex": "03 - Not to Disclose",
-	"dateOfBirth": "2001/12/29",
-	"civilStatus": "01 - Single",
-	"employed": "01 - Government Employed",
-	"profession": "12 - Physician",
-	"otherProfession": "string",
-	"employerContactNumber": "09260729017",
-	"directCOVID": true,
-	"pregnancyStatus": false,
-	"withAllergy": false,
-	"allergy": "string",
-	"withComorbidities": false,
-	"comorbidity": "01 - Hypertension",
-	"covidHistory": false,
-	"consentForDataCollection": "01 - Yes",
-	"consentForVaccination": "01 - Yes"
-}
-
+// Find a value in a nested object. This function is used to search API responses for sensitive info.
 function findNested(obj, value) {
   for (const key of Object.keys(obj)) {
     if (obj[key] === value) {
@@ -85,8 +46,6 @@ function findNested(obj, value) {
   return false
 }
 
-const authorizedEndpoints = ["/user", "/log", "/notification", "/getVAPIDPublicKey"]
-const apiResponses = [];
 
 describe("✨ Good luck, me!", () => {
   const wait = new Promise(r => {
@@ -94,7 +53,7 @@ describe("✨ Good luck, me!", () => {
     describe('Registration', () => {
       
       describe("Applying invalid registration mutations", () => {
-        invalidRegistrationMutators.map((mutation, index) => {
+        invalidRegistrationMutations.map((mutation, index) => {
           const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
           it(`Should return bad request if ${JSON.stringify(mutation)}`, (done) => {
             chai.request(app)
@@ -200,7 +159,7 @@ describe("✨ Good luck, me!", () => {
 
 
       describe("Applying invalid registration mutations on update user info", done => {
-        invalidRegistrationMutators.map((mutation, index) => {
+        invalidRegistrationMutations.map((mutation, index) => {
           const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
           it(`Should not change the user if invalid registration mutation ${JSON.stringify(mutation)} is applied`, (done) => {
             chai.request(app)
