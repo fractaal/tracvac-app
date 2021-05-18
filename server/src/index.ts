@@ -57,17 +57,6 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
   // Secure static paths to admin interface
   app.use('/secure', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
   app.use('/secure/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
-  /**
-  app.use('/secure', async (req, res, next) => {
-    if (req.socket.localAddress === req.socket.remoteAddress) {
-      next();
-    } else {
-      logger.warn(`An attempt to access secure static files was made from ${req.socket.remoteAddress}`)
-      res.status(401).json({result: false, message: "You are not authorized"});
-      return;
-    }
-  })
-   */
   app.use('/secure', express.static(internalStaticPath));
 
   logger.log(`Static files path: ${staticPath}`);
