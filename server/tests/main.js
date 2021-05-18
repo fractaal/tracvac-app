@@ -1,6 +1,14 @@
 require('dotenv').config()
 
+const exceptionLogger = (error) => {
+  console.error(error.stack)
+  fs.writeFileSync(path.resolve(process.cwd(), `${Date.now()}-test-error.log`), error.stack, {encoding: 'utf-8'});
+}
+
+process.on('uncaughtException', exceptionLogger)
+process.on('unhandledRejection', exceptionLogger)
 process.env.NODE_ENV = "TEST"
+
 const chai = require('chai');
 const chaiHttp = require('chai-http')
 const { expect } = chai;
