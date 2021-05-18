@@ -56,10 +56,16 @@ jobs:
 
       - name: Programatically Update Version
         run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           node ./version-from-tag.js
           git add package.json
           git commit -m "bump version"
-          git push -u origin main
+
+      - name: Push Version Bump
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run build script
         run: node build
