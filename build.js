@@ -72,14 +72,14 @@ async function install() {
 async function build() {
   console.log ("Building server software...")
   console.log("Compiling TypeScript")
-  await cmd ("cd server && tsc")
+  await cmd ("cd server && npx tsc")
 
   if (!serverOnly()) {
     console.log("Building front end application")
-    await cmd("cd client && quasar build -m pwa") 
+    await cmd("cd client && npx quasar build -m pwa") 
     
     console.log("Building administrative interface")
-    await cmd("cd admin && quasar build -m spa")
+    await cmd("cd admin && npx quasar build -m spa")
   }
   
   if (!noExeFlagIsPresent() || !serverOnly()) {
