@@ -211,7 +211,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
     })
 
     app.get('/admin/export', async (_, response) => {
-        const [result, data] = await exportTable(UserModel, 'users', ['password'])
+        const [result, data] = await exportTable(await UserModel.query().select('*'), ['password'])
         if (result) {
             response.download(data) 
         } else {
@@ -220,7 +220,13 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
     });
 
     app.get('/admin/export-logs', async(_, response) => {
-        const [result, data] = await exportTable(LogModel, 'logs', [])
+        const [result, data] = await exportTable(
+            await LogModel.query()
+                .select(raw('logs.*, users.email, users."firstName", users."middleName", users."lastName"'))
+                .leftJoinRelated("users")
+                .where(raw('logs."userId" = users.id')),
+                []
+            )
         if (result) {
             response.download(data)
         } else {
