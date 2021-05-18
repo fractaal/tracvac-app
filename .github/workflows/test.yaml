@@ -37,7 +37,7 @@ jobs:
         run: cd server && tsc
 
       - name: Run tests
-        run: cd server && npm run test
+        run: cd server && npm run test-watch
         env:
           DB_URL: ${{ secrets.DB_URL }}
 
