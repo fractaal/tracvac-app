@@ -15,7 +15,7 @@ jobs:
   build:
     name: Build
     # The type of runner that the job will run on
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -48,7 +48,7 @@ jobs:
         working-directory: ./gitmoji-semver
         run: |
           make scaffold F=../.semver.yml O=..
-          
+
       - name: Release
         working-directory: ./.release
         env:
