@@ -19,6 +19,7 @@ const cmd = (command) => {
 }
 
 (async () => {
+  console.log("noexe flag: ", noExeFlagIsPresent(), " server only: ", serverOnly())
   try {
     await cmd ("yarn -v")
   } catch(err) {
@@ -73,7 +74,7 @@ async function build() {
   console.log("Compiling TypeScript")
   await cmd ("cd server && tsc")
 
-  if (serverOnly()) {
+  if (!serverOnly()) {
     console.log("Building front end application")
     await cmd("cd client && quasar build -m pwa") 
     
