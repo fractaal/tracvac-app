@@ -7,8 +7,7 @@
   "author": "benedict.jude.rocat@gmail.com",
   "license": "MIT",
   "scripts": {
-    "test": "mocha ./tests --timeout 10000",
-    "test-watch": "mocha ./tests --timeout 10000 --watch",
+    "test": "mocha tests --timeout 10000",
     "distributable-build": "pkg package.json -t node14-win",
     "start": "node dist/cluster",
     "generate-models": "objection-generator generate ./objection-generator/schema.yaml ./src/database",
