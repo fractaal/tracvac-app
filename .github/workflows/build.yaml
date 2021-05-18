@@ -31,31 +31,53 @@ jobs:
       - name: Run build script
         run: node build
 
-      - name: 'Get latest tag'
-        uses: oprypin/find-latest-tag@v1
+  release:
+    name: Release
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          repository: fractaal/tracvac-app  # The repository to scan.
-          releases-only: false  # We know that all relevant tags have a GitHub release for them.
-        id: previoustag  # The step ID to refer to later.
-      
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Install jq yq
+        run: |
+          sudo wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /usr/bin/jq &&\
+          sudo chmod +x /usr/bin/jq
+          sudo pip install yq
+          jq --version
+          yq --version
+      - name: Install gitmoji-semver
+        run: |
+          git clone https://github.com/nkmr-jp/gitmoji-semver -b v2.0.0
+      - name: Generate semantic-release configs
+        working-directory: ./gitmoji-semver
+        run: |
+          make scaffold F=../.semver.yml O=..
+      - name: Release
+        working-directory: ./.release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.previoustag.outputs.tag }}
-          release_name: Tracvac Server ${{ steps.previoustag.outputs.tag }}
-          draft: false
-          prerelease: false
+        run: |
+          npm install
+          npx semantic-release
+
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release
         id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v1actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          upload_url: ${{ steps.get_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./server/tracvac-server.exe
           asset_name: tracvac-server.exe
           asset_content_type: application/vnd.microsoft.portable-executable
