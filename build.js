@@ -2,7 +2,11 @@ const { exec, execSync } = require('child_process')
 const args = process.argv.slice(2);
 
 function noExeFlagIsPresent() {
-  return args[0] === '--noexe'
+  return args.indexOf('--noexe') !== -1
+}
+
+function serverOnly() {
+  return args.indexOf('--serverOnly') !== -1
 }
 
 const cmd = (command) => {
@@ -29,7 +33,7 @@ const cmd = (command) => {
     await cmd ("yarn global add typescript")
   }
 
-  if (!noExeFlagIsPresent())
+  if (!noExeFlagIsPresent() || !serverOnly())
   try {
     await cmd ("pkg -v")
   } catch(err) {
@@ -37,11 +41,13 @@ const cmd = (command) => {
     await cmd("yarn global add pkg")
   }
 
-  try {
-    await cmd ("quasar -v")
-  } catch(err) {
-    console.log("Installing Quasar ... ")
-    await cmd ("yarn global add @quasar/cli")
+  if (!serverOnly()) {
+    try {
+      await cmd ("quasar -v")
+    } catch(err) {
+      console.log("Installing Quasar ... ")
+      await cmd ("yarn global add @quasar/cli")
+    }
   }
 
   await install();
@@ -50,12 +56,16 @@ const cmd = (command) => {
 })()
 
 async function install() {
-  console.log("Installing dependencies for client...")
-  await cmd ("cd client && yarn install --production=false")
   console.log("Installing dependencies for server...")
   await cmd ("cd server && yarn install --production=false")
-  console.log("Installing dependencies for admin...")
-  await cmd ("cd admin && yarn install --production=false")
+
+  if (!serverOnly()) {
+    console.log("Installing dependencies for client...")
+    await cmd ("cd client && yarn install --production=false")
+
+    console.log("Installing dependencies for admin...")
+    await cmd ("cd admin && yarn install --production=false")
+  }
 }
 
 async function build() {
@@ -63,13 +73,15 @@ async function build() {
   console.log("Compiling TypeScript")
   await cmd ("cd server && tsc")
 
-  console.log("Building front end application")
-  await cmd("cd client && quasar build -m pwa") 
+  if (serverOnly()) {
+    console.log("Building front end application")
+    await cmd("cd client && quasar build -m pwa") 
+    
+    console.log("Building administrative interface")
+    await cmd("cd admin && quasar build -m spa")
+  }
   
-  console.log("Building administrative interface")
-  await cmd("cd admin && quasar build -m spa")
-  
-  if (!noExeFlagIsPresent()) {
+  if (!noExeFlagIsPresent() || !serverOnly()) {
     console.log("Packaging into executable...")
     await cmd ("cd server && yarn distributable-build") 
   }
