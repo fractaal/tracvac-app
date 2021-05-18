@@ -31,13 +31,13 @@ jobs:
           architecture: x64 
 
       - name: Install packages
-        run: npm install
+        run: cd server && npm install
 
       - name: Install Mocha testing suite
         run: npm install --global mocha
       
-      - name: Run build script  
-        run: node build --serverOnly
+      - name: Compile TypeScript
+        run: tsc
 
       - name: Run tests
         run: yarn test
