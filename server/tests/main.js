@@ -1,4 +1,5 @@
 require('dotenv').config()
+const fs = require('fs')
 
 const exceptionLogger = (error) => {
   console.error(error.stack)
