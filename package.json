@@ -1,6 +1,6 @@
 {
   "name": "tracvac-app",
-  "version": "1.9.7",
+  "version": "v1.9.8",
   "description": "Vaccine tracking application",
   "scripts": {
     "test": "cd server && yarn test",
