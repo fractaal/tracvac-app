@@ -50,7 +50,7 @@ initialize().then(() => {
       res.json({result: true, message: "Successfully saved subscription."});
       
     } else {
-      res.status(400).json({result: false, message: `You are not authenticated.`})
+      res.status(400).json({result: false, message: `You are not authenticated`})
     }
   })
 })

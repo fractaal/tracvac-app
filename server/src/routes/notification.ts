@@ -9,7 +9,7 @@ app.use('/notification', (request, response, next) => {
     if (request.isAuthenticated) {
         next();
     } else {
-        response.status(400).json({result: false, message: `You are not authorized`});
+        response.status(400).json({result: false, message: `You are not authenticated`});
     }
 })
 
