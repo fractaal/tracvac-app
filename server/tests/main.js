@@ -1,5 +1,6 @@
 require('dotenv').config()
 const fs = require('fs')
+const path = require('path')
 
 const exceptionLogger = (error) => {
   console.error(error.stack)
@@ -25,6 +26,12 @@ const email = `${username}@${password}.com`
 const validRegistrationData = Object.assign({}, require("./validRegistrationData"), {username, password, email})
 const invalidRegistrationMutations = require("./invalidRegistrationMutations")
 
+const exemptedEndpoints = [
+  {method: 'post', path: '/login'},
+  {method: 'get', path: '/is-authorized'},
+  {method: 'get', path: '/reception'}
+]
+
 // Add in the computed invalid username
 invalidRegistrationMutations[0].username = username.substring(0, 5)
 
@@ -33,7 +40,6 @@ let token = "";
 let currentUserInfo = {};
 let logs = [];
 
-const authorizedEndpoints = ["/user", "/log", "/notification", "/getVAPIDPublicKey"]
 const apiResponses = [];
 
 // This is horrible, but by the time we'll check for the vapid private key, this promise should have resolved. 
@@ -58,9 +64,7 @@ function findNested(obj, value) {
 
 describe("✨ Good luck, me!", () => {
   const wait = new Promise(r => {
-
     describe('Registration', () => {
-      
       describe("Applying invalid registration mutations", () => {
         invalidRegistrationMutations.map((mutation, index) => {
           const invalidRegistrationData = Object.assign({}, validRegistrationData, mutation)
@@ -264,24 +268,44 @@ describe("✨ Good luck, me!", () => {
           .end((err, res) => {
             expect(res.body.result).to.equals(true)
             expect(res.body.publicKey).to.be.a("string")
+            r()
             done()
           })
       })
     })
+  })
 
-    describe("Authorized Endpoints Security Audit", () => {
-      authorizedEndpoints.map((endpoint, index) => {
-        ["get", "post", "patch", "delete"].map(method => {
+  const wait2 = new Promise(r => {
+    wait.then(() => {
+      describe("Authorized Endpoints Security Audit", () => {
+        const authorizedEndpoints = app._router.stack
+          .filter(x=> x.route && x.route.path && Object.keys(x.route.methods) != 0)
+          .map(layer => ({method: layer.route.stack[0].method, path: layer.route.path}))
+          .filter(value => { 
+            for (const endpoint of exemptedEndpoints) {
+              if (endpoint.path == value.path && endpoint.method == value.method) return false;
+            }
+            return true;
+          });
+        
+        console.log("\tEndpoints detected: ")
+        authorizedEndpoints.map(item => console.log(`\t${item.method.toUpperCase()} ${item.path}`))
+        authorizedEndpoints.map((item, index) => {
+
+          const method = item.method
+          const endpoint = item.path
+
           if (endpoint === '/user' && method === 'post') return
           
           it(`Should forbid this ${method.toUpperCase()} request to endpoint ${endpoint}`, done => {
             chai.request(app)
               [method](endpoint)
               .end((err, res) => {
-                console.log("\t", res.body)
+                console.log(`\t ${endpoint}`, res.body, "STATUS CODE - ", res.status)
                 expect(res.status).to.be.greaterThanOrEqual(400)
                 apiResponses.push(res.body)
-                if (index+1 === authorizedEndpoints.length) r();
+                if (index+1 === authorizedEndpoints.length) 
+                r();
                 done()
               })
           })
@@ -290,8 +314,7 @@ describe("✨ Good luck, me!", () => {
     })
   })
 
-  
-  wait.then(() => {
+  wait2.then(() => {
     describe("API Responses Security Audit", () => {
       it(`Total of ${apiResponses.length} API responses`, done => { done() })
       apiResponses.map((response, index) => {
