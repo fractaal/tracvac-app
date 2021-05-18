@@ -111,55 +111,55 @@ const columns = [
     name: 'fever',
     label: 'Fever?',
     field: 'fever',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'abdominalPain',
     label: 'Abdominal Pain?',
     field: 'abdominalPain',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'chills',
     label: 'Chills?',
     field: 'chills',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'cough',
     label: 'Cough?',
     field: 'cough',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'diarrhea',
     label: 'Diarrhea?',
     field: 'diarrhea',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'difficultyBreathing',
     label: 'Difficulty Breathing?',
     field: 'difficultyBreathing',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'headache',
     label: 'Headache?',
     field: 'headache',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'soreThroat',
     label: 'Sore Throat?',
     field: 'soreThroat',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'nauseaOrVomiting',
     label: 'Nausea or Vomiting?',
     field: 'nauseaOrVomiting',
-    format: (val: boolean) => `${val ? '❌ Yes' : '✅ No'}`
+    format: (val: boolean) => `${val ? '⚠ Yes' : '✅ No'}`
   },
   {
     name: 'others',

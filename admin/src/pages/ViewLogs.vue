@@ -28,6 +28,13 @@
                     Yes
                   </div>
                 </div>
+                <br/>
+                <div class="font-bold bg-gray-100 p-4 rounded-xl">
+                  <p class="text-lg p-0 m-0" :class="log.others ? 'text-black' : 'text-gray-400'">Other: 
+                    <span class="font-bold" v-if="log.others">{{log.others}}</span>
+                    <span class="font-bold font-italic" v-else>NONE</span>
+                  </p>
+                </div>
               </q-card-section>
             </q-card>
           </div>

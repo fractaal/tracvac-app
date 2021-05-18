@@ -7,9 +7,9 @@ import { knex } from './database'
 
 const logger = Logger('Exporter')
 
-export async function exportTable(model: any, tableName: string, columnsToExclude: string[]): Promise<[boolean, string]> {
+export async function exportTable(modelData: Record<string,any>[], columnsToExclude: string[]): Promise<[boolean, string]> {
   const start = Date.now();
-  logger.log(`Performing table export on ${tableName}!`)
+  logger.log(`Exporting data as xslx!`)
 
   let workbook: ExcelJS.Workbook;
   let sheet: ExcelJS.Worksheet;
@@ -24,10 +24,9 @@ export async function exportTable(model: any, tableName: string, columnsToExclud
 
       sheet = workbook.addWorksheet("people");
 
-      const _columns: string[] = (await knex.raw(`SELECT * FROM information_schema.columns WHERE table_name = '${tableName}'`)).rows.map((val: any) => val.column_name);
       const columns = [];
 
-      for (const column of _columns) {
+      for (const column of Object.keys(modelData[0])) {
           if (columnsToExclude.indexOf(column) === -1) {
             columns.push({
                 header: column,
@@ -43,26 +42,15 @@ export async function exportTable(model: any, tableName: string, columnsToExclud
       return [false, `Error occured while initializing the workbook: ${err}`]
   }
 
-  let table: typeof model[];
-
   try {
-      table = await model.query().select('*');
-  } catch (err) {
-      logger.error(`Error occurred while querying the database: ${err}`);
-      return [false, `Error occured while querying the database: ${err}`]
-  }
-
-  try {
-      for (const user of table) {
-          sheet.addRow(user);
-      }
+      for (const item of modelData) sheet.addRow(item);
 
       const folder = await mkdtemp(path.join(os.tmpdir(), 'tracvac-export-'))
       const filePath = path.join(folder, `export-${Date.now()}.xlsx`)
       await workbook.xlsx.writeFile(filePath);
 
       logger.success(`Data export complete.`)
-      logger.success(`Took ${Date.now() - start}ms for ${table.length} users`)
+      logger.success(`Took ${Date.now() - start}ms for ${modelData.length} items`)
       logger.success(`Export path: ${filePath}`)
 
       return [true, filePath]

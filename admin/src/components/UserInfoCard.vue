@@ -58,6 +58,10 @@ const medicalHistory = [
     displayName: 'Comorbidity',
   },
   {
+    name: 'otherComorbidity',
+    displayName: 'Comorbidity (Other)',
+  },
+  {
     name: 'covidHistory',
     displayName: 'Diagnosed with COVID-19?',
   },
