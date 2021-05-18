@@ -37,7 +37,7 @@ jobs:
         run: npm install --global mocha
       
       - name: Compile TypeScript
-        run: tsc
+        run: cd server && tsc
 
       - name: Run tests
         run: yarn test
