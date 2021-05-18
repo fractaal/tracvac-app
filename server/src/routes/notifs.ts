@@ -10,7 +10,6 @@ const logger = Logger("Notifications")
 initialize().then(() => {
   app.get('/getVAPIDPublicKey', async (req, res) => {
     if (req.isAuthenticated) {
-      console.log(getVapidKeys());
       try {
         res.json({result: true, publicKey: getVapidKeys().vapidPublicKey});
       } catch(err) {
