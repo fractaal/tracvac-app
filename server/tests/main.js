@@ -1,6 +1,4 @@
-if (process.env.IS_GITHUB_ACTIONS != "true") {
-  require('dotenv').config()
-}
+require('dotenv').config()
 
 const exceptionLogger = (error) => {
   console.error(error.stack)
@@ -9,7 +7,6 @@ const exceptionLogger = (error) => {
 
 process.on('uncaughtException', exceptionLogger)
 process.on('unhandledRejection', exceptionLogger)
-
 process.env.NODE_ENV = "TEST"
 
 const chai = require('chai');

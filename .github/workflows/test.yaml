@@ -43,5 +43,4 @@ jobs:
         run: yarn test
         env:
           DB_URL: ${{ secrets.DB_URL }}
-          IS_GITHUB_ACTIONS: true
 
