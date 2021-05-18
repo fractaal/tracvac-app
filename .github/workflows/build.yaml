@@ -1,0 +1,63 @@
+
+# This is a basic workflow to help you get started with Actions
+
+name: Build
+
+# Controls when the action will run. 
+on:
+    pull_request:
+      branches: [main]
+    push:
+      branches: [main]
+    
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build-and-test:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out master branch
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: 14.8.0
+          architecture: x64 
+      
+      - name: Run build script
+        run: node build
+
+      - name: 'Get latest tag'
+        uses: oprypin/find-latest-tag@v1
+        with:
+          repository: fractaal/tracvac-app  # The repository to scan.
+          releases-only: false  # We know that all relevant tags have a GitHub release for them.
+        id: previoustag  # The step ID to refer to later.
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.previoustag.outputs.tag }}
+          release_name: Tracvac Server ${{ steps.previoustag.outputs.tag }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./server/tracvac-server.exe
+          asset_name: tracvac-server.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
