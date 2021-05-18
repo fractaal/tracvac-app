@@ -32,6 +32,9 @@ jobs:
 
       - name: Install packages
         run: npm install
+
+      - name: Install Mocha testing suite
+        run: npm install --global mocha
       
       - name: Run build script  
         run: node build --serverOnly
