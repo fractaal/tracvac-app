@@ -56,7 +56,6 @@ jobs:
 
       - name: Programatically Update Version
         run: |
-          cd server
           node ./version-from-tag.js
           git add package.json
           git commit -m "bump version"
