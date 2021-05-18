@@ -3,6 +3,7 @@
   "version": "1.9.5",
   "description": "Vaccine tracking application",
   "scripts": {
+    "test": "cd server && yarn test",
     "build": "node build.js",
     "heroku-postbuild": "node build.js --noexe",
     "start": "cd server && yarn start"
