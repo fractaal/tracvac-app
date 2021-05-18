@@ -2,7 +2,7 @@ import Logger from '../logger';
 import { app } from '../';
 import {getConfig} from "../config";
 
-const logger = Logger('Reception Route');
+const logger = Logger('ReceptionRoute');
 
 app.get('/reception', async (req, res) => {
   try {

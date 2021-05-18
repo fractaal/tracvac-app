@@ -2,7 +2,7 @@ import { app } from "../index";
 import { NotificationModel } from "../database/models/NotificationModel";
 import Logger from '../logger';
 
-const logger = Logger("Notification Route");
+const logger = Logger("NotificationRoute");
 
 // Notifications route.
 app.use('/notification', (request, response, next) => {

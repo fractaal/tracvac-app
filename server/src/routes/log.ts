@@ -2,7 +2,7 @@ import { app } from '../';
 import Logger from '../logger';
 import { LogModel } from '../database/models/LogModel';
 
-const logger = Logger('Log Route')
+const logger = Logger('LogRoute')
 
 app.use('/log', async (request, response, next) => {
   if (request.isAuthenticated) {
