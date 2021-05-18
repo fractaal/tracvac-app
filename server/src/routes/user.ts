@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { UserModel } from '../database/models/UserModel';
 import {userValidator} from "../validation";
 
-const logger = Logger('User Route');
+const logger = Logger('UserRoute');
 
 // Registration route
 app.post('/user', async (request, response) => {

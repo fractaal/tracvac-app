@@ -10,7 +10,7 @@ import * as PushScheduler from '../push-scheduler'
 import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 import { exportTable } from "../exporter"
 
-const logger = Logger("Administrator Route");
+const logger = Logger("AdminRoute");
 
 /**
 const adminCheckerMiddleware = (request: Request, response: Response, next: NextFunction) => {

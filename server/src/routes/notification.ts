@@ -2,14 +2,14 @@ import { app } from "../index";
 import { NotificationModel } from "../database/models/NotificationModel";
 import Logger from '../logger';
 
-const logger = Logger("Notification Route");
+const logger = Logger("NotificationRoute");
 
 // Notifications route.
 app.use('/notification', (request, response, next) => {
     if (request.isAuthenticated) {
         next();
     } else {
-        response.status(400).json({result: false, message: `You are not authorized`});
+        response.status(400).json({result: false, message: `You are not authenticated`});
     }
 })
 

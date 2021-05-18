@@ -1,6 +1,6 @@
 import Logger from './logger'
 
-const logger = Logger("Database Config")
+const logger = Logger("DatabaseConfig")
 
 export interface DatabaseConfig {
     connectionString: string;

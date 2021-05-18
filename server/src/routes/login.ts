@@ -7,7 +7,7 @@ import { UserModel } from '../database/models/UserModel';
 import {getConfig} from "../config";
 
 
-const logger = Logger('Login Route');
+const logger = Logger('LoginRoute');
 
 // Login route
 app.post('/login', async (req, res) => {

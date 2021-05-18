@@ -6,7 +6,7 @@ import Logger from '../logger';
 import path from 'path';
 import {UploadedFile} from "express-fileupload";
 
-const logger = Logger('Profile Picture Route');
+const logger = Logger('ProfilePictureRoute');
 
 // Make a new folder inside the static route
 if (!fs.existsSync(path.resolve(staticPath, 'users'))) fs.mkdirSync(path.resolve(staticPath, 'users'))

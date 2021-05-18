@@ -15,7 +15,7 @@ import cors from 'cors';
 import expressBasicAuth from "express-basic-auth";
 import { UserModel } from './database/models/UserModel';
 
-const logger = Logger(`Worker Main`);
+const logger = Logger(`Index`);
 export const app = express();
 export const staticPath = path.resolve(process.cwd(), 'public')
 export const internalStaticPath = path.join(__dirname, '../static')
