@@ -2,12 +2,12 @@ import chalk from 'chalk';
 import cluster from 'cluster';
 
 let activeStyle = process.env.LOG_STYLE ?? "MEDIUM"
-const emojisEnabled = !!(process.env.LOG_EMOJIS ?? true)
-const emojis = ['⏹', 'ℹ', '⚠', '❌', '✔']
+let emojisEnabled = !!(parseInt(process.env.LOG_EMOJIS as string) ?? true)
+const emojis = ['⏹', 'ℹ', '⚠', '☢', '✔']
 const styles = {
   SHORT: ['M', 'I', 'W', 'E', 'S'],
   MEDIUM: ['MOD', 'INF', 'WRN', 'ERR', 'SCS'],
-  LONG: ['MODULE', 'INFO', 'WARN', 'ERROR', 'SUCCESS']
+  LONG: ['  MODULE  ', '   INFO   ', '   WARN   ', '  ERROR!  ', ' SUCCESS! ']
 }
 const style = (level: number) => {
   // @ts-ignore
