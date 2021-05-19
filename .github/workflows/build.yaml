@@ -83,3 +83,5 @@ jobs:
           tag: ${{ steps.get_release.outputs.tag_name }}
           allowUpdates: true
           artifact: ./server/tracvac-server.exe
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
