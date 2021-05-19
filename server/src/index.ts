@@ -66,19 +66,21 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
   const config = await getConfig()
 
   // HTTPS middleware
+  /* Because of the changes, we don't actually need this anymore.
   const protocolIsSecure = (req: Request) => req.secure || req.get("X-Forwarded-Proto") === 'https';
   app.use(async (req, res, next) => {
-    logger.log(`${req.method} ${req.url} ${req.ip}`)
+    logger.log(`(S:${req.secure}) ${req.method} ${req.url} - ${req.ip}`)
     if (!protocolIsSecure(req) && !isHTTPSAvailable) {
       logger.warn(`This request (${req.ip}) is not secure. Sensitive data such as login credentials or access tokens can be intercepted.`)
       next()
     } else if (!protocolIsSecure(req) && isHTTPSAvailable) {
       logger.log(`Redirecting ${req.ip}'s insecure request to ${req.headers.host} to HTTPS... (${'https://' + req.headers.host + req.url})`)
-      res.redirect(307, 'https://' + req.headers.host + req.url)
+      res.redirect(302, 'https://' + req.headers.host + req.url)
     } else {
       next()
     }
   });
+  */
 
   // JWT Middleware
   logger.log("Initializing JWT middleware");
@@ -126,26 +128,32 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
   })
 
   // HTTPS / HTTP server starts
-  logger.log(`HTTP - Binding to port ${process.env.PORT ?? config?.httpPort ?? 80}.`)
-  http.createServer(app).listen(config?.httpPort).on('error', (err) => {
-    logger.error(`Failed to bind to port ${config?.httpPort}: ` + err);
-  });
+  const startHttp = () => {
+    logger.log(`HTTP: Binding to port ${process.env.PORT ?? config?.httpPort ?? 80}.`)
+    http.createServer(app).listen(config?.httpPort).on('error', (err) => {
+      logger.error(`Failed to bind to port ${config?.httpPort}: `, err.stack);
+    });
+  }
 
-  const privkeyLocation = path.join(process.env.CERT_PATH ?? '', 'privkey.pem')
-  const certLocation = path.join(process.env.CERT_PATH ?? '', 'cert.pem')
+  const privkeyLocation = process.env.KEY_PATH ?? "NONE"
+  const certLocation = process.env.CERT_PATH ?? "NONE"
 
   if (fs.existsSync(privkeyLocation) && fs.existsSync(certLocation)) {
-    logger.log(`HTTPS certificates detected! Binding to port ${config?.httpsPort}.`)
+    logger.log(`HTTPS: Certificates detected! Binding to port ${config?.httpsPort}.`)
     https.createServer({
       key: fs.readFileSync(privkeyLocation),
       cert: fs.readFileSync(certLocation),
     }, app)
       .listen(config?.httpsPort).on('error', (err) => {
-        logger.error(`Failed to bind to port ${config?.httpsPort}: ` + err);
+        logger.error(`Failed to bind to port ${config?.httpsPort}: `, err.stack);
         isHTTPSAvailable = false;
+        startHttp()
       });
+    logger.log(`HTTPS: Starting minimal HTTP server for redirection.`)
+    express().all('*', (req, res) => res.redirect(302, 'https://' + req.headers.host + req.url)).listen(config?.httpPort)
   } else {
     isHTTPSAvailable = false;
+    startHttp()
   }
 
   logger.success("Server start complete! Startup took " + (Date.now() - start) + "ms");
