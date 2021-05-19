@@ -377,6 +377,9 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             .groupBy('vaccineManufacturer')
         ).forEach((val: any) => vaccineManufacturers[val.vaccineManufacturer] = val.count)
 
+        // Prevent null key from showing in vaccineManufacturers
+        delete vaccineManufacturers.null
+
         const alerts: {title: string; message?: string; type: string;}[] = []
 
         alerts.push({title: `${totalUserCount} users registered`, type: 'info'})
