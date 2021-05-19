@@ -1,6 +1,7 @@
 const start = Date.now();
 
 // Libraries
+import morgan from "morgan"
 import http from 'http';
 import https from 'https';
 import express, {NextFunction, Request, Response } from 'express';
@@ -46,6 +47,9 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
 
 
 (async () => {
+  // Access logging.
+  app.use(morgan("combined", {stream: fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })}))
+  
   // Public paths
   app.use('/public', express.static(staticPath));
   app.use('/public', express.static(path.join(__dirname, '../public')));
