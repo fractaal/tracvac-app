@@ -32,7 +32,7 @@ export default function register (name: string) {
     },
     warn: (...data: any[]) => {
       if (process.env.NODE_ENV === "TEST") return
-      console.warn(chalk.yellowBright(`${style(2)} | ${name}@${clusterName}]`, ...data))
+      console.warn(chalk.yellowBright(`[${style(2)} | ${name}@${clusterName}]`, ...data))
     },
     error: (...data: any[]) => {
       if (process.env.NODE_ENV === "TEST") return
