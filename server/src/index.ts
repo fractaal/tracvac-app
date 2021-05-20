@@ -48,7 +48,7 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
 
 (async () => {
   // Access logging.
-  app.use(morgan("combined", {stream: fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })}))
+  app.use(morgan("combined", {stream: fs.createWriteStream(path.resolve(process.cwd(), 'access.log'), { flags: 'a' })}))
   
   // Public paths
   app.use('/public', express.static(staticPath));
