@@ -10,6 +10,9 @@ import * as vapid from './vapid';
 
 let forksBeforeStop = 5;
 
+// Change window title
+process.stdout.write(`${String.fromCharCode(27)}]0;${'TracVac Server ' + require('../package.json').version}${String.fromCharCode(7)}`);
+
 (async () => {
     if (cluster.isMaster) {
         const logger = Logger("Master");
