@@ -1,17 +1,27 @@
 <template>
   <q-page class="p-8">
     <h4 class="m-0 font-light">CONFIGURATION</h4>
-    <div class="my-8 mx-auto w-1/2">
-      <q-input class="mt-8" label="Name" v-model="store.serverConfig.name" disable/>
-      <p class="my-1">The name of this Tracvac site. It could be the company name, or the name of the LGU, so long as it's a good indicator of who's hosting this site.</p>
-      <q-input class="mt-8" label="Location" v-model="store.serverConfig.location" disable/>
-      <p class="my-1">Where is this Tracvac site physically situated in?</p>
-      <q-input class="mt-8" label="Local Government Unit Website" v-model="store.serverConfig.websiteUrl" disable/>
-      <p class="my-1">Website address of this LGU.<br><i>Note: If you leave this blank, the button that leads to the LGU website in the app will not be shown.</i></p>
-      <q-input class="mt-8" label="HTTP Port" v-model="store.serverConfig.httpPort" type="number" disable/>
-      <p class="my-1">Port number that the server will listen to for HTTP requests. Defaults to 80.</p>
-      <q-input class="mt-8" label="HTTPS Port" v-model="store.serverConfig.httpsPort" type="number" disable/>
-      <p class="my-1">Port number that the server will listen to for HTTPS requests. Defaults to 443.</p>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="mt-16 mx-auto w-3/4">
+        <h6 class="m-0 m-0 p-0">GENERAL</h6>
+        <q-input class="" label="Name" v-model="store.serverConfig.name" disable/>
+        <p class="my-1">The name of this Tracvac site. It could be the company name, or the name of the LGU, so long as it's a good indicator of who's hosting this site.</p>
+        <q-input class="mt-2" label="Location" v-model="store.serverConfig.location" disable/>
+        <p class="my-1">Where is this Tracvac site physically situated in?</p>
+        <q-input class="mt-2" :label="`${this.store.serverConfig.name} website`" v-model="store.serverConfig.websiteUrl" disable/>
+        <p class="my-1">Website address of {{store.serverConfig.name}}, if there is one.<br><i>Note: If you leave this blank, the button that leads to the website in the app will not be shown.</i></p>
+        <q-input class="mt-2" label="HTTP Port" v-model="store.serverConfig.httpPort" type="number" disable/>
+        <p class="my-1">Port number that the server will listen to for HTTP requests. Defaults to 80.</p>
+        <q-input class="mt-2" label="HTTPS Port" v-model="store.serverConfig.httpsPort" type="number" disable/>
+        <p class="my-1">Port number that the server will listen to for HTTPS requests. Defaults to 443.</p>
+      </div>
+      <div class="mt-16 mr-32">
+        <h6 class="m-0 p-0 font-black">Why can't I change them here?</h6>
+        <p>
+          Because of the way Tracvac Server is designed, important configuration settings like this cannot be changed on-the-fly.
+          Modify the .env file to change settings, and restart Tracvac Server for the changes to take effect.
+        </p>
+      </div>
     </div>
   </q-page>
 </template>
