@@ -27,6 +27,6 @@ if (package.version == getLatestTag()) {
 // Syncing server version with upper package.json version 
 console.log("Syncing upper package.json version with server package.json version")
 const changed = Object.assign({}, serverPackage, {version: package.version})
-fs.writeFileSync("./server/package.json", JSON.stringify(changed, null, 2))  
+writeFileSync("./server/package.json", JSON.stringify(changed, null, 2))  
 console.log(execSync('git add ./server/package.json', {encoding: 'utf-8'}))
 console.log(execSync('git commit -m "bump version"', {encoding: 'utf-8'}))
