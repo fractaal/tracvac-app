@@ -6,11 +6,11 @@
       bordered
       content-class="bg-grey-1"
     >
-      <h6 class="px-8 mt-12 m-0 -my-2 font-bold truncate">{{store.serverConfig.name}}</h6>
-      <p class="px-8 m-0 mb-4">at <b>{{store.serverConfig.location}}</b></p>
-      <p class="px-8 mb-2">TRACVAC ADMINISTRATOR</p>
+      <h5 class="px-8 m-0 -my-1 mt-8 font-bold truncate">{{store.serverConfig.name}}</h5>
+      <p class="px-8 m-0 -my-1">at <b>{{store.serverConfig.location}}</b></p>
+      <p class="p-0 m-0 px-8 mb-2 text-sm">on TracVac <b>{{require('../../../package.json').version}}</b></p>
       <q-list class="my-auto blo">
-        <q-item clickable v-ripple class="p-12" @click="$router.push('/')">
+        <q-item clickable v-ripple class="px-12 py-8" @click="$router.push('/')">
           <q-item-section avatar>
             <q-icon color="primary" name="person" size="lg"/>
           </q-item-section>
@@ -20,7 +20,7 @@
             <i class="text-sm">Change vaccination status of people on this site.</i>
           </q-item-section>
         </q-item>
-        <q-item clickable v-ripple class="p-12" @click="$router.push('/notif')">
+        <q-item clickable v-ripple class="px-12 py-8" @click="$router.push('/notif')">
           <q-item-section avatar>
             <q-icon color="primary" name="announcement" size="lg" />
           </q-item-section>
@@ -30,7 +30,7 @@
             <i class="text-sm">Push notifications to everyone on this site.</i>
            </q-item-section>
         </q-item>
-        <q-item clickable v-ripple class="p-12" @click="$router.push('/view-logs')">
+        <q-item clickable v-ripple class="px-12 py-8" @click="$router.push('/view-logs')">
           <q-item-section avatar>
             <q-icon color="primary" name="fas fa-pen" size="lg" />
           </q-item-section>
@@ -43,7 +43,7 @@
             <i class="text-sm">Logs users have created.</i>
           </q-item-section>
         </q-item>
-        <q-item clickable v-ripple class="p-12" @click="$router.push('/insight')">
+        <q-item clickable v-ripple class="px-12 py-8" @click="$router.push('/insight')">
           <q-item-section avatar>
             <q-icon color="primary" name="fas fa-lightbulb" size="lg" />
           </q-item-section>
@@ -53,7 +53,7 @@
             <i class="text-sm">Data analytics.</i>
           </q-item-section>
         </q-item>
-        <q-item clickable v-ripple class="p-12" @click="$router.push('/config')">
+        <q-item clickable v-ripple class="px-12 py-8" @click="$router.push('/config')">
           <q-item-section avatar>
             <q-icon color="primary" name="settings" size="lg"/>
           </q-item-section>
