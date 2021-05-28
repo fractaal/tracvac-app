@@ -106,7 +106,8 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                     user.isVaccineReady === undefined &&
                     user.isPUM === undefined &&
                     user.isPUI === undefined &&
-                    user.dosageNumber === undefined
+                    user.dosageNumber === undefined &&
+                    user.group === undefined
                 ) response.status(400).json({result: false, message: "Missing parameters."})
             }
 
@@ -127,6 +128,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             isPUI: !!user.isPUI,
                             isPUM: !!user.isPUM,
                             dosageNumber: user.dosageNumber
+                            group: user.group
                         });
                         // Queue a push to be handled by the push scheduler 
                         PushScheduler.enqueue(user.id as number, {title: "Your vaccine/vaccination status has changed!", message: "You might want to check it out!"})
@@ -418,5 +420,17 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                 "Vaccine Manufacturers": vaccineManufacturers
             }
         })
+    })
+
+    // Groups 
+    app.post('/admin/getAllUsersFromGroup', async (req, res) => {
+        if (!req.body.group) { res.json({result: false, message: "Missing group parameter"}); return; }
+        try {
+            const selection = await UserModel.query().select('*').where('group', req.body.group);
+            res.json({result: true, data: selection});
+        } catch(err) {
+            logger.error(`Error occurred while trying get all users from group ${req.body.group}: ${err.stack}`)
+            res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
+        }
     })
 })();
