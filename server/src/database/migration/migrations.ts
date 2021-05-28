@@ -278,5 +278,19 @@ export const migrations = [
         table.dropColumn('otherComorbidity')
       })
     }
+  },
+  {
+    version: 8,
+    description: 'Add group field to users table',
+    up: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.string('group')
+      })
+    },
+    down: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.dropColumn('group')
+      })
+    }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
