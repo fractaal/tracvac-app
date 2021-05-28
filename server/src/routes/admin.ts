@@ -433,7 +433,11 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         if (!req.body.group) { res.json({result: false, message: "Missing group parameter"}); return; }
         try {
             const selection = await UserModel.query().select('*').where('group', req.body.group);
-            res.json({result: true, data: selection});
+            if (selection.length === 0) {
+                res.json({result: false, message: "Group does not exist, or has no members."})
+            } else {
+                res.json({result: true, data: selection});
+            }
         } catch(err) {
             logger.error(`Error occurred while trying get all users from group ${req.body.group}: ${err.stack}`)
             res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
