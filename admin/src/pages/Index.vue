@@ -1,6 +1,8 @@
 <template>
   <q-page class="px-8 py-8">
-    <h4 class="m-0 font-light">PEOPLE</h4>
+      <p class="-my-2">TRACVAC</p>
+      <h4 class="m-0 font-light">PEOPLE</h4>
+      <p class="-my-2">SELECT AND EDIT ACCOUNTS</p>
     <q-tabs
       class="border-0 border-b border-solid border-gray-300"
       v-model="activeTab"
@@ -10,8 +12,70 @@
     </q-tabs>
     <q-tab-panels v-model="activeTab" animated keep-alive>
       <q-tab-panel name="select">
-        <h6 class="m-0 font-light">SELECT ACCOUNTS TO EDIT</h6>
         <br>
+          <div class="flex content-center">
+            <q-input
+              dense
+              outlined
+              class="mr-2"
+              debounce="300"
+              v-model="searchFilter"
+              placeholder="Search names"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+            <q-select
+              class='mr-2'
+              v-model="visibleColumns"
+              multiple
+              outlined
+              dense
+              options-dense
+              display-value='Columns'
+              emit-value
+              map-options
+              :options="columns"
+              option-value="name"
+              options-cover
+              style="min-width: 150px"
+            />
+            <q-btn
+              outline class='mr-2'
+              label='Select amount...'
+              icon='fas fa-plus'
+              @click='selectAmountOfPeople'
+            >
+              <q-tooltip content-class="text-base">
+                Select an arbitrary amount of people to update.
+              </q-tooltip>
+            </q-btn>
+            <q-btn
+              outline class="mr-2"
+              label='Select group...'
+              icon='fas fa-plus'
+              @click='selectGroup'
+            >
+              <q-tooltip content-class="text-base">
+                Select people that match the group you specify.
+              </q-tooltip>
+            </q-btn>
+            <q-btn
+              outline class='mr-2'
+              :color='showPUMs ? "green" : "black"'
+              :label='showPUMs ? "Showing Under Monitoring" : "Show Under Monitoring"'
+              :icon='showPUMs ? "fas fa-eye" : "fas fa-eye-slash"'
+              @click='toggleShow("PUMs", !showPUMs)'
+            />
+            <q-btn
+              outline class='mr-2'
+              :color='showPUIs ? "green" : "black"'
+              :label='showPUIs ? "Showing Under Investigation" : "Show Under Investigation"'
+              :icon='showPUIs ? "fas fa-eye" : "fas fa-eye-slash"'
+              @click='toggleShow("PUIs", !showPUIs)'
+            />
+          </div>
         <q-table
           class='sticky'
           :loading="loading"
@@ -30,57 +94,7 @@
           @request="getData"
         >
           <template v-slot:top>
-            <div class='flex flex-row items-center content-center'>
-              <q-btn
-                outline class='mx-2'
-                label='Select amount of people...'
-                icon='fas fa-plus'
-                @click='selectAmountOfPeople'
-              />
-              <q-input
-                dense
-                outlined
-                debounce="300"
-                v-model="searchFilter"
-                placeholder="Search names"
-                style='min-width: 400px'
-              >
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-              <q-select
-                class='mx-4'
-                v-model="visibleColumns"
-                multiple
-                outlined
-                dense
-                options-dense
-                display-value='Show/hide columns'
-                emit-value
-                map-options
-                :options="columns"
-                option-value="name"
-                options-cover
-                style="min-width: 150px"
-              />
-              <div>
-                <q-btn
-                  outline class='mx-2'
-                  :color='showPUMs ? "green" : "black"'
-                  :label='showPUMs ? "Showing Under Monitoring" : "Show Under Monitoring"'
-                  :icon='showPUMs ? "fas fa-eye" : "fas fa-eye-slash"'
-                  @click='toggleShow("PUMs", !showPUMs)'
-                />
-                <q-btn
-                  outline class='mx-2'
-                  :color='showPUIs ? "green" : "black"'
-                  :label='showPUIs ? "Showing Under Investigation" : "Show Under Investigation"'
-                  :icon='showPUIs ? "fas fa-eye" : "fas fa-eye-slash"'
-                  @click='toggleShow("PUIs", !showPUIs)'
-                />
-              </div>
-            </div>
+            
           </template>
         </q-table>
         <q-page-sticky :offset='[20, 20]' position="bottom-right">
@@ -131,6 +145,13 @@ import EditVaccinationStatus from 'components/EditVaccinationStatus.vue'
 export default Vue.extend({
   name: 'Index',
   components: { EditVaccinationStatus },
+  created() {
+    window.onbeforeunload = () => {
+      if (store.usersToModify.length !== 0) {
+        return 'Are you sure you want to leave? The changes you made to users will not be saved.'
+      }
+    }
+  },
   async activated() {
     this.loading = true;
     await this.getData({
@@ -157,7 +178,7 @@ export default Vue.extend({
         descending: false,
       },
       columns: peopleColumns,
-      visibleColumns: ['username', 'firstName', 'middleName', 'lastName'],
+      visibleColumns: ['username', 'firstName', 'middleName', 'lastName', 'group'],
     }
   },
   methods: {
@@ -200,18 +221,26 @@ export default Vue.extend({
       }
       this.selected = [];
     },
+    selectGroup() {
+      this.$q.dialog( { message: 'Type the name of the group you want to select', prompt: { model: '', type: 'string' } }).onOk(async (group: string) => {
+        const response = await this.store.axios.post('/admin/getAllUsersFromGroup', {group})
+        if (response.data.result) {
+          this.$q.notify({ message: `Added ${response.data.data.length} users from group.`, type: 'positive' })
+          this.selected = response.data.data
+        } else {
+          this.$q.notify({ message: `Could not get all users from group - ${response.data.message}`, type: 'negative' })
+        }
+        this.addSelectionToEdit()
+      })
+    },
     selectAmountOfPeople() {
       this.$q.dialog({message: 'Input amount of people to select', prompt: {model: '', type: 'number'}}).onOk(async (amount: number) => {
-        if (amount > this.pagination.rowsNumber) {
-          this.$q.notify({message: 'Amount selected is more than amount currently loaded.', type: 'warn'});
-        }
         const response = await this.store.axios.post('/admin/selectAmountOfPeople', {limit: amount})
         if (response.data.result) {
           this.selected = response.data.data;
         } else {
           this.$q.notify({message: `Could not get amount of people - ${response.data.message}`, type: 'negative'})
         }
-
         this.addSelectionToEdit();
       })
     },
