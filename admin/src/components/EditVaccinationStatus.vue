@@ -48,6 +48,7 @@
                 <div class='grid grid-cols-2 gap-2'>
                   <q-input dense debounce='500' @input='computeDiscrepancies' outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
                   <q-input dense debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
+                  <q-input dense debounce='500' type='string' outlined label='Group' v-model='user.group'/>
                 </div>
               </div>
             </q-card-section>
@@ -97,6 +98,8 @@
         <hr>
         <q-fab-action @click="markAllVaccinationStatus(false)" color="negative" icon="fas fa-times " label="Mark all unvaccinated"/>
         <q-fab-action @click="markAllVaccinationStatus(true)" color="primary" icon="fas fa-check" label="Mark all vaccinated"/>
+        <hr>
+        <q-fab-action label='Set all group' color="primary" icon="fas fa-pen" @click='setAllGroup()'/>
       </q-fab>
       <q-btn
         class="p-2 mx-2"
@@ -278,6 +281,24 @@ export default Vue.extend({
         this.computeDiscrepancies();
       })
     },
+    setAllGroup() {
+      this.$q.dialog({
+        title: 'Set all group',
+        message: "Batch set all of these user's groups",
+        prompt: {
+          model: '', 
+          type: 'string'
+        },
+        cancel: true,
+        persistent: true
+      }).onOk((group: string|null) => {
+        if (group === '') group = null;
+        for (const user of store.usersToModify) {
+          user.group = group;
+        }
+        this.computeDiscrepancies();
+      })
+    },
     confirmSubmit() {
       this.$q.dialog({
         title: 'Commit changes?',
@@ -299,6 +320,7 @@ export default Vue.extend({
                   isPUI: user.isPUI,
                   isPUM: user.isPUM,
                   dosageNumber: user.dosageNumber,
+                  group: user.group,
                 }
               })
             })

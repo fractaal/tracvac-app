@@ -128,6 +128,7 @@ export class UserModel extends BaseModel {
   consentForDataCollection!: UserConsentForDataCollectionEnum
   consentForVaccination!: UserConsentForVaccinationEnum
   lastVaccinationTime!: string;
+  group!: string;
 
   static tableName = 'users'
 
