@@ -29,6 +29,13 @@ export default [
       sortable: true,
     },
     {
+      name: 'group',
+      required: false,
+      label: 'Group',
+      field: 'group',
+      sortable: true,
+    },
+    {
       name: 'isPUM',
       required: false,
       label: 'Is Under Monitoring',
