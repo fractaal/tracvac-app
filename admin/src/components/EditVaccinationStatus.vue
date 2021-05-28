@@ -99,7 +99,7 @@
         <q-fab-action @click="markAllVaccinationStatus(false)" color="negative" icon="fas fa-times " label="Mark all unvaccinated"/>
         <q-fab-action @click="markAllVaccinationStatus(true)" color="primary" icon="fas fa-check" label="Mark all vaccinated"/>
         <hr>
-        <q-fab-action outline label='Set all group' color="primary" icon="fas fa-pen" @click='setAllGroup()'/>
+        <q-fab-action label='Set all group' color="primary" icon="fas fa-pen" @click='setAllGroup()'/>
       </q-fab>
       <q-btn
         class="p-2 mx-2"
