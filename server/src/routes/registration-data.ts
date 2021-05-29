@@ -1,9 +1,8 @@
 import { app } from '../'
+import { getConfig } from '../config';
 
-app.get('/registrationData', (req, res) => {
-  if (!process.env.IS_CORPORATION) {
-    res.json([]);
-  } else {
+app.get('/registrationData', async (req, res) => {
+  if ((await getConfig()).isCorporation) {
     res.json([
       {
         title: "Company Information",
@@ -18,5 +17,7 @@ app.get('/registrationData', (req, res) => {
         ]
       }
     ])
+  } else {
+    res.json([])
   }
 })

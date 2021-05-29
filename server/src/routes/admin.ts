@@ -415,7 +415,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         let branchIsVaccinated: Record<string, any> = {};
         let branchVaccineManufacturer: Record<string, any> = {};
 
-        if (!!process.env.IS_CORPORATION) {
+        if ((await getConfig()).isCorporation) {
             branchIsVaccineReady = {};
             (await UserModel.query()
                 .select('companyBranch', 'isVaccineReady')
@@ -489,7 +489,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             }
         }
 
-        if (!!process.env.IS_CORPORATION) {
+        if ((await getConfig()).isCorporation) {
             response = Object.assign(
                 {}, 
                 response, 
