@@ -137,6 +137,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
+import { LocalStorage } from 'quasar'
 import store from 'src/api/store';
 import peopleColumns from 'src/people-columns';
 import Vue from 'vue';
@@ -146,10 +147,16 @@ export default Vue.extend({
   name: 'Index',
   components: { EditVaccinationStatus },
   created() {
+    this.visibleColumns = LocalStorage.getItem('visibleColumns') ?? ['username', 'firstName', 'middleName', 'lastName', 'group']; 
     window.onbeforeunload = () => {
       if (store.usersToModify.length !== 0) {
         return 'Are you sure you want to leave? The changes you made to users will not be saved.'
       }
+    }
+  },
+  watch: {
+    visibleColumns () {
+      LocalStorage.set('visibleColumns', this.visibleColumns)
     }
   },
   async activated() {
@@ -178,7 +185,7 @@ export default Vue.extend({
         descending: false,
       },
       columns: peopleColumns,
-      visibleColumns: ['username', 'firstName', 'middleName', 'lastName', 'group'],
+      visibleColumns: [],
     }
   },
   methods: {
