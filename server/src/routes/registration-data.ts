@@ -1,10 +1,10 @@
 import { app } from '../'
 
 app.get('/registrationData', (req, res) => {
-  if (!!process.env.IS_CORPORATION) {
-    return [];
+  if (!process.env.IS_CORPORATION) {
+    res.json([]);
   } else {
-    return [
+    res.json([
       {
         title: "Company Information",
         description: "Information relating to your workplace.",
@@ -17,6 +17,6 @@ app.get('/registrationData', (req, res) => {
           }
         ]
       }
-    ]
+    ])
   }
 })
