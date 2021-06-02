@@ -143,6 +143,18 @@ import peopleColumns from 'src/people-columns';
 import Vue from 'vue';
 import EditVaccinationStatus from 'components/EditVaccinationStatus.vue'
 
+// Inject branch field into peopleColumns if isCorporation
+if (store.serverConfig.isCorporation) {
+  peopleColumns.push({
+    name: 'companyBranch',
+    required: false,
+    label: 'Company Branch',
+    field: 'companyBranch',
+    sortable: true,
+    align: 'left',
+  })
+}
+
 export default Vue.extend({
   name: 'Index',
   components: { EditVaccinationStatus },
