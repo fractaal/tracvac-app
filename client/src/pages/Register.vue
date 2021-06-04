@@ -138,7 +138,7 @@ export default Vue.extend({
     this.template = [...registrationFormTemplate, ...extraRegistrationFormTemplate]
     console.log(`Register component activated with mode ${this.$props.mode}`)
     if (this.$props.mode === 'register') {
-      for (const section of registrationFormTemplate) {
+      for (const section of this.template) {
         for (const formItem of section.formItems) {
           this.$set(this.formData, formItem.name, null)
         }
@@ -146,7 +146,7 @@ export default Vue.extend({
     } else if (this.$props.mode === 'edit') {
       this.template = this.template.filter(section => section.title !== 'Credentials') // Don't show the username / password bit
       console.log('template: ', this.template)
-      for (const section of registrationFormTemplate) {
+      for (const section of this.template) {
         for (const formItem of section.formItems) {
           // console.log(store.userInfo)
           if (formItem.name === 'password' || formItem.name === 'username' || formItem.name === 'email') continue
@@ -224,7 +224,7 @@ export default Vue.extend({
       this.$q.loading.show({ message: 'Communicating with the server...' })
       const dataToSubmit: Record<string, any> = {}
       for (const itemName in this.formData) {
-        for (const section of registrationFormTemplate) {
+        for (const section of this.template) {
           for (const formItem of section.formItems) {
             if (formItem.name === itemName) {
               if (formItem.name.startsWith('__')) continue
