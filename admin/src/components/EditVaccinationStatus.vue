@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="overflow-x-visible grid grid-cols-2 gap-4">
+    <div class="overflow-x-visible grid grid-cols-2 gap-6">
       <div>
         <div class='text-h6 mb-8'>EDIT VACCINATION STATUSES</div>
         <div class='flex mx-auto'>
@@ -9,7 +9,7 @@
         </div>
         <br/>
         <!-- <transition-group v-if='store.usersToModify.length !== 0' name="transition" mode="out-in"> -->
-          <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "ring-4 ring-red-500" : ""' class="mb-8 shadow-none border border-solid border-gray-400" :key="user.id">
+          <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "ring-4 ring-red-500" : "ring-4 ring-gray-300"' class="mb-8 rounded-2xl shadow-xl border-3" :key="user.id">
             <q-card-section>
               <div class="flex flex-nowrap justify-between">
                 <q-btn class="absolute -mt-8 -ml-8" round color="negative" icon="close" @click="store.usersToModify.splice(idx, 1)"/>
@@ -23,8 +23,11 @@
                       <p class="m-0 p-0">@{{user.username}}</p>
                     </div>
                   </div>
+                </div>
+                <div>
                   <q-btn outline label='View Logs' @click='$router.push("view-logs/" + user.id)'/>
                 </div>
+                <!--
                 <div>
                   <p :class="user.isVaccinated === true ? 'text-green-500' : 'text-red-700'" class="m-0 p-0 text-right font-extrabold">{{user.isVaccinated === true ? '✅ VACCINATED' : '❌ NOT VACCINATED'}}</p>
                   <p :class="vaccineStatusStyling(user.isVaccineReady)" class="m-0 p-0 text-right font-extrabold">VACCINE IS {{user.isVaccineReady.toUpperCase()}}</p>
@@ -32,23 +35,24 @@
                   <p class="m-0 p-0 text-right">UNDER INVESTIGATION: <b>{{user.isPUI ? 'Yes' : 'No'}}</b></p>
                   <p class="m-0 p-0 text-right">UNDER MONITORING: <b>{{user.isPUM ? 'Yes' : 'No'}}</b></p>
                 </div>
+                -->
               </div>
               <br>
               <div>
-                <q-btn dense outline color="negative" label="Vaccine Not Ready" @click="toggleVaccineStatus(user, 'Not Ready')"/>
-                <q-btn dense outline color="primary" label="Vaccine Pending" @click="toggleVaccineStatus(user, 'Pending')"/>
-                <q-btn dense outline color="positive" label="Vaccine Ready" @click="toggleVaccineStatus(user, 'Ready')"/>
+                <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Not Ready'" color="negative" label="Vaccine Not Ready" @click="toggleVaccineStatus(user, 'Not Ready')"/>
+                <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Pending'" color="primary" label="Vaccine Pending" @click="toggleVaccineStatus(user, 'Pending')"/>
+                <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Ready'" color="positive" label="Vaccine Ready" @click="toggleVaccineStatus(user, 'Ready')"/>
                 <div class='my-1'/>
-                <q-btn dense outline label="Mark as not vaccinated" @click="toggleVaccinated(user, false)"/>
-                <q-btn dense outline label="Mark as vaccinated" color="secondary" @click="toggleVaccinated(user, true)"/>
+                <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccinated" label="Not Vaccinated" color="negative" @click="toggleVaccinated(user, false)"/>
+                <q-btn class="mr-1 rounded-xl" unelevated  :outline="!user.isVaccinated" label="Vaccinated" color="green" @click="toggleVaccinated(user, true)"/>
                 <div class='my-1'/>
-                <q-btn dense outline label='Mark as Under Investigation' @click='togglePUI(user, !user.isPUI)'/>
-                <q-btn dense outline label='Mark as Under Monitoring' @click='togglePUM(user, !user.isPUM)'/>
-                <div class='my-1'/>
-                <div class='grid grid-cols-2 gap-2'>
-                  <q-input dense debounce='500' @input='computeDiscrepancies' outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
-                  <q-input dense debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
-                  <q-input dense debounce='500' type='string' outlined label='Group' v-model='user.group'/>
+                <q-btn class="mr-1 rounded-xl" unelevated :outline="!user.isPUI" :color="user.isPUI ? 'red' : 'green'" label='Under Investigation' @click='togglePUI(user, !user.isPUI)'/>
+                <q-btn class="mr-1 rounded-xl" unelevated :outline="!user.isPUM" :color="user.isPUM ? 'red' : 'green'" label='Under Monitoring' @click='togglePUM(user, !user.isPUM)'/>
+                <div class='my-2'/>
+                <div class='grid grid-cols-3 gap-2'>
+                  <q-input class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
+                  <q-input class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
+                  <q-input class="mr-1" unelevated debounce='500' type='string' outlined label='Group' v-model='user.group'/>
                 </div>
               </div>
             </q-card-section>
@@ -61,7 +65,7 @@
         <transition-group name="transition">
           <empty-placeholder key='pl' v-if='discrepancies.length === 0' icon='fas fa-check' title='No discrepancies detected' subtitle="You're good to go!"/>
           <div v-for='discrepancy in discrepancies' :key='discrepancy.title'>
-            <q-card class='mb-4'>
+            <q-card class='mb-4 ring-4 ring-gray-300 rounded-2xl shadow-xl border-3'>
               <div>
                 <div class='p-4'>
                   <div class='flex flex-nowrap'>
