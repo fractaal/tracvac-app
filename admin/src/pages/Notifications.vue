@@ -2,15 +2,15 @@
   <q-page class="p-8">
     <h4 class="m-0 font-light">NOTIFICATIONS</h4>
     <div class="mt-4 flex flex-row">
-      <q-btn outline class="p-2" @click="$router.push('/addNotif')" icon="fas fa-plus" label="Post Notification"/>
+      <q-btn rounded outline class="p-2" @click="$router.push('/addNotif')" icon="fas fa-plus" label="Post Notification"/>
     </div>
     <div class="mt-4">
-      <q-card class="mb-4 border border-solid border-gray-400 shadow-lg" v-for="notification in notifications" :key="notification.id">
+      <q-card class="mb-8 shadow-xl rounded-2xl ring-4 ring-gray-300" v-for="notification in notifications" :key="notification.id">
         <q-card-section>
           <div class="flex flex-row justify-between">
             <h5 class="m-0 p-0">{{notification.title}}</h5>
             <div>
-              <q-btn class="block ml-auto mb-2" outline icon="fas fa-trash" label="Delete" @click="deleteNotification(notification.id)"/>
+              <q-btn class="block ml-auto mb-2" rounded outline icon="fas fa-trash" label="Delete" @click="deleteNotification(notification.id)"/>
               <p>Created on {{notification.createdAt}}</p>
             </div>
           </div>
