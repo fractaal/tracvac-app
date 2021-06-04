@@ -292,5 +292,19 @@ export const migrations = [
         table.dropColumn('group')
       })
     }
+  },
+  {
+    version: 9,
+    description: 'Add companyBranch field to users table',
+    up: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.string('companyBranch')
+      })
+    },
+    down: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.dropColumn('companyBranch')
+      })
+    }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];

@@ -9,6 +9,7 @@ export interface Config {
     httpPort: string;
     httpsPort: string;
     adminPassword: string;
+    isCorporation: boolean;
     email: string;
 }
 
@@ -25,6 +26,7 @@ export async function getConfig(): Promise<Config> {
         httpsPort: process.env.PORT_SECURE ?? '443' ,
         httpPort: process.env.PORT ?? '80' ,
         adminPassword: process.env.ADMIN_PASSWORD ,
+        isCorporation: !!process.env.IS_CORPORATION ,
         email: process.env.EMAIL 
     } as Partial<Config>;
 

@@ -103,6 +103,7 @@
 import { format } from 'date-fns'
 import transition from '../transitions'
 import { store } from 'src/api/store'
+import { api } from 'src/api/server'
 import registrationFormTemplate, { FormData } from '../templates/registrationFormTemplate'
 import Vue from 'vue'
 import { register } from '../api/auth'
@@ -129,19 +130,23 @@ export default Vue.extend({
       isLoading: false
     }
   },
-  activated () {
-    this.template = [...registrationFormTemplate]
+  async activated () {
+    this.$q.loading.show({ message: 'Loading form... ' })
+    const { data: extraRegistrationFormTemplate } = await api.get('/registrationData')
+    this.$q.loading.hide()
+
+    this.template = [...registrationFormTemplate, ...extraRegistrationFormTemplate]
     console.log(`Register component activated with mode ${this.$props.mode}`)
     if (this.$props.mode === 'register') {
-      for (const section of registrationFormTemplate) {
+      for (const section of this.template) {
         for (const formItem of section.formItems) {
           this.$set(this.formData, formItem.name, null)
         }
       }
     } else if (this.$props.mode === 'edit') {
-      this.template.splice(4) // Don't show the username/email/password bit
+      this.template = this.template.filter(section => section.title !== 'Credentials') // Don't show the username / password bit
       console.log('template: ', this.template)
-      for (const section of registrationFormTemplate) {
+      for (const section of this.template) {
         for (const formItem of section.formItems) {
           // console.log(store.userInfo)
           if (formItem.name === 'password' || formItem.name === 'username' || formItem.name === 'email') continue
@@ -219,7 +224,7 @@ export default Vue.extend({
       this.$q.loading.show({ message: 'Communicating with the server...' })
       const dataToSubmit: Record<string, any> = {}
       for (const itemName in this.formData) {
-        for (const section of registrationFormTemplate) {
+        for (const section of this.template) {
           for (const formItem of section.formItems) {
             if (formItem.name === itemName) {
               if (formItem.name.startsWith('__')) continue

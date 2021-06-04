@@ -7,6 +7,7 @@ export default {
   unreadLogsCount: 0,
   serverConfig: {
     isConfigured: false,
+    isCorporation: false,
     secret: null,
     location: null,
     websiteUrl: null,
@@ -14,6 +15,7 @@ export default {
     httpsPort: null,
   } as unknown as {
     isConfigured: boolean;
+    isCorporation: boolean;
     secret: string;
     location: string;
     websiteUrl: string;

@@ -385,9 +385,66 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             .groupBy('vaccineManufacturer')
         ).forEach((val: any) => vaccineManufacturers[val.vaccineManufacturer] = val.count)
 
+        // Group analytics
+        const groupsIsVaccineReady: Record<string,any> = {};
+        (await UserModel.query()
+            .select('group', 'isVaccineReady')
+            .count('isVaccineReady')
+            .groupBy('group', 'isVaccineReady')
+            .orderBy('group')
+        ).forEach((val: any) => groupsIsVaccineReady[`${val.group || 'No Group'} - ${val.isVaccineReady}`] = val.count)
+
+        const groupsIsVaccinated: Record<string,any> = {};
+        (await UserModel.query()
+            .select('group', 'isVaccinated')
+            .count('isVaccinated')
+            .groupBy('group', 'isVaccinated')
+            .orderBy('group')
+        ).forEach((val: any) => groupsIsVaccinated[`${val.group || 'No Group'} - ${val.isVaccinated === true ? 'Yes' : 'No'}`] = val.count)
+
+        const groupsVaccineManufacturer: Record<string,any> = {};
+        (await UserModel.query()
+            .select('group', 'vaccineManufacturer')
+            .count('vaccineManufacturer')
+            .groupBy('group', 'vaccineManufacturer')
+            .orderBy('group')
+        ).forEach((val: any) => groupsVaccineManufacturer[`${val.group || 'No Group'} - ${val.vaccineManufacturer || 'No vaccine manufacturer'}`] = val.count)
+        
+        // Branch analytics (TODO)
+        let branchIsVaccineReady: Record<string, any> = {};
+        let branchIsVaccinated: Record<string, any> = {};
+        let branchVaccineManufacturer: Record<string, any> = {};
+
+        if ((await getConfig()).isCorporation) {
+            branchIsVaccineReady = {};
+            (await UserModel.query()
+                .select('companyBranch', 'isVaccineReady')
+                .count('isVaccineReady')
+                .groupBy('companyBranch', 'isVaccineReady')
+                .orderBy('companyBranch')
+            ).forEach((val: any) => branchIsVaccineReady[`${val.companyBranch || 'No Company Branch'} - ${val.isVaccineReady}`] = val.count)
+
+            branchIsVaccinated = {};
+            (await UserModel.query()
+                .select('companyBranch', 'isVaccinated')
+                .count('isVaccinated')
+                .groupBy('companyBranch', 'isVaccinated')
+                .orderBy('companyBranch')
+            ).forEach((val: any) => branchIsVaccinated[`${val.companyBranch || 'No Company Branch'} - ${val.isVaccinated === true ? 'Yes' : 'No'}`] = val.count)
+
+            branchVaccineManufacturer = {};
+            (await UserModel.query()
+                .select('companyBranch', 'vaccineManufacturer')
+                .count('vaccineManufacturer')
+                .groupBy('companyBranch', 'vaccineManufacturer')
+                .orderBy('companyBranch')
+            ).forEach((val: any) => branchVaccineManufacturer[`${val.companyBranch || 'No Company Branch'} - ${val.vaccineManufacturer || 'No vaccine manufacturer'}`] = val.count)
+        }
+
         // Prevent null key from showing in vaccineManufacturers
         delete vaccineManufacturers.null
 
+        // Alerts
         const alerts: {title: string; message?: string; type: string;}[] = []
 
         alerts.push({title: `${totalUserCount} users registered`, type: 'info'})
@@ -401,6 +458,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             })
         }
         
+        // Alert if only a small percentage of users have notifications enabled.
         const percentageNotifsEnabled = (usersWithNotifsEnabled / totalUserCount) * 100
         if (percentageNotifsEnabled < 65) {
             alerts.push({
@@ -410,7 +468,8 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             })
         }
 
-        res.json({
+        // Response construction
+        let response = {
             alerts,
             miscItems: {
                 totalUserCount,
@@ -423,9 +482,25 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                 "Pregnancies": pregnancies, 
                 "Vaccination Statuses": vaccinationStatuses, 
                 "Vaccine Statuses": vaccineStatuses,
-                "Vaccine Manufacturers": vaccineManufacturers
+                "Vaccine Manufacturers": vaccineManufacturers,
+                "Groups - Vaccine Statuses": groupsIsVaccineReady,
+                "Groups - Vaccination Statuses": groupsIsVaccinated,
+                "Groups - Vaccine Manufacturers": groupsVaccineManufacturer,
             }
-        })
+        }
+
+        if ((await getConfig()).isCorporation) {
+            response = Object.assign(
+                {}, 
+                response, 
+                {
+                    "Branch - Vaccine Statuses": branchIsVaccineReady,
+                    "Branch - Vaccination Statuses": branchIsVaccinated,
+                    "Branch - Vaccine Manufacturers": branchVaccineManufacturer
+                })
+        }
+
+        res.json(response)
     })
 
     // Groups 
