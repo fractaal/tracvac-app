@@ -159,6 +159,7 @@ export default Vue.extend({
   name: 'Index',
   components: { EditVaccinationStatus },
   created() {
+    
     this.visibleColumns = LocalStorage.getItem('visibleColumns') ?? ['username', 'firstName', 'middleName', 'lastName', 'group']; 
     window.onbeforeunload = () => {
       if (store.usersToModify.length !== 0) {
@@ -197,7 +198,7 @@ export default Vue.extend({
         descending: false,
       },
       columns: peopleColumns,
-      visibleColumns: [],
+      visibleColumns: [] as string[],
     }
   },
   methods: {
