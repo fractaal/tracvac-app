@@ -152,7 +152,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 
     app.post('/admin/getNotifications', async (request, response) => {
         if (request.body.pageSize !== undefined && request.body.page !== undefined) {
-            const result = await NotificationModel.query().select('*');
+            const result = await NotificationModel.query().select('*').orderBy('createdAt', 'desc');
 
             response.json(result);
         } else {
