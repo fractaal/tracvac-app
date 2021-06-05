@@ -2,7 +2,7 @@
   <q-page class="p-8">
     <h4 class="m-0 font-light">NOTIFICATIONS</h4>
     <div class="mt-4 flex flex-row">
-      <q-btn rounded outline class="p-2" @click="$router.push('/addNotif')" icon="fas fa-plus" label="Post Notification"/>
+      <q-btn unelevated class="rounded-xl p-2" color="primary" @click="$router.push('/addNotif')" icon="fas fa-plus" label="Post Notification"/>
     </div>
     <div class="mt-4 grid grid-cols-2 gap-6">
       <q-card class="shadow-xl rounded-2xl ring-4 ring-gray-300" v-for="notification in notifications" :key="notification.id">
