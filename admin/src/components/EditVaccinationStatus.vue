@@ -81,30 +81,68 @@
       </div>
     </div>
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
-      <q-fab
+      <q-btn
+        fab
+        round
+        @click="showOptionsDialog = !showOptionsDialog"
         :disable="store.usersToModify.length === 0"
         class="p-2"
         color="secondary"
         direction="up"
         icon="expand_less"
-      >
-        <q-fab-action @click='setAllDosageNumber' color='secondary' icon='fas fa-calculator' label='Set all dosage number'/>
-        <q-fab-action @click="setAllVaccineManufacturer" color="primary" icon="fas fa-pen" label="Set all vaccine manufacturer"/>
-        <hr>
-        <q-fab-action @click="markAllPUI(true)" color="primary" icon="fas fa-pen" label="Mark all under investigation"/>
-        <q-fab-action @click="markAllPUI(false)" color="negative" icon="fas fa-pen" label="Mark all not under investigation"/>
-        <q-fab-action @click="markAllPUM(true)" color="primary" icon="fas fa-pen" label="Mark all under monitoring"/>
-        <q-fab-action @click="markAllPUM(false)" color="negative" icon="fas fa-pen" label="Mark all not under monitoring"/>
-        <hr>
-        <q-fab-action @click="markAllVaccineStatus('Not Ready')" color="negative" icon="fas fa-times" label="Mark all Vaccine not ready"/>
-        <q-fab-action @click="markAllVaccineStatus('Pending')" color="primary" icon="fas fa-hourglass" label="Mark all Vaccine pending"/>
-        <q-fab-action @click="markAllVaccineStatus('Ready')" color="positive" icon="fas fa-check" label="Mark all Vaccine ready"/>
-        <hr>
-        <q-fab-action @click="markAllVaccinationStatus(false)" color="negative" icon="fas fa-times " label="Mark all unvaccinated"/>
-        <q-fab-action @click="markAllVaccinationStatus(true)" color="primary" icon="fas fa-check" label="Mark all vaccinated"/>
-        <hr>
-        <q-fab-action label='Set all group' color="primary" icon="fas fa-pen" @click='setAllGroup()'/>
-      </q-fab>
+      />
+      <q-dialog v-model="showOptionsDialog">
+        <q-card>
+          <div class="p-4 text-h6">Batch Modify</div>
+          <q-list bordered>
+            <q-item clickable v-ripple @click='markAllVaccineStatus'>
+              <q-item-section>Vaccine Status...</q-item-section>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fas fa-syringe"/>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-ripple @click='setAllVaccineManufacturer'>
+              <q-item-section>Vaccine Manufacturer...</q-item-section>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fas fa-building"/>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-ripple @click='markAllVaccinationStatus'>
+              <q-item-section>Vaccination Status...</q-item-section>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fas fa-shield-alt"/>
+              </q-item-section>
+            </q-item>
+            <hr>
+            <q-item clickable v-ripple @click='setAllDosageNumber'>
+              <q-item-section>Dosage Number...</q-item-section>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fas fa-circle-notch"/>
+              </q-item-section>
+            </q-item>
+            <hr>
+            <q-item clickable v-ripple @click='markAllPUI'>
+              <q-item-section>Investigation...</q-item-section>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fas fa-search"/>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-ripple @click='markAllPUM'>
+              <q-item-section>Monitoring...</q-item-section>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fas fa-eye"/>
+              </q-item-section>
+            </q-item>
+            <hr>
+            <q-item clickable v-ripple @click='setAllGroup'>
+              <q-item-section>Group...</q-item-section>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fas fa-pen"/>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card>
+      </q-dialog>
       <q-btn
         class="p-2 mx-2"
         :disable="store.usersToModify.length === 0"
@@ -138,6 +176,7 @@ export default Vue.extend({
   data() {
     return {
       store,
+      showOptionsDialog: false,
       searchFilter: '',
       usersPerPage: 10,
       pageIndex: 1,
@@ -214,18 +253,42 @@ export default Vue.extend({
       user.isVaccineReady = isVaccineReady;
       this.computeDiscrepancies()
     },
-
-    markAllVaccineStatus(status: string) {
-      for (const user of store.usersToModify) {
-        user.isVaccineReady = status
-      }
-      this.computeDiscrepancies()
+    markAllVaccineStatus() {
+      this.$q.dialog({
+        title: 'Set all vaccine status',
+        options: {
+          type: 'radio',
+          model: '', 
+          items: [
+            {label: 'Not Ready', value: 'Not Ready'},
+            {label: 'Pending', value: 'Pending'},
+            {label: 'Ready', value: 'Ready'}
+          ]
+        }
+      }).onOk((data: string) => {
+        for (const user of store.usersToModify) {
+          user.isVaccineReady = data
+        }
+        this.computeDiscrepancies()
+      })
     },
-    markAllVaccinationStatus(boolean: boolean) {
-      for (const user of store.usersToModify) {
-        user.isVaccinated = boolean;
-      }
-      this.computeDiscrepancies()
+    markAllVaccinationStatus() {
+      this.$q.dialog({
+        title: 'Set Vaccination Status',
+        options: {
+          type: 'checkbox',
+          model: [],
+          items: [
+            { label: 'Is Vaccinated?', value: true }
+          ]
+        }
+      }).onOk((data: boolean[]) => {
+        console.log(data)
+        for (const user of store.usersToModify) {
+          user.isVaccinated = data.includes(true)
+        }
+        this.computeDiscrepancies()
+      })
     },
     confirmDiscard() {
       this.$q.dialog({
@@ -236,21 +299,43 @@ export default Vue.extend({
         store.usersToModify = [];
       })
     },
-    togglePUI (user: Record<string,any>, value: boolean) {
-      user.isPUI = value;
+    togglePUI(user: Record<string, any>, value: boolean) {
+        user.isPUI = value
     },
-    togglePUM (user: Record<string,any>, value: boolean) {
-      user.isPUM = value;
+    togglePUM(user: Record<string, any>, value: boolean) {
+        user.isPUM = value
     },
-    markAllPUI (value: boolean) {
-      for (const user of store.usersToModify) {
-        this.togglePUI(user, value);
-      }
+    markAllPUI () {
+      this.$q.dialog({
+        title: 'Set Under Investigation',
+        options: {
+          type: 'checkbox',
+          model: [],
+          items: [
+            { label: 'Is Under Investigation?', value: true }
+          ]
+        }
+      }).onOk((data: boolean[]) => {
+        for (const user of store.usersToModify) {
+          this.togglePUI(user, data.includes(true))
+        }
+      })
     },
-    markAllPUM (value: boolean) {
-      for (const user of store.usersToModify) {
-        this.togglePUM(user, value);
-      }
+    markAllPUM () {
+      this.$q.dialog({
+        title: 'Set Under Monitoring',
+        options: {
+          type: 'checkbox',
+          model: [],
+          items: [
+            { label: 'Is Under Monitoring?', value: true }
+          ]
+        }
+      }).onOk((data: boolean[]) => {
+        for (const user of store.usersToModify) {
+          this.togglePUM(user, data.includes(true))
+        }
+      })
     },
     setAllVaccineManufacturer() {
       this.$q.dialog({
