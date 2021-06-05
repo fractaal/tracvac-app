@@ -2,18 +2,22 @@
   <q-page class="p-8">
     <h4 class="m-0 font-light">NOTIFICATIONS</h4>
     <div class="mt-4 flex flex-row">
-      <q-btn outline class="p-2" @click="$router.push('/addNotif')" icon="fas fa-plus" label="Post Notification"/>
+      <q-btn unelevated class="rounded-xl p-2" color="primary" @click="$router.push('/addNotif')" icon="fas fa-plus" label="Post Notification"/>
     </div>
-    <div class="mt-4">
-      <q-card class="mb-4 border border-solid border-gray-400 shadow-lg" v-for="notification in notifications" :key="notification.id">
+    <div class="mt-4 grid grid-cols-2 gap-6">
+      <q-card class="shadow-xl rounded-2xl ring-4 ring-gray-300" v-for="notification in notifications" :key="notification.id">
         <q-card-section>
           <div class="flex flex-row justify-between">
-            <h5 class="m-0 p-0">{{notification.title}}</h5>
             <div>
-              <q-btn class="block ml-auto mb-2" outline icon="fas fa-trash" label="Delete" @click="deleteNotification(notification.id)"/>
-              <p>Created on {{notification.createdAt}}</p>
+              <h5 class="m-0 p-0">{{notification.title}}</h5>
+              <p class="m-0 p-0 font-bold">Created on {{formatDateAndTime(notification.createdAt).formatted}}</p>
+              <p class="m-0 p-0 font-bold">{{formatDateAndTime(notification.createdAt).formattedDistance}}</p>
+            </div>
+            <div>
+              <q-btn color="red" class="ml-auto mb-2 rounded-xl" unelevated icon="delete" label="Delete" @click="$q.dialog({message: 'Delete notification?', cancel: true}).onOk(() => deleteNotification(notification.id))"/>
             </div>
           </div>
+          <hr>
           <p v-html="notification.content"></p>
         </q-card-section>
       </q-card>
@@ -22,7 +26,8 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { format, formatDistanceToNow } from 'date-fns'
+import Vue from 'vue'
 
 export default Vue.extend({
   name: 'Notifications',
@@ -35,6 +40,13 @@ export default Vue.extend({
     }
   },
   methods: {
+    formatDateAndTime(dateString: string) {
+      const date = new Date(dateString);
+      return {
+        formatted: format(date, 'MMMM dd, yyyy - hh:mmaaa'),
+        formattedDistance: formatDistanceToNow(date, {addSuffix: true})
+      }
+    },
     async loadData() {
       const response = await this.$axios.post('/admin/getNotifications', {pageSize: 0, page: 0});
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
