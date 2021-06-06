@@ -9,17 +9,30 @@ function serverOnly() {
   return args.indexOf('--serverOnly') !== -1
 }
 
+function noInstall() {
+  return args.indexOf('--noInstall') !== -1
+}
+
 const cmd = (command) => {
+  /*
   return new Promise((resolve, reject) => {
     const thing = exec(command, (err, stdout) => {
       if (err) reject(err); else resolve(stdout)
     })
     thing.stdout.pipe(process.stdout)
   })
+   */
+  const child = exec(command)
+  child.stdout.pipe(process.stdout)
+  return new Promise((resolve, reject) => {
+    child.addListener("error", reject)
+    child.addListener("exit", resolve)
+  })
 }
 
 (async () => {
-  console.log("noexe flag: ", noExeFlagIsPresent(), " server only: ", serverOnly())
+  console.log("noexe flag: ", noExeFlagIsPresent(), " server only: ", serverOnly(), " no install dependencies: ", noInstall())
+
   try {
     await cmd ("yarn -v")
   } catch(err) {
@@ -57,15 +70,17 @@ const cmd = (command) => {
 })()
 
 async function install() {
-  console.log("Installing dependencies for server...")
-  await cmd ("cd server && yarn install --production=false")
+  if (!noInstall()) {
+    console.log("Installing dependencies for server...")
+    await cmd ("cd server && yarn install --production=false")
 
-  if (!serverOnly()) {
-    console.log("Installing dependencies for client...")
-    await cmd ("cd client && yarn install --production=false")
+    if (!serverOnly()) {
+      console.log("Installing dependencies for client...")
+      await cmd ("cd client && yarn install --production=false")
 
-    console.log("Installing dependencies for admin...")
-    await cmd ("cd admin && yarn install --production=false")
+      console.log("Installing dependencies for admin...")
+      await cmd ("cd admin && yarn install --production=false")
+    }
   }
 }
 
@@ -76,14 +91,14 @@ async function build() {
 
   if (!serverOnly()) {
     console.log("Building front end application")
-    await cmd("cd client && npx quasar build -m pwa") 
-    
+    await cmd("cd client && npx quasar build -m pwa")
+
     console.log("Building administrative interface")
     await cmd("cd admin && npx quasar build -m spa")
   }
-  
+
   if (!noExeFlagIsPresent() || !serverOnly()) {
     console.log("Packaging into executable...")
-    await cmd ("cd server && yarn distributable-build") 
+    await cmd ("cd server && yarn distributable-build")
   }
 }
