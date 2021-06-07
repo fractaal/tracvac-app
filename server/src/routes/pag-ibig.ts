@@ -22,7 +22,7 @@ class UserModel extends _ {
     })
 
     app.post('/healthDeclarationForm', async (req, res) => {
-        // TODO
+        // TODO: Logic that updates user model depending on the Health Declaration Form
     })
 
 })();
