@@ -130,11 +130,11 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             dosageNumber: user.dosageNumber,
                             group: user.group
                         });
-                        
+
                         // Queue a push to be handled by the push scheduler (IF vaccine/vaccination statuses have changed)
-                        if ( 
+                        if (
                             oldUser.isVaccinated !== user.isVaccinated ||
-                            oldUser.isVaccineReady !== user.isVaccineReady  
+                            oldUser.isVaccineReady !== user.isVaccineReady
                         ) {
                             PushScheduler.enqueue(user.id as number, {title: "Your vaccine/vaccination status has changed!", message: "You might want to check it out!"})
                         }
@@ -221,7 +221,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
     app.get('/admin/export', async (_, response) => {
         const [result, data] = await exportTable(await UserModel.query().select('*'), ['password'])
         if (result) {
-            response.download(data) 
+            response.download(data)
         } else {
             response.json({result, message: data})
         }
@@ -337,7 +337,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             .orderBy('count', 'desc')
             .groupBy('firstName', 'middleName', 'lastName', 'users.id')
             .where(raw('users.id = "userId"'))
-        
+
         const professions: Record<string,any> = {};
         (await UserModel.query()
             .select('profession')
@@ -345,16 +345,16 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             .groupBy('profession')
             .orderBy('profession', 'desc')
         ).forEach((val: any) => professions[val.profession] = val.count)
-            
 
-        const sexes: Record<string,any> = {}; 
+
+        const sexes: Record<string,any> = {};
         (await UserModel.query()
             .select('sex')
             .count('sex')
             .groupBy('sex')
         ).forEach((val: any) => sexes[val.sex] = val.count)
 
-        const pregnancies: Record<string,any> = {}; 
+        const pregnancies: Record<string,any> = {};
         (await UserModel.query()
             .select('pregnancyStatus')
             .count('pregnancyStatus')
@@ -363,14 +363,14 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 
         const usersWithNotifsEnabled = parseInt((await PushSubscriptionModel.query()
             .countDistinct("userId") as any[])[0].count)
-        
+
         const vaccinationStatuses: Record<string,any> = {};
         (await UserModel.query()
             .select('isVaccinated')
             .count('isVaccinated')
             .groupBy('isVaccinated')
         ).forEach((val: any) => vaccinationStatuses[val.isVaccinated === true ? "Yes" : "No"] = val.count)
-        
+
         const vaccineStatuses: Record<string,any> = {};
         (await UserModel.query()
             .select('isVaccineReady')
@@ -409,7 +409,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             .groupBy('group', 'vaccineManufacturer')
             .orderBy('group')
         ).forEach((val: any) => groupsVaccineManufacturer[`${val.group || 'No Group'} - ${val.vaccineManufacturer || 'No vaccine manufacturer'}`] = val.count)
-        
+
         // Branch analytics (TODO)
         let branchIsVaccineReady: Record<string, any> = {};
         let branchIsVaccinated: Record<string, any> = {};
@@ -451,13 +451,13 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 
         if (totalUserCount < 30) {
             alerts.push({
-                title: 'Insight data may not be accurate', 
+                title: 'Insight data may not be accurate',
                 type: 'warn',
-                message: 
+                message:
                 `Only ${totalUserCount} samples are available.<br/>The more users register, the more representative this data is of the population.`
             })
         }
-        
+
         // Alert if only a small percentage of users have notifications enabled.
         const percentageNotifsEnabled = (usersWithNotifsEnabled / totalUserCount) * 100
         if (percentageNotifsEnabled < 65) {
@@ -474,13 +474,13 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             miscItems: {
                 totalUserCount,
                 logsAfterVaccination,
-                usersWithNotifsEnabled, 
+                usersWithNotifsEnabled,
             },
             chartItems: {
-                "Professions": professions, 
-                "Sexes": sexes, 
-                "Pregnancies": pregnancies, 
-                "Vaccination Statuses": vaccinationStatuses, 
+                "Professions": professions,
+                "Sexes": sexes,
+                "Pregnancies": pregnancies,
+                "Vaccination Statuses": vaccinationStatuses,
                 "Vaccine Statuses": vaccineStatuses,
                 "Vaccine Manufacturers": vaccineManufacturers,
                 "Groups - Vaccine Statuses": groupsIsVaccineReady,
@@ -491,8 +491,8 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 
         if ((await getConfig()).isCorporation) {
             response = Object.assign(
-                {}, 
-                response, 
+                {},
+                response,
                 {
                     "Branch - Vaccine Statuses": branchIsVaccineReady,
                     "Branch - Vaccination Statuses": branchIsVaccinated,
@@ -503,7 +503,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         res.json(response)
     })
 
-    // Groups 
+    // Groups
     app.post('/admin/getAllUsersFromGroup', async (req, res) => {
         if (!req.body.group) { res.json({result: false, message: "Missing group parameter"}); return; }
         try {
@@ -517,5 +517,13 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             logger.error(`Error occurred while trying get all users from group ${req.body.group}: ${err.stack}`)
             res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
         }
+    })
+
+    // Retrieve extra modifiable user fields
+    app.get('/admin/extraModifiableUserFields', async (req, res) => {
+        res.json([
+            {name: "isDeferredFirst", displayName: 'Is Deferred? (First)', type: "boolean"},
+            {name: "isDeferredSecond", displayName: 'Is Deferred? (Second)', type: "boolean"},
+        ])
     })
 })();
