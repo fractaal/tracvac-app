@@ -54,6 +54,15 @@
                   <q-input class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
                   <q-input class="mr-1" unelevated debounce='500' type='string' outlined label='Group' v-model='user.group'/>
                 </div>
+                <div class='grid grid-cols-3 gap-2'>
+                  <div v-for="item in extraModifiableUserFields" :key="item.name">
+                    <div v-if="item.type === 'boolean'">
+                      <q-item>
+                        <q-toggle v-model="user[item.name]" :label="item.displayName"/>
+                      </q-item>
+                    </div>
+                  </div>
+                </div>
               </div>
             </q-card-section>
           </q-card>
@@ -141,6 +150,20 @@
               </q-item-section>
             </q-item>
           </q-list>
+          <hr>
+          <div class="p-4 text-h6">Others</div>
+          <q-list>
+            <q-item 
+              v-for="item in extraModifiableUserFields" 
+              :key="item.name" clickable v-ripple 
+              @click='setAllArbitraryField(item.name, item.displayName, item.type)'
+            >
+              <q-item-section>{{item.displayName}}</q-item-section>
+              <q-item-section avatar>
+                <q-icon color="primary" name="fas fa-pen"/>
+              </q-item-section>
+            </q-item>
+          </q-list>
         </q-card>
       </q-dialog>
       <q-btn
@@ -170,6 +193,7 @@
 import store from 'src/api/store';
 import Vue from 'vue';
 import EmptyPlaceholder from 'components/EmptyPlaceholder.vue';
+
 export default Vue.extend({
   name: 'EditVaccinationStatus',
   components: { EmptyPlaceholder },
@@ -181,9 +205,11 @@ export default Vue.extend({
       usersPerPage: 10,
       pageIndex: 1,
       discrepancies: [] as {title: string, subtitle: string}[],
+      extraModifiableUserFields: [] as any[],
     }
   },
-  activated() {
+  async activated() {
+    this.extraModifiableUserFields = (await store.axios.get('/admin/extraModifiableUserFields')).data
     this.computeDiscrepancies()
   },
   computed: {
@@ -388,6 +414,26 @@ export default Vue.extend({
         this.computeDiscrepancies();
       })
     },
+    setAllArbitraryField(field: string, displayName: string, type: string) {
+      let options;
+      switch(type) {
+        case 'boolean': options = {model: [], type: 'checkbox' as const, items: [{label: displayName, value: field}]}; break;
+        default: options = {model: ''};
+      }
+      console.log(field, displayName, type, options)
+      this.$q.dialog({
+        title: `Set all ${displayName}`,
+        message: `Batch set all of these user's ${displayName} fields (${field})`,
+        options
+      }).onOk((data: any | any[]) => {
+        for (const user of store.usersToModify) {
+          if (type === 'boolean') {
+            // @ts-ignore
+            user[field] = data.includes(field)
+          }
+        }
+      })
+    },
     confirmSubmit() {
       this.$q.dialog({
         title: 'Commit changes?',
@@ -400,6 +446,7 @@ export default Vue.extend({
         const performRequest = async (data: Record<string,any>[]): Promise<[boolean, string]> => {
           try {
             const response = await this.$axios.post('/admin/editUser', {
+              // TODO: Support for arbitrary user fields
               data: data.map(user => {
                 return {
                   id: user.id,
