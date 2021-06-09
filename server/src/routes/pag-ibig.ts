@@ -15,10 +15,12 @@ class UserModel extends _ {
 
 (async () => {
     // Perform schema changes to the user table
-    await knex.schema.table('users', table => {
-        table.boolean('isDeferredFirst')
-        table.boolean('isDeferredSecond')
-        table.json('healthDeclarationData')
+    await knex.schema.table('users', async table => {
+        if (! await knex.schema.hasColumn('users', 'isDeferredFirst')) {
+            table.boolean('isDeferredFirst')
+            table.boolean('isDeferredSecond')
+            table.json('healthDeclarationData')
+        }
     })
 
     app.post('/healthDeclarationForm', async (req, res) => {
