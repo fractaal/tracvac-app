@@ -94,7 +94,7 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
       req.isAuthenticated = false;
     } else {
       const unverifiedToken = jwt.decode(token) as Partial<Request['tokenData']>;
-      if (unverifiedToken.userId) {
+      if (unverifiedToken?.userId) {
         const secret = (await UserModel.query().select('password').where({id: unverifiedToken.userId}))[0]?.password;
         if (secret) {
           jwt.verify(token, secret, (error, decoded) => {
