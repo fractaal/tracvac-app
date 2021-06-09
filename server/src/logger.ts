@@ -1,8 +1,17 @@
 import chalk from 'chalk';
+import fs from 'fs';
 import cluster from 'cluster';
 
 let activeStyle = process.env.LOG_STYLE ?? "MEDIUM"
 let emojisEnabled = !!(parseInt(process.env.LOG_EMOJIS as string) ?? true)
+let writeToFile = !!(parseInt(process.env.LOG_WRITE_TO_FILE as string) ?? true)
+
+if (writeToFile) {
+  const access = fs.createWriteStream('./tracvac.log')
+  // @ts-ignore
+  process.stdout.write = process.stderr.write = access.write.bind(access)
+}
+
 const emojis = ['⏹', 'ℹ', '⚠', '☢', '✔']
 const styles = {
   SHORT: ['M', 'I', 'W', 'E', 'S'],
