@@ -447,8 +447,9 @@ export default Vue.extend({
           try {
             const response = await this.$axios.post('/admin/editUser', {
               // TODO: Support for arbitrary user fields
+              
               data: data.map(user => {
-                return {
+                const result = {
                   id: user.id,
                   isVaccinated: user.isVaccinated,
                   isVaccineReady: user.isVaccineReady,
@@ -458,6 +459,11 @@ export default Vue.extend({
                   dosageNumber: user.dosageNumber,
                   group: user.group,
                 }
+
+                // @ts-ignore
+                this.extraModifiableUserFields.map(x => result[x.name] = user[x.name])
+
+                return result
               })
             })
 

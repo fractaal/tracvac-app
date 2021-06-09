@@ -10,6 +10,8 @@ import * as PushScheduler from '../push-scheduler'
 import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 import { exportTable } from "../exporter"
 
+import extraModifiableUserFields from '../extraModifiableUserFields' // Contains the user fields that can be modified 
+
 const logger = Logger("AdminRoute");
 
 /**
@@ -121,7 +123,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             await UserModel.query(trx).where({ id: user.id }).patch({lastVaccinationTime: new Date().toUTCString()})
                         }
 
-                        await UserModel.query(trx).where({ id: user.id }).patch({
+                        const updatedUser = {
                             isVaccinated: !!user.isVaccinated,
                             vaccineManufacturer: user.vaccineManufacturer,
                             isVaccineReady: user.isVaccineReady,
@@ -129,7 +131,12 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             isPUM: !!user.isPUM,
                             dosageNumber: user.dosageNumber,
                             group: user.group
-                        });
+                        }
+                        
+                        // @ts-ignore I know what I'm doing
+                        extraModifiableUserFields.forEach(field => updatedUser[field.name] = user[field.name])
+
+                        await UserModel.query(trx).where({ id: user.id }).patch(updatedUser);
 
                         // Queue a push to be handled by the push scheduler (IF vaccine/vaccination statuses have changed)
                         if (
@@ -521,9 +528,6 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 
     // Retrieve extra modifiable user fields
     app.get('/admin/extraModifiableUserFields', async (req, res) => {
-        res.json([
-            {name: "isDeferredFirst", displayName: 'Is Deferred? (First)', type: "boolean"},
-            {name: "isDeferredSecond", displayName: 'Is Deferred? (Second)', type: "boolean"},
-        ])
+        res.json(extraModifiableUserFields)
     })
 })();
