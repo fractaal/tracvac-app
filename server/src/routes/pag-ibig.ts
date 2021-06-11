@@ -44,7 +44,7 @@ class UserModel extends _ {
         if (!Array.isArray(req.body)) { res.status(400).json({result: false, message: 'Invalid data'}); return }
 
         try {
-            await UserModel.query().patch({healthDeclarationData: JSON.stringify(req.body)})
+            await UserModel.query().where({id: req.tokenData.userId}).patch({healthDeclarationData: JSON.stringify(req.body)})
             // TODO: Logic that updates user model depending on the Health Declaration Form
             for (const [key, value] of Object.entries(vaccinationDeferralTriggers)) {
                 if (req.body.includes(key) === value) {
@@ -64,8 +64,10 @@ class UserModel extends _ {
 
     app.get('/admin/healthDeclarationForm/:id', async (req, res) => {
         try {
-            res.json((await UserModel.query().select('healthDeclarationData').where({id: req.params.id}))[0].healthDeclarationData)
+            const data = (await UserModel.query().select('healthDeclarationData', 'firstName', 'middleName', 'lastName').where({id: req.params.id}))[0]
+            res.json({result: true, data})
         } catch(err) {
+            res.json({result: false, message: 'Error occurred while getting health declaration form submission.'})
             console.error("Error occured while getting health declaration form submission: ", err)
         }
     }) 
