@@ -97,6 +97,34 @@
             
           </template>
         </q-table>
+        <q-dialog v-model="showOptionsDialog">
+          <q-card>
+            <div class="p-4 text-h6">Batch Modify</div>
+            <q-list bordered>
+              <q-item :disable="selected.length !== 1" clickable v-ripple @click='viewLogs'>
+                <q-item-section>View Logs</q-item-section>
+                <q-item-section avatar>
+                  <q-icon color="primary" name="fas fa-syringe"/>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <hr>
+            <div class="p-4 text-h6">Others</div>
+            <q-list>
+              <q-item 
+                :disable="selected.length !== 1"
+                v-for="item in store.userActions" 
+                :key="item.name" clickable v-ripple 
+                @click='item.action(selected[0].id)'
+              >
+                <q-item-section>{{item.name}}</q-item-section>
+                <q-item-section avatar>
+                  <q-icon color="primary" name="fas fa-pen"/>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </q-dialog>
         <q-page-sticky :offset='[20, 20]' position="bottom-right">
           <q-btn
             class="p-2 mx-2"
@@ -108,11 +136,9 @@
           />
           <q-btn
             class="p-2 mx-2"
-            :disable="selected.length !== 1"
-            label=" VIEW LOGS"
             color="secondary"
-            icon="remove_red_eye"
-            @click="viewLogs"
+            icon="keyboard_arrow_up"
+            @click="showOptionsDialog = true"
             fab
           />
           <q-btn
@@ -182,6 +208,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      showOptionsDialog: false,
       selected: [] as Record<string,any>[],
       store,
       searchFilter: '',
