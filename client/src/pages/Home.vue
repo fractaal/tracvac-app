@@ -31,6 +31,7 @@
 import Vue from 'vue'
 import { uploadProfilePicture } from '../api/user'
 import { store } from '../api/store'
+import { api } from 'src/api/server'
 import * as push from 'src/api/push'
 
 import ButtonCard from '../components/ButtonCard.vue'
@@ -40,8 +41,28 @@ import startup from 'src/api/startup'
 
 const _ = import('src/api/background')
 
+/*
+// Load pag-ibig plugin
+import { init as PagIbigPlugin } from 'src/plugins/PagIbig.vue'
+*/
+
+// Dynamically load plugins in the plugins folder (usually for development only)
+const plugins = require.context('../plugins', false, /.\w+\.(vue|js)$/)
+
 export default Vue.extend({
   name: 'Home',
+  created () {
+    // Dynamically import plugins from the plugins folder
+    plugins.keys().forEach((name: string) => {
+      const config = plugins(name)
+      /**
+       * Bind the plugin's init (initialization) function
+       * to this Vue component's "this" context so that it can access
+       * Vue router as well as Quasar APIs
+       */
+      config.init.call(this, api)
+    })
+  },
   components: { LargeButtonCard, ButtonCard, ProfilePicture },
   activated () {
     startup()
