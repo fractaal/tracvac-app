@@ -101,10 +101,23 @@
 import store from '../api/store'
 import Vue from 'vue';
 
+// Dynamically load plugins in the plugins folder (usually for development only)
+const plugins = (require as any).context('../plugins', false, /.\w+\.(vue|js)$/)
+
 export default Vue.extend({
   name: 'MainLayout',
   async created() {
     this.store.unreadLogsCount = (await store.axios.post('/admin/getUnreadLogsCount')).data.count
+    // Dynamically import plugins from the plugins folder
+    plugins.keys().forEach((name: string) => {
+      const config = plugins(name)
+      /**
+       * Bind the plugin's init (initialization) function
+       * to this Vue component's "this" context so that it can access
+       * Vue router as well as Quasar APIs
+       */
+      config.init.call(this)
+    })
   },
   data() {
     return {
