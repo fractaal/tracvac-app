@@ -9,6 +9,7 @@ import expressBasicAuth from "express-basic-auth"
 import * as PushScheduler from '../push-scheduler'
 import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 import { exportTable } from "../exporter"
+import { getInsightLoaders } from "../insight"
 
 import extraModifiableUserFields from '../extraModifiableUserFields' // Contains the user fields that can be modified 
 
@@ -476,7 +477,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
 
         // Response construction
-        let response = {
+        let response: Record<string,any> = {
             alerts,
             miscItems: {
                 totalUserCount,
@@ -496,15 +497,18 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             }
         }
 
+        // Plugin Insight loaders 
+        const loaders = getInsightLoaders()
+
+        await Promise.all(loaders.map(async (loader) => {
+            const [name, data] = await loader()
+            response.chartItems[name] = data
+        }))
+
         if ((await getConfig()).isCorporation) {
-            response = Object.assign(
-                {},
-                response,
-                {
-                    "Branch - Vaccine Statuses": branchIsVaccineReady,
-                    "Branch - Vaccination Statuses": branchIsVaccinated,
-                    "Branch - Vaccine Manufacturers": branchVaccineManufacturer
-                })
+            response.chartItems["Branch - Vaccine Statuses"] = branchIsVaccineReady
+            response.chartItems["Branch - Vaccination Statuses"] = branchIsVaccinated
+            response.chartItems["Branch - Vaccine Manufacturers"] = branchVaccineManufacturer
         }
 
         res.json(response)
