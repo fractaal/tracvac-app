@@ -6,6 +6,9 @@ import { knex } from "../database"
 import { app } from "../index"
 import { UserModel as _ } from "../database/models/UserModel"
 import { addInsightLoader } from "../insight"
+import Logger from "../logger"
+
+const logger = Logger("PagIbig")
 
 const vaccinationDeferralTriggers = {
     "Below16": true,
@@ -70,17 +73,22 @@ addInsightLoader(async () => {
     app.post('/healthDeclarationForm', async (req, res) => {
         if (!Array.isArray(req.body)) { res.status(400).json({result: false, message: 'Invalid data'}); return }
 
+        logger.log(`User ${req.tokenData.userId} updated health declaration:`, req.body)
+
         try {
             await UserModel.query().where({id: req.tokenData.userId}).patch({healthDeclarationData: JSON.stringify(req.body)})
             // TODO: Logic that updates user model depending on the Health Declaration Form
             for (const [key, value] of Object.entries(vaccinationDeferralTriggers)) {
                 if (req.body.includes(key) === value) {
                     // Defer vaccination
+                    logger.log(`User ${req.tokenData.userId} vaccination is now deferred:`)
                     await UserModel.query().patch({ isDeferredFirst: true }).where({ id: req.tokenData.userId })
                     res.json({result: true, message: 'Submit successful!'})
                     return
                 }
             }
+            logger.log(`User ${req.tokenData.userId} vaccination is now not deferred:`)
+            await UserModel.query().patch({ isDeferredFirst: false}).where({ id: req.tokenData.userId })
             res.json({result: true, message: 'Submit successful!'})
             return
         } catch(err) {
