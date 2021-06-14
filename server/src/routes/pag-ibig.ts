@@ -2,9 +2,10 @@
  * Pag-Ibig specific module
  */
 
-import { knex } from "../database";
-import { app } from "../index";
-import { UserModel as _ } from "../database/models/UserModel";
+import { knex } from "../database"
+import { app } from "../index"
+import { UserModel as _ } from "../database/models/UserModel"
+import { addInsightLoader } from "../insight"
 
 const vaccinationDeferralTriggers = {
     "Below16": true,
@@ -29,6 +30,32 @@ class UserModel extends _ {
     isDeferredSecond!: boolean;
     healthDeclarationData!: Record<string,any>;
 }
+
+addInsightLoader(async () => {
+    const isDeferredFirst: Record<string,any> = {};
+
+    (await UserModel.query()
+        .select('isDeferredFirst')
+        .count('isDeferredFirst')
+        .groupBy('isDeferredFirst')
+        .orderBy('isDeferredFirst')
+    ).forEach((val: any) => isDeferredFirst[`${val.isDeferredFirst === true ? 'Yes' : 'No'}`] = val.count);
+
+    return ["Is Deferred? (First)", isDeferredFirst]
+});
+
+addInsightLoader(async () => {
+    const isDeferredSecond: Record<string,any> = {};
+
+    (await UserModel.query()
+        .select('isDeferredSecond')
+        .count('isDeferredSecond')
+        .groupBy('isDeferredSecond')
+        .orderBy('isDeferredSecond')
+    ).forEach((val: any) => isDeferredSecond[`${val.isDeferredSecond === true ? 'Yes' : 'No'}`] = val.count);
+
+    return ["Is Deferred? (Second)", isDeferredSecond]
+});
 
 (async () => {
     // Perform schema changes to the user table
