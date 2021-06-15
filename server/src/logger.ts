@@ -4,13 +4,6 @@ import cluster from 'cluster';
 
 let activeStyle = process.env.LOG_STYLE ?? "MEDIUM"
 let emojisEnabled = !!(parseInt(process.env.LOG_EMOJIS as string) ?? true)
-let writeToFile = !!(parseInt(process.env.LOG_WRITE_TO_FILE as string) ?? true)
-
-if (writeToFile) {
-  const access = fs.createWriteStream('./tracvac.log')
-  // @ts-ignore
-  process.stdout.write = process.stderr.write = access.write.bind(access)
-}
 
 const emojis = ['⏹', 'ℹ', '⚠', '☢', '✔']
 const styles = {
@@ -28,10 +21,18 @@ if (!(activeStyle in styles)) {
   activeStyle = 'MEDIUM'
 }
 
+let _ = {
+  module: chalk.blue,
+  log: (...x: any[]) => x,
+  warn: chalk.yellowBright,
+  error: chalk.bgRedBright.black,
+  success: chalk.greenBright
+}
+
 export default function register (name: string) {
   const clusterName = cluster.isWorker ? `${cluster.worker.id}` : `Main`;
 
-  console.log(chalk.blue(`[ ${(Date.now()/1000).toFixed(3)} ${style(0)} | ${name}@${clusterName}] Registered new module ${name}.`));
+  console.log(_.module(`[ ${(Date.now()/1000).toFixed(3)} ${style(0)} | ${name}@${clusterName}] Registered new module ${name}.`));
 
   return {
     log: (...data: any[]) => {
@@ -41,15 +42,15 @@ export default function register (name: string) {
     },
     warn: (...data: any[]) => {
       if (process.env.NODE_ENV === "TEST") return
-      console.warn(chalk.yellowBright(`[ ${(Date.now() / 1000).toFixed(3)} ${style(2)} | ${name}@${clusterName}]`, ...data))
+      console.warn(_.warn(`[ ${(Date.now() / 1000).toFixed(3)} ${style(2)} | ${name}@${clusterName}]`, ...data))
     },
     error: (...data: any[]) => {
       if (process.env.NODE_ENV === "TEST") return
-      console.error(chalk.bgRedBright.black(`[ ${(Date.now() / 1000).toFixed(3)} ${style(3)} | ${name}@${clusterName}]`, ...data))
+      console.error(_.error(`[ ${(Date.now() / 1000).toFixed(3)} ${style(3)} | ${name}@${clusterName}]`, ...data))
     },
     success: (...data: any[]) => {
       if (process.env.NODE_ENV === "TEST") return
-      console.log(chalk.greenBright(`[ ${(Date.now() / 1000).toFixed(3)} ${style(4)} | ${name}@${clusterName}]`,...data))
+      console.log(_.success(`[ ${(Date.now() / 1000).toFixed(3)} ${style(4)} | ${name}@${clusterName}]`,...data))
     },
   }
 }
