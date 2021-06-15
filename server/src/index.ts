@@ -125,6 +125,7 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
   for (const filename of fs.readdirSync(routePath)) await import(path.join(routePath, path.basename(filename)));
 
   // Load plugins!
+  await import('./user-registration-fields')
   await import('./plugins')
   
   // Error handling.
