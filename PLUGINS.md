@@ -1,11 +1,43 @@
 ## TracVac Plugin Specification (WIP)
+### How plugins are loaded
+Plugins are plain JavaScript files that are executed by TracVac server to provide additional functionality not present in the base version of TracVac.
+
+TracVac searches for plugins in the `./plugins` folder. 
+
+TracVac expects plugins to implement the following interface:
+```ts
+TracVacPlugin {
+	load ({
+		Models: {
+			UserModel, 
+			LogModel, 
+			PushSubscriptionModel, 
+			NotificationModel
+		}, 
+		UserRegistrationFields, 
+		UserDataFields,
+		App
+	}) => void
+
+	getClientPlugin() => string
+	getAdminPlugin() => string
+}
+```
+`load` is called whenever TracVac server is starting, therefore this is the place to put initialization code like updating the database schema to fit the needs of the plugin, or to bind middleware to the Express stack `App`.
+
+`getClientPlugin` is also called when TracVac server is starting, and it should return the file path to the JavaScript file that needs to be served to the client (should the plugin have a frontend.)
+
+`getAdminPlugin` is also called when TracVac server is starting, and it should return the file path to the JavaScript file that needs to be served to the administrator interface (should the plugin have a frontend.)
+
 ### Server Modules
+Models are already self explanatory and are used extensively in the base source code, as well as the express app exposed to the plugin `App`. However, there are two modules specifically made for plugins to interact with.
+
 - UserRegistrationFields
 	- Concerns when the user first registers onto TracVac. Any data supplied to the UserRegistrationFields module shows up on the Registration form in the TracVac app. 
 	- This module also exposes an endpoint to to be consumed by the TracVac app, so that the app can then show the extra registration fields that may be required.
 
 A more technical specification is as follows:
-```
+```ts
 UserRegistrationFields {
 	
 	addRegistrationField(Section []) => void
