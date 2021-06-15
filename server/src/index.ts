@@ -124,6 +124,9 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
   const routePath = path.join(__dirname, "/routes");
   for (const filename of fs.readdirSync(routePath)) await import(path.join(routePath, path.basename(filename)));
 
+  // Load plugins!
+  await import('./plugins')
+  
   // Error handling.
   logger.log('Initializing error handler middleware');
   app.use(function (err: Error, _: Request, res: Response, __: NextFunction) {
