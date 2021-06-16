@@ -1,8 +1,11 @@
+import Logger from "./logger"
 import { app } from "./"
 
+const logger = Logger("UserRegistrationFields")
 const registrationFields: any[] = []
 
 export function addRegistrationFields(data: any[]) {
+	logger.log("New registration fields added", data)
 	registrationFields.push(...data)
 }
 
