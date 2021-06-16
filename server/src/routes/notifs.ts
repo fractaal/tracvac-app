@@ -27,9 +27,9 @@ initialize().then(() => {
       const pushSubscription = {endpoint: req.body.endpoint, expirationTime: req.body.expirationTime, keys: req.body.keys} as PushSubscriptionJSON;
 
       const subscriptions = await PushSubscriptionModel.query().select('*').where({userId: req.tokenData.userId, token: req.header('x-access-token')});
-
-      console.log(req.body)
-      console.log(pushSubscription, subscriptions)
+       
+      // console.log(req.body)
+      // console.log(pushSubscription, subscriptions)
 
       if (subscriptions.length === 0) {
         logger.log(`Creating new subscription for user ${req.tokenData.userId}`)
