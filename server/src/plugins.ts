@@ -15,6 +15,7 @@ import { PushSubscriptionModel } from "./database/models/PushSubscriptionModel"
 // Plugin Services
 import * as UserRegistrationFields from "./user-registration-fields"
 import * as UserDataFields from "./user-data-fields"
+import * as Insight from "./insight"
 
 const logger = Logger("PluginManager")
 
@@ -23,6 +24,7 @@ interface TracVacPlugin {
 		Models: Record<string,any>,
 		UserRegistrationFields: Record<string,any>
 		UserDataFields: Record<string,any>
+		Insight: typeof Insight
 		app: Express.Application
 		logger: ReturnType<typeof Logger>
 	}): Promise<void>
@@ -35,7 +37,7 @@ interface TracVacPlugin {
 	__errored: boolean
 }
 
-const requiredManifestKeys = ['name', 'version']
+const requiredManifestKeys = ['name']
 const plugins: TracVacPlugin[] = [];
 const pluginFolder = path.join(process.cwd(), 'plugins')
 
@@ -94,8 +96,9 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 				}, 
 				UserDataFields,
 				UserRegistrationFields,
+				Insight,
 				app,
-				logger: Logger(manifest.name)
+				logger: Logger(manifest.name + "Plugin")
 			})
 
 			plugin.__loaded = true
