@@ -477,15 +477,21 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                 usersWithNotifsEnabled, 
             },
             chartItems: {
-                "Professions": professions, 
-                "Sexes": sexes, 
-                "Pregnancies": pregnancies, 
-                "Vaccination Statuses": vaccinationStatuses, 
-                "Vaccine Statuses": vaccineStatuses,
-                "Vaccine Manufacturers": vaccineManufacturers,
-                "Groups - Vaccine Statuses": groupsIsVaccineReady,
-                "Groups - Vaccination Statuses": groupsIsVaccinated,
-                "Groups - Vaccine Manufacturers": groupsVaccineManufacturer,
+                "Demographic": {
+                    "Professions": professions, 
+                    "Sexes": sexes, 
+                    "Pregnancies": pregnancies, 
+                },
+                "Vaccination": {
+                    "Vaccination Statuses": vaccinationStatuses, 
+                    "Vaccine Statuses": vaccineStatuses,
+                    "Vaccine Manufacturers": vaccineManufacturers,
+                },
+                "Vaccination - Groups": {
+                    "Groups - Vaccine Statuses": groupsIsVaccineReady,
+                    "Groups - Vaccination Statuses": groupsIsVaccinated,
+                    "Groups - Vaccine Manufacturers": groupsVaccineManufacturer,
+                }
             }
         }
 
