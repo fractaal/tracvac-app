@@ -14,6 +14,7 @@ import { PushSubscriptionModel } from "./database/models/PushSubscriptionModel"
 
 // Plugin Services
 import * as UserRegistrationFields from "./user-registration-fields"
+import * as UserDataFields from "./user-data-fields"
 
 const logger = Logger("PluginManager")
 
@@ -91,7 +92,7 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 					NotificationModel,
 					PushSubscriptionModel
 				}, 
-				UserDataFields: {test: 'xd'}, 
+				UserDataFields,
 				UserRegistrationFields,
 				app,
 				logger: Logger(manifest.name)
