@@ -9,6 +9,7 @@ import expressBasicAuth from "express-basic-auth"
 import * as PushScheduler from '../push-scheduler'
 import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 import { exportTable } from "../exporter"
+import { getInsightLoaders } from "../insight"
 
 const logger = Logger("AdminRoute");
 
@@ -469,7 +470,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
 
         // Response construction
-        let response = {
+        let response: Record<string,any> = {
             alerts,
             miscItems: {
                 totalUserCount,
@@ -494,6 +495,19 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                 }
             }
         }
+
+        // Injecting insight loaders
+        const insightLoaders = getInsightLoaders()
+        const resolvedInsightLoaderValues = await Promise.all(
+            insightLoaders.map(async x => {return {data: x.loader(), section: x.section, name: x.name}}))
+
+        resolvedInsightLoaderValues.forEach(({section, name, data}) => {
+
+            if (!(section in response.chartItems)) response.chartItems[section] = {}
+
+            // @ts-ignore
+            response.chartItems[section][name] = data
+        })
 
         if ((await getConfig()).isCorporation) {
             response = Object.assign(
