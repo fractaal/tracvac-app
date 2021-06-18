@@ -77,11 +77,13 @@
             />
           </div>
         <q-table
-          class='sticky'
+          class='sticky mb-20'
           :loading="loading"
           virtual-scroll
-          table-style="max-height: 500px;"
+          table-style="padding-bottom: 200px;"
           flat
+          separator="vertical"
+          dense
           :columns="columns"
           :visible-columns='visibleColumns'
           :filter="searchFilter"
@@ -93,13 +95,32 @@
           :data="data"
           @request="getData"
         >
-          <template v-slot:top>
-            
+          <template v-slot:top></template>
+          <!--
+          <template v-slot:body-cell="props">
+            <q-td :props="props">
+              <q-menu context-menu>
+                <q-list dense style="min-width: 100px">
+                  <q-item clickable v-close-popup>
+                    <q-item-section>Add to Editor Panel</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup>
+                    <q-item-section>New</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <q-item clickable v-close-popup>
+                    <q-item-section>Quit</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+              {{props.value}}
+            </q-td>
           </template>
+          -->
         </q-table>
         <q-page-sticky :offset='[20, 20]' position="bottom-right">
           <q-btn
-            class="p-2 mx-2"
+            class="p-2"
             label=" EXPORT AS EXCEL"
             color="secondary"
             icon="fas fa-file-export"
@@ -192,7 +213,7 @@ export default Vue.extend({
       loading: false,
       pagination: {
         page: 0,
-        rowsPerPage: 10,
+        rowsPerPage: 50,
         rowsNumber: 0,
         sortBy: 'id',
         descending: false,
