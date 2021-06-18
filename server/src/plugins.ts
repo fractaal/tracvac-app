@@ -113,8 +113,8 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 			})
 
 			// Expose the plugin's scripts as routes
-			const clientPluginPath = plugin.getClientPlugin()
-			const adminPluginPath = plugin.getAdminPlugin()
+			const clientPluginPath = path.resolve(plugin.getClientPlugin())
+			const adminPluginPath = path.resolve(plugin.getAdminPlugin())
 
 			if (fs.existsSync(clientPluginPath)) {
 				const js = fs.readFileSync(clientPluginPath, { encoding: 'utf8' });
@@ -124,8 +124,7 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 					res.type(".js").send(js)
 				})
 			} else if (!((clientPluginPath ?? "NONE") === "NONE")) {
-				logger.warn(`The client plugin script for ${manifest.name} - ${clientPluginPath} - does not exist. 
-				If this plugin has a front-end, it won't work properly!`)
+				logger.warn(`The client plugin script for ${manifest.name} - ${clientPluginPath} - does not exist.  If this plugin has a front-end, it won't work properly!`)
 			}
 
 			if (fs.existsSync(adminPluginPath)) {
@@ -136,8 +135,7 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 					res.type(".js").send(js)
 				})
 			} else if (!((adminPluginPath ?? "NONE") === "NONE")) {
-				logger.warn(`The admin plugin script for ${manifest.name} - ${clientPluginPath} - does not exist. 
-				If this plugin has a front-end, it won't work properly!`)
+				logger.warn(`The admin plugin script for ${manifest.name} - ${clientPluginPath} - does not exist. If this plugin has a front-end, it won't work properly!`)
 			}
 
 			plugin.__loaded = true
