@@ -6,12 +6,12 @@ import path from 'path'
 // src/utils/external-component.js
 export default function plugin (url: string) {
   return new Promise((resolve, reject) => {
-    const name = url// .split('/').reverse()[0].match(/^(.*?)\.umd/)[1]
+    console.log(path.basename(url))
     const script = document.createElement('script')
     script.async = true
     script.addEventListener('load', () => {
       // @ts-ignore
-      resolve({ [path.basename(url)]: window[path.basename(url)], init: window.init })
+      resolve(window[path.basename(url)])
     })
     script.addEventListener('error', () => {
       reject(new Error(`Error loading ${url}`))
