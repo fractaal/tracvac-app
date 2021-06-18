@@ -49,7 +49,8 @@ export default Vue.extend({
     const { data: pluginPaths } = await api.get('/plugin')
     for (const pluginPath of pluginPaths) {
       const plugin = await loadPlugin(pluginPath)
-      await (plugin as any).init.call(this, api)
+      console.log(plugin)
+      await (plugin as any).init(this, api)
     }
   },
   activated () {
