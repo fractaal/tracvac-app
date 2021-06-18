@@ -56,12 +56,12 @@ const cmd = (command) => {
   // }
 
   if (!serverOnly()) {
-    try {
-      await cmd ("quasar -v")
-    } catch(err) {
+    // try {
+    //   await cmd ("quasar -v")
+    // } catch(err) {
       console.log("Installing Quasar ... ")
       await cmd ("yarn global add @quasar/cli")
-    }
+    // }
   }
 
   await install();
