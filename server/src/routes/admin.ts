@@ -10,6 +10,7 @@ import * as PushScheduler from '../push-scheduler'
 import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 import { exportTable } from "../exporter"
 import { getInsightLoaders } from "../insight"
+import { getDataFields } from "../user-data-fields"
 
 const logger = Logger("AdminRoute");
 
@@ -537,5 +538,10 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             logger.error(`Error occurred while trying get all users from group ${req.body.group}: ${err.stack}`)
             res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
         }
+    })
+
+    // User Data Fields
+    app.get('/admin/userDataFields', async (req, res) => {
+        res.json(getDataFields())
     })
 })();
