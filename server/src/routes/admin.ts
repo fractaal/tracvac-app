@@ -133,8 +133,10 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             group: user.group
                         }
                         
-                        // @ts-ignore I know what I'm doing
-                        extraModifiableUserFields.forEach(field => updatedUser[field.name] = user[field.name])
+                        getDataFields().forEach(field => {
+                            // @ts-ignore I know what I'm doing
+                            updatedUser[field.name] = (field.type === "json" ? JSON.stringify(user[field.name]) : user[field.name])
+                        })
 
                         await UserModel.query(trx).where({ id: user.id }).patch(updatedUser);
                         
