@@ -33,27 +33,27 @@ const cmd = (command) => {
 (async () => {
   console.log("noexe flag: ", noExeFlagIsPresent(), " server only: ", serverOnly(), " no install dependencies: ", noInstall())
 
-  try {
-    await cmd ("yarn -v")
-  } catch(err) {
+  // try {
+  //   await cmd ("yarn -v")
+  // } catch(err) {
     console.log("Installing Yarn...")
     await cmd ("npm install --global yarn")
-  }
+  // }
 
-  try {
-    await cmd ("tsc -v")
-  } catch(err) {
+  // try {
+  //   await cmd ("tsc -v")
+  // } catch(err) {
     console.log("Installing TypeScript Compiler...")
     await cmd ("yarn global add typescript")
-  }
+  // }
 
   if (!noExeFlagIsPresent() || !serverOnly())
-  try {
-    await cmd ("pkg -v")
-  } catch(err) {
+  // try {
+    // await cmd ("pkg -v")
+  // } catch(err) {
     console.log("Installing pkg (Executable bundler)")
     await cmd("yarn global add pkg")
-  }
+  // }
 
   if (!serverOnly()) {
     try {
