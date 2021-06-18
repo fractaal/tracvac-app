@@ -123,7 +123,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             await UserModel.query(trx).where({ id: user.id }).patch({lastVaccinationTime: new Date().toUTCString()})
                         }
 
-                        await UserModel.query(trx).where({ id: user.id }).patch({
+                        const updatedUser = {
                             isVaccinated: !!user.isVaccinated,
                             vaccineManufacturer: user.vaccineManufacturer,
                             isVaccineReady: user.isVaccineReady,
@@ -131,7 +131,12 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             isPUM: !!user.isPUM,
                             dosageNumber: user.dosageNumber,
                             group: user.group
-                        });
+                        }
+                        
+                        // @ts-ignore I know what I'm doing
+                        extraModifiableUserFields.forEach(field => updatedUser[field.name] = user[field.name])
+
+                        await UserModel.query(trx).where({ id: user.id }).patch(updatedUser);
                         
                         // Queue a push to be handled by the push scheduler (IF vaccine/vaccination statuses have changed)
                         if ( 
