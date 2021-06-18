@@ -96,6 +96,9 @@
           @request="getData"
         >
           <template v-slot:top></template>
+          <template v-slot:loading>
+            <q-inner-loading showing color="primary" />
+          </template>
           <!--
           <template v-slot:body-cell="props">
             <q-td :props="props">
