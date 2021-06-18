@@ -12,6 +12,8 @@ interface UserDataField {
 
 const dataFields: UserDataField[] = []
 
+export const getDataFields = () => dataFields
+
 export const addDataFields = async (data: UserDataField[]) => {
 	if (!Array.isArray(data)) data = [data]
 
