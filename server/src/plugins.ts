@@ -38,7 +38,10 @@ interface TracVacPlugin {
 }
 
 const requiredManifestKeys = ['name']
-const plugins: TracVacPlugin[] = [];
+const plugins: TracVacPlugin[] = []
+const clientPluginRoutes: string[] = []
+const adminPluginRoutes: string[] = []
+
 const pluginFolder = path.join(process.cwd(), 'plugins')
 
 // Create a plugins folder if one doesn't exist
@@ -47,6 +50,14 @@ if (!fs.existsSync(pluginFolder)) fs.mkdirSync(pluginFolder)
 const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.endsWith('.js'));
 
 (async () => {
+	app.get("/plugin", async (req, res) => {
+		res.json(clientPluginRoutes)
+	})
+
+	app.get("/admin/plugin", async (req, res) => {
+		res.json(adminPluginRoutes)
+	})
+
 	await Promise.all(pluginFiles.map(async (fileName: string) => {
 		const plugin: TracVacPlugin = require(path.join(pluginFolder, fileName))
 		plugins.push(plugin)
@@ -100,6 +111,34 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 				app,
 				logger: Logger(manifest.name + "Plugin")
 			})
+
+			// Expose the plugin's scripts as routes
+			const clientPluginPath = plugin.getClientPlugin()
+			const adminPluginPath = plugin.getAdminPlugin()
+
+			if (fs.existsSync(clientPluginPath)) {
+				const js = fs.readFileSync(clientPluginPath, { encoding: 'utf8' });
+				clientPluginRoutes.push(`/plugin/${manifest.name}`)
+
+				app.get(`/plugin/${manifest.name}`, async (req, res) => {
+					res.type(".js").send(js)
+				})
+			} else if (!((clientPluginPath ?? "NONE") === "NONE")) {
+				logger.warn(`The client plugin script for ${manifest.name} - ${clientPluginPath} - does not exist. 
+				If this plugin has a front-end, it won't work properly!`)
+			}
+
+			if (fs.existsSync(adminPluginPath)) {
+				const js = fs.readFileSync(adminPluginPath, { encoding: 'utf8' });
+				adminPluginRoutes.push(`/admin/plugin/${manifest.name}`)
+
+				app.get(`/admin/plugin/${manifest.name}`, async (req, res) => {
+					res.type(".js").send(js)
+				})
+			} else if (!((adminPluginPath ?? "NONE") === "NONE")) {
+				logger.warn(`The admin plugin script for ${manifest.name} - ${clientPluginPath} - does not exist. 
+				If this plugin has a front-end, it won't work properly!`)
+			}
 
 			plugin.__loaded = true
 		} catch(err) {
