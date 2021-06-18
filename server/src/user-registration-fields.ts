@@ -5,7 +5,7 @@ const logger = Logger("UserRegistrationFields")
 const registrationFields: any[] = []
 
 export function addRegistrationFields(data: any[]) {
-	logger.log("New registration fields added", data)
+	logger.log("New registration fields added", data.map(x => x.name))
 	registrationFields.push(...data)
 }
 
