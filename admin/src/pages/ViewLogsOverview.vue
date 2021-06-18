@@ -48,11 +48,11 @@
     </q-page-sticky>
 
     <q-table
-      class='sticky my-auto'
+      class='sticky my-auto mb-20'
       :loading="loading"
       virtual-scroll
-      table-style="max-height: 700px;"
       flat
+      dense
       :pagination.sync="pagination"
       binary-state-sort
       selection="multiple"
@@ -184,7 +184,7 @@ export default Vue.extend({
       columns,
       pagination: {
         page: 0,
-        rowsPerPage: 10,
+        rowsPerPage: 50,
         rowsNumber: 0,
         sortBy: 'id',
         descending: false,
