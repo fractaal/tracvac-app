@@ -98,13 +98,21 @@
 </template>
 
 <script lang="ts">
-import store from '../api/store'
+import store from 'src/api/store'
 import Vue from 'vue';
+import loadPlugin from 'src/api/plugin'
 
 export default Vue.extend({
   name: 'MainLayout',
   async created() {
     this.store.unreadLogsCount = (await store.axios.post('/admin/getUnreadLogsCount')).data.count
+
+    const { data: pluginPaths } = await store.axios.get('/admin/plugin')
+    for (const pluginPath of pluginPaths) {
+      const plugin = await loadPlugin(pluginPath)
+      console.log(plugin)
+      await (plugin as any).init(this)
+    }
   },
   data() {
     return {
