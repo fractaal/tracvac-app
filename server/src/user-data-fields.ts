@@ -12,7 +12,7 @@ interface UserDataField {
 
 const dataFields: UserDataField[] = []
 
-export const addDataField = async (data: UserDataField[]) => {
+export const addDataFields = async (data: UserDataField[]) => {
 	if (!Array.isArray(data)) data = [data]
 
 	await knex.schema.table("users", async (table) => {
