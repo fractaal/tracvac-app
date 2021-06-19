@@ -1,6 +1,10 @@
 <template>
-  <q-page class="p-8">
-    <h4 class="m-0 font-light">CONFIGURATION</h4>
+  <q-page class="py-8"> 
+    <!-- TODO: Consistent design language with Tracvac People & Tracvac Insight -->
+    <div class="m-0 py-8 px-8 bg-blue-200">
+      <div class="m-0 font-light text-sm">YOU'RE RUNNING</div>  
+      <h4 class="m-0 font-black">TRACVAC {{require('../../../package.json').version}}</h4>
+    </div>
     <div class="grid grid-cols-2 gap-4">
       <div class="mt-16 mx-auto w-3/4">
         <h6 class="m-0 m-0 p-0">GENERAL</h6>
