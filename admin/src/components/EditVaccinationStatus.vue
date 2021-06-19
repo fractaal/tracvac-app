@@ -1,75 +1,68 @@
 <template>
   <div>
-    <div class="overflow-x-visible grid grid-cols-2 gap-6">
-      <div>
-        <div class='text-h6 mb-8'>EDIT VACCINATION STATUSES</div>
-        <div class='flex mx-auto'>
-          <q-input dense debounce='500' v-model='searchFilter' label='Search...' class='w-1/2 mr-2'/>
-          <q-pagination v-model='pageIndex' :max='Math.ceil(filteredUsers.length/usersPerPage)' input/>
-        </div>
-        <br/>
-        <!-- <transition-group v-if='store.usersToModify.length !== 0' name="transition" mode="out-in"> -->
-          <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "ring-4 ring-red-500" : "ring-4 ring-gray-300"' class="mb-8 rounded-2xl shadow-xl border-3" :key="user.id">
-            <q-card-section>
-              <div class="flex flex-nowrap justify-between">
-                <q-btn class="absolute -mt-8 -ml-8" round color="negative" icon="close" @click="store.usersToModify.splice(idx, 1)"/>
-                <div>
-                  <div class='flex flex-nowrap'>
-                    <q-avatar class='block mb-4 rounded-full ring-4 w-16 h-16 ring-blue-500 shadow-5'>
-                      <q-img ratio='1' :src='"http://localhost/" + user.profilePicturePath'/>
-                    </q-avatar>
-                    <div class='mx-4'>
-                      <h6 class="m-0 p-0 font-bold leading-5">{{user.firstName}} {{user.lastName}}</h6>
-                      <p class="m-0 p-0">@{{user.username}}</p>
-                    </div>
-                  </div>
+    <div class='flex justify-center content-center mb-8'>
+      <q-input outlined rounded dense debounce='500' v-model='searchFilter' label='Filter...' class='w-full mr-2'/>
+      <q-pagination v-model='pageIndex' class="mt-2"  :max='Math.ceil(filteredUsers.length/usersPerPage)' input/>
+    </div>
+    <div v-if='store.usersToModify.length !== 0' class="overflow-x-visible ">
+      <!-- grid grid-cols-2 gap-6 -->
+      <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "bg-red-200 ring-4 ring-red-500" : ""' class="mb-8 rounded-2xl shadow-lg border border-solid border-gray-300" :key="user.id">
+        <q-card-section>
+          <div class="flex flex-nowrap justify-between">
+            <q-btn class="absolute -mt-8 -ml-8" round color="negative" icon="close" @click="store.usersToModify.splice(idx, 1)"/>
+            <div>
+              <div class='flex flex-nowrap'>
+                <q-avatar class='block rounded-full ring-4 w-16 h-16 ring-blue-500 shadow-5'>
+                  <q-img ratio='1' :src='"http://localhost/" + user.profilePicturePath'/>
+                </q-avatar>
+                <div class='mx-4'>
+                  <h6 class="m-0 p-0 font-bold leading-5">{{user.firstName}} {{user.lastName}}</h6>
+                  <p class="m-0 p-0">@{{user.username}}</p>
                 </div>
-                <div>
-                  <q-btn outline label='View Logs' @click='$router.push("view-logs/" + user.id)'/>
-                </div>
-                <!--
-                <div>
-                  <p :class="user.isVaccinated === true ? 'text-green-500' : 'text-red-700'" class="m-0 p-0 text-right font-extrabold">{{user.isVaccinated === true ? '✅ VACCINATED' : '❌ NOT VACCINATED'}}</p>
-                  <p :class="vaccineStatusStyling(user.isVaccineReady)" class="m-0 p-0 text-right font-extrabold">VACCINE IS {{user.isVaccineReady.toUpperCase()}}</p>
-                  <hr/>
-                  <p class="m-0 p-0 text-right">UNDER INVESTIGATION: <b>{{user.isPUI ? 'Yes' : 'No'}}</b></p>
-                  <p class="m-0 p-0 text-right">UNDER MONITORING: <b>{{user.isPUM ? 'Yes' : 'No'}}</b></p>
-                </div>
-                -->
               </div>
-              <br>
-              <div>
+            </div>
+            <div>
+              <q-btn outline label='View Logs' @click='$router.push("view-logs/" + user.id)'/>
+            </div>
+          </div>
+          <br>
+          <div>
+            <div class="flex flex-nowrap overflow-x-auto justify-between">
+              <div class="flex flex-nowrap">
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Not Ready'" color="negative" label="Vaccine Not Ready" @click="toggleVaccineStatus(user, 'Not Ready')"/>
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Pending'" color="primary" label="Vaccine Pending" @click="toggleVaccineStatus(user, 'Pending')"/>
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Ready'" color="positive" label="Vaccine Ready" @click="toggleVaccineStatus(user, 'Ready')"/>
-                <div class='my-1'/>
+                <q-icon name="fas fa-forward" color="green" class="mx-2 my-auto"/>
+                <!-- <div class='my-1'/> -->
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccinated" label="Not Vaccinated" color="negative" @click="toggleVaccinated(user, false)"/>
                 <q-btn class="mr-1 rounded-xl" unelevated  :outline="!user.isVaccinated" label="Vaccinated" color="green" @click="toggleVaccinated(user, true)"/>
-                <div class='my-1'/>
+                <!-- <div class='my-1'/> -->
+              </div>
+              <div class="flex flex-nowrap">
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="!user.isPUI" :color="user.isPUI ? 'red' : 'green'" label='Under Investigation' @click='togglePUI(user, !user.isPUI)'/>
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="!user.isPUM" :color="user.isPUM ? 'red' : 'green'" label='Under Monitoring' @click='togglePUM(user, !user.isPUM)'/>
-                <div class='my-2'/>
-                <div class='grid grid-cols-3 gap-2'>
-                  <q-input class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
-                  <q-input class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
-                  <q-input class="mr-1" unelevated debounce='500' type='string' outlined label='Group' v-model='user.group'/>
-                </div>
-                <div class='grid grid-cols-3 gap-2'>
-                  <div v-for="item in userDataFields" :key="item.name">
-                    <div v-if="item.type === 'boolean'">
-                      <q-item>
-                        <q-toggle v-model="user[item.name]" :label="item.displayName"/>
-                      </q-item>
-                    </div>
-                  </div>
+              </div>
+            </div>
+            <div class='my-2'/>
+            <div class='grid grid-cols-3 gap-2'>
+              <q-input dense class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
+              <q-input dense class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
+              <q-input dense class="mr-1" unelevated debounce='500' type='string' outlined label='Group' v-model='user.group'/>
+            </div>
+            <q-separator v-if="userDataFields.length !== 0" class="my-2"/>
+            <div class='grid grid-cols-3 gap-2'>
+              <div v-for="item in userDataFields" :key="item.name">
+                <div v-if="item.type === 'boolean'">
+                  <q-item>
+                    <q-toggle dense v-model="user[item.name]" :label="item.displayName"/>
+                  </q-item>
                 </div>
               </div>
-            </q-card-section>
-          </q-card>
-        <!-- </transition-group> -->
-        <empty-placeholder v-if='paginatedUsers.length === 0' icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
-      </div>
-      <div>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+      <!-- <div>
         <div class='text-h6 mb-8'>DISCREPANCIES</div>
         <transition-group name="transition">
           <empty-placeholder key='pl' v-if='discrepancies.length === 0' icon='fas fa-check' title='No discrepancies detected' subtitle="You're good to go!"/>
@@ -87,8 +80,9 @@
             </q-card>
           </div>
         </transition-group>
-      </div>
+      </div> -->
     </div>
+    <empty-placeholder class="pt-24" v-else icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
       <q-btn
         fab
@@ -218,7 +212,7 @@ export default Vue.extend({
       const result = [];
       for (const user of store.usersToModify) {
         const name = `${user.firstName} ${user.middleName} ${user.lastName}`;
-        if (name.indexOf(this.searchFilter) !== -1) {
+        if (name.toLowerCase().indexOf(this.searchFilter.toLowerCase()) !== -1) {
           result.push(user);
         }
       }
