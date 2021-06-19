@@ -1,5 +1,6 @@
 <template>
   <q-page class="p-8">
+    <!-- TODO: Consistent design language with Tracvac People & Tracvac Insight -->
     <h4 class="m-0 font-light">NOTIFICATIONS</h4>
     <div class="mt-4 flex flex-row">
       <q-btn unelevated class="rounded-xl p-2" color="primary" @click="$router.push('/addNotif')" icon="fas fa-plus" label="Post Notification"/>
