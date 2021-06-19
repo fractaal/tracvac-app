@@ -1,5 +1,6 @@
 <template>
   <q-page>
+    <!-- TODO: Consistent design language with Tracvac People & Tracvac Insight -->
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
       <q-btn
         class="p-2 mx-2"
