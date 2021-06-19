@@ -1,8 +1,24 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <!-- <q-layout view="lHh Lpr lFf"> -->
+  <q-layout view="lHh lpr lFf"> 
+    <q-footer class="bg-white text-black shadow-lg border-2 border-solid border-gray-200 overflow-x-auto">
+      <q-toolbar class="p-4">
+        <q-btn flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" />
+        <q-btn flat round dense icon="keyboard_arrow_left" @click="$router.back()" />
+        <q-btn flat round dense icon="keyboard_arrow_right" @click="$router.forward()" />
+        <q-toolbar-title>
+          {{store.serverConfig.name}} - <strong>Tracvac</strong> Administrator
+          <p class="m-0 -my-1 text-sm">at <b>{{store.serverConfig.location}}</b></p>
+        </q-toolbar-title>
+        <q-btn flat rounded name="images" label="People" icon="person" @click="$router.push('/')"/>
+        <q-btn flat rounded name="videos" label="Notifications" icon="announcement" @click="$router.push('/notif')"/>
+        <q-btn flat rounded name="articles" label="Logs" icon="fas fa-pen" @click="$router.push('/view-logs')"/>
+        <q-btn flat rounded name="articles" label="Insight" icon="fas fa-lightbulb" @click="$router.push('/insight')"/>
+        <q-btn flat rounded name="articles" label="Configuration" icon="settings" @click="$router.push('/config')"/>
+      </q-toolbar>
+    </q-footer >
     <q-drawer
       v-model="leftDrawerOpen"
-      show-if-above
       bordered
       content-class="bg-grey-1"
     >
@@ -70,29 +86,8 @@
       <keep-alive>
         <router-view />
       </keep-alive>
-      <q-page-sticky :offset='[20, 20]' position="bottom-left">
-        <q-btn
-          fab
-          class='mr-2'
-          color='primary'
-          icon="keyboard_arrow_left"
-          @click="$router.back()"
-        />
-        <q-btn
-          fab
-          class='mr-2'
-          color='primary'
-          icon="keyboard_arrow_right"
-          @click="$router.forward()"
-        />
-        <q-btn
-          fab
-          label='Show/hide menu'
-          color="secondary"
-          icon="remove_red_eye"
-          @click="leftDrawerOpen = !leftDrawerOpen"
-        />
-      </q-page-sticky>
+      <!-- <q-page-sticky :offset='[20, 20]' position="bottom-left"> -->
+      <!-- </q-page-sticky> -->
     </q-page-container>
   </q-layout>
 </template>
