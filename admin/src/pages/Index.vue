@@ -37,9 +37,9 @@
               <q-btn outline class='mr-2' :color='showPUIs ? "green" : "black"' :label='showPUIs ? "Showing Under Investigation" : "Show Under Investigation"' :icon='showPUIs ? "fas fa-eye" : "fas fa-eye-slash"' @click='toggleShow("PUIs", !showPUIs)' />
             </div>
             <div class="flex content-center flex-nowrap">
-              <q-btn class="mr-2" round color="blue" icon="keyboard_arrow_up" @click="showOptionsDialog = true"/>
-              <q-btn class="mr-2" label=" EXPORT AS EXCEL" color="secondary" icon="fas fa-file-export" @click="exportToExcel"/>
-              <q-btn class="mr-0" :disable="selected.length === 0" label="ADD TO EDITOR PANEL" color="primary" icon="add" @click="addSelectionToEdit"/>
+              <q-btn unelevated class="mr-2" round color="blue" icon="keyboard_arrow_up" @click="showOptionsDialog = true"/>
+              <q-btn unelevated class="mr-2" label=" EXPORT AS EXCEL" color="secondary" icon="fas fa-file-export" @click="exportToExcel"/>
+              <q-btn unelevated class="mr-0" :disable="selected.length === 0" label="ADD TO EDITOR PANEL" color="primary" icon="add" @click="addSelectionToEdit"/>
             </div>
           </div>
         <q-table
