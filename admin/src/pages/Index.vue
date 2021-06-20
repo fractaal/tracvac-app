@@ -54,6 +54,7 @@
           :visible-columns='visibleColumns'
           :filter="searchFilter"
           :pagination.sync="pagination"
+          :rows-per-page-options="[ 5, 10, 25, 50, 100, 200, 500, 1000, 2500, 5000 ]"
           binary-state-sort
           selection="multiple"
           :selected.sync="selected"
@@ -161,6 +162,15 @@ export default Vue.extend({
   watch: {
     visibleColumns () {
       LocalStorage.set('visibleColumns', this.visibleColumns)
+    },
+    'pagination.rowsPerPage': function (val) {
+      if (val > 1000) {
+        this.$q.dialog({
+          title: 'Warning',
+          message: 'Displaying more than 1,000 items at a time may result in extremely poor performance!',
+          color: 'red'
+        })
+      }
     }
   },
   async activated() {
@@ -261,8 +271,10 @@ export default Vue.extend({
     },
     exportToExcel() {
       this.$q.dialog({
-        title: 'Export user data to an excel file?',
-        message: 'You will be exporting all user data.',
+        title: 'Warning!',
+        color: 'red',
+        html: true,
+        message: 'Exporting user data is a <b>blocking operation.</b> Tracvac Server will become unresponsive to all user and administrator requests for a time. Are you sure to proceed?',
         cancel: true,
       }).onOk(async () => {
         try {
