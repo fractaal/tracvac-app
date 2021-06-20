@@ -1,0 +1,18 @@
+{
+  "name": "tracvac-app",
+  "version": "1.12.1",
+  "description": "Vaccine tracking application",
+  "scripts": {
+    "test": "cd server && yarn test",
+    "build": "node build.js",
+    "heroku-postbuild": "node build.js --noexe",
+    "start": "cd server && yarn start"
+  },
+  "repository": "https://github.com/fractaal/tracvac-app.git",
+  "author": "Ben Jude <sonoroustwo@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "csv-write-stream": "^2.0.0",
+    "faker": "^5.5.3"
+  }
+}
