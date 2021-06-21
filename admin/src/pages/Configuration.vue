@@ -1,9 +1,12 @@
 <template>
-  <q-page class="py-8"> 
-    <!-- TODO: Consistent design language with Tracvac People & Tracvac Insight -->
-    <div class="m-0 py-8 px-8 bg-blue-200">
-      <div class="m-0 font-light text-sm">YOU'RE RUNNING</div>  
-      <h4 class="m-0 font-black">TRACVAC {{require('../../../package.json').version}}</h4>
+  <q-page class="p-8"> 
+    <tracvac-header title="CONFIGURATION" description="SEE HOW TRACVAC IS SET UP"/>
+    <div class="mt-16 flex justify-center content-center py-4 -mx-8 bg-blue-200">
+      <q-icon name="fas fa-check" size="128px" />
+      <div class="ml-8 flex flex-col justify-center content-center">
+        <div class="m-0 font-light text-sm">YOU'RE RUNNING</div>
+        <h4 class="m-0 font-black">TRACVAC {{require('../../../package.json').version}}</h4>
+      </div>
     </div>
     <div class="grid grid-cols-2 gap-4">
       <div class="mt-16 mx-auto w-3/4">
@@ -27,6 +30,7 @@
         </p>
       </div>
     </div>
+    <div class="mb-20"/>
   </q-page>
 </template>
 
@@ -36,10 +40,11 @@
 import Vue from 'vue';
 import { getConfig, setConfig } from '../api/config'
 import store from 'src/api/store';
+import TracvacHeader from 'components/TracvacHeader.vue'
 
 export default Vue.extend({
   name: 'Configuration',
-  components: {},
+  components: { TracvacHeader },
   async mounted() {
     await getConfig();
   },
