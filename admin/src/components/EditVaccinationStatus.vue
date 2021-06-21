@@ -6,7 +6,7 @@
     </div>
     <div v-if='store.usersToModify.length !== 0' class="overflow-x-visible ">
       <!-- grid grid-cols-2 gap-6 -->
-      <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "bg-red-200 ring-4 ring-red-500" : ""' class="mb-8 rounded-2xl shadow-lg border border-solid border-gray-300" :key="user.id">
+      <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "bg-red-200 ring-4 ring-red-500" : ""' class="mb-8 rounded-2xl shadow-lg border-2 border-solid border-gray-300" :key="user.id">
         <q-card-section>
           <div class="flex flex-nowrap justify-between">
             <q-btn class="absolute -mt-8 -ml-8" round color="negative" icon="close" @click="store.usersToModify.splice(idx, 1)"/>
