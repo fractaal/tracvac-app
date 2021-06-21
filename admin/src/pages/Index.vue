@@ -1,9 +1,7 @@
 <template>
   <q-page class="px-8">
     <q-header class="pt-8 px-8 bg-white text-black">
-      <p class="-my-2">TRACVAC</p>
-      <h4 class="m-0 font-light">PEOPLE</h4>
-      <p class="-my-2">SELECT AND EDIT ACCOUNTS</p>
+      <tracvac-header title="PEOPLE" description="SELECT AND EDIT ACCOUNTS"/>
       <q-tabs
         class="-mt-16 border-0 border-b border-solid border-gray-300"
         v-model="activeTab"
@@ -134,6 +132,7 @@ import store from 'src/api/store';
 import peopleColumns from 'src/people-columns';
 import Vue from 'vue';
 import EditVaccinationStatus from 'components/EditVaccinationStatus.vue'
+import TracvacHeader from 'components/TracvacHeader.vue'
 
 // Inject branch field into peopleColumns if isCorporation
 if (store.serverConfig.isCorporation) {
@@ -149,7 +148,7 @@ if (store.serverConfig.isCorporation) {
 
 export default Vue.extend({
   name: 'Index',
-  components: { EditVaccinationStatus },
+  components: { EditVaccinationStatus, TracvacHeader },
   created() {
     
     this.visibleColumns = LocalStorage.getItem('visibleColumns') ?? ['username', 'firstName', 'middleName', 'lastName', 'group']; 
