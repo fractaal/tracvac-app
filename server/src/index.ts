@@ -36,7 +36,7 @@ process.on('unhandledRejection', exceptionLogger)
 
 // Use middleware
 app.use(cors());
-app.use(json());
+app.use(json({limit: '10mb'}));
 app.use(fileUpload({
   limits: { fileSize: 1024 * 1024 },
   abortOnLimit: true
@@ -86,7 +86,7 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
   });
   */
 
-  // JWT Middleware
+ // JWT Middleware
   logger.log("Initializing JWT middleware");
   app.use(async (req, res, next) => {
     const token = req.header('x-access-token');
