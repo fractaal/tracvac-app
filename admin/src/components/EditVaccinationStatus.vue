@@ -50,12 +50,40 @@
               <q-input dense class="mr-1" unelevated debounce='500' type='string' outlined label='Group' v-model='user.group'/>
             </div>
             <q-separator v-if="userDataFields.length !== 0" class="my-2"/>
-            <div class='grid grid-cols-3 gap-2'>
-              <div v-for="item in userDataFields" :key="item.name">
-                <div v-if="item.type === 'boolean'">
-                  <q-item>
-                    <q-toggle dense v-model="user[item.name]" :label="item.displayName"/>
-                  </q-item>
+            <div>
+              <div v-for="(section, name) in sectionedUserDataFields" :key="section[0].name" >
+                <div class="text-sm font-black">{{name}}</div>
+                <div class="grid grid-cols-3 gap-2 mb-2" >
+                  <div v-for="item in section" :key="item.name" >
+                    <div v-if="item.type === 'boolean'">
+                      <q-item>
+                        <q-toggle dense v-model="user[item.name]" :label="item.displayName"/>
+                      </q-item>
+                    </div>
+                    <div v-if="item.type === 'date'">
+                      <q-item>
+                        <q-input dense rounded v-model="user[item.name]" mask="date" :rules="['date']">
+                          <template v-slot:append>
+                            <q-icon name="event" class="cursor-pointer">
+                              <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                                <q-date v-model="date">
+                                  <div class="row items-center justify-end">
+                                    <q-btn v-close-popup label="Close" color="primary" flat />
+                                  </div>
+                                </q-date>
+                              </q-popup-proxy>
+                            </q-icon>
+                          </template>
+                        </q-input>
+                      </q-item>
+                    </div>
+                    <div v-if="item.type === 'number'">
+                      <q-item> <q-input type="number" dense rounded v-model="user[item.name]"/> </q-item>
+                    </div>
+                    <div v-else>
+                      <q-item> <q-input dense rounded v-model="user[item.name]" :label="item.displayName"/> </q-item>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -84,16 +112,7 @@
     </div>
     <empty-placeholder class="pt-24" v-else icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
-      <q-btn
-        fab
-        round
-        @click="showOptionsDialog = !showOptionsDialog"
-        :disable="store.usersToModify.length === 0"
-        class="p-2"
-        color="secondary"
-        direction="up"
-        icon="expand_less"
-      />
+      <q-btn fab round @click="showOptionsDialog = !showOptionsDialog" :disable="store.usersToModify.length === 0" class="p-2" color="secondary" direction="up" icon="expand_less" />
       <q-dialog v-model="showOptionsDialog">
         <q-card>
           <div class="p-4 text-h6">Batch Modify</div>
@@ -207,6 +226,18 @@ export default Vue.extend({
     this.computeDiscrepancies()
   },
   computed: {
+    sectionedUserDataFields (): Record<string, any[]> {
+      const result: Record<string, any[]> = {}
+      this.userDataFields.forEach(field => {
+        if (field.section in result) {
+          result[field.section].push(field)
+        } else {
+          result[field.section] = [field]
+        }
+      })
+
+      return result
+    },
     filteredUsers (): Record<string,any>[] {
       if (this.searchFilter === '') return this.store.usersToModify;
       const result = [];
