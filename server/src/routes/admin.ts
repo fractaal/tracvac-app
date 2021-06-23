@@ -549,6 +549,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 
     // User Data Fields
     app.get('/admin/userDataFields', async (req, res) => {
-        res.json(getDataFields())
+        const filteredUserDataFields = getDataFields().filter(field => field.isShownInAdmin)
+        res.json(filteredUserDataFields)
     })
 })();
