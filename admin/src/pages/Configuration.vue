@@ -30,6 +30,11 @@
         </p>
       </div>
     </div>
+    <div>
+      <configuration-list type="plugins" class="my-4 mt-8" />
+      <configuration-list type="dataFields" class="my-4" />
+      <configuration-list type="registrationFields" class="my-4" />
+    </div>
     <div class="mb-20"/>
   </q-page>
 </template>
@@ -41,10 +46,11 @@ import Vue from 'vue';
 import { getConfig, setConfig } from '../api/config'
 import store from 'src/api/store';
 import TracvacHeader from 'components/TracvacHeader.vue'
+import ConfigurationList from 'components/ConfigurationList.vue'
 
 export default Vue.extend({
   name: 'Configuration',
-  components: { TracvacHeader },
+  components: { TracvacHeader, ConfigurationList },
   async mounted() {
     await getConfig();
   },
