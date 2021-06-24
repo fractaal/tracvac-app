@@ -32,7 +32,7 @@
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Not Ready'" color="negative" label="Vaccine Not Ready" @click="toggleVaccineStatus(user, 'Not Ready')"/>
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Pending'" color="primary" label="Vaccine Pending" @click="toggleVaccineStatus(user, 'Pending')"/>
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Ready'" color="positive" label="Vaccine Ready" @click="toggleVaccineStatus(user, 'Ready')"/>
-                <q-icon name="fas fa-forward" color="green" class="mx-2 my-auto"/>
+                <q-icon name="fas fa-forward" :color="user.isVaccineReady === 'Ready' ? 'green' : 'red'" class="mx-2 my-auto"/>
                 <!-- <div class='my-1'/> -->
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccinated" label="Not Vaccinated" color="negative" @click="toggleVaccinated(user, false)"/>
                 <q-btn class="mr-1 rounded-xl" unelevated  :outline="!user.isVaccinated" label="Vaccinated" color="green" @click="toggleVaccinated(user, true)"/>
@@ -53,38 +53,35 @@
             <div>
               <div v-for="(section, name) in sectionedUserDataFields" :key="section[0].name" >
                 <div class="text-sm font-black">{{name}}</div>
-                <div class="grid grid-cols-3 gap-2 mb-2" >
-                  <div v-for="item in section" :key="item.name" >
+                <div class="grid grid-cols-6 mb-2" >
+                  <div class="mx-2" v-for="item in section" :key="item.name" >
                     <div v-if="item.type === 'boolean'">
-                      <q-item>
-                        <q-toggle dense v-model="user[item.name]" :label="item.displayName"/>
-                      </q-item>
+                      <q-toggle dense v-model="user[item.name]" :label="item.displayName"/>
                     </div>
                     <div v-else-if="item.type === 'date'">
-                      <q-item>
-                        <q-input dense rounded v-model="user[item.name]" mask="date" :rules="['date']">
-                          <template v-slot:append>
-                            <q-icon name="event" class="cursor-pointer">
-                              <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                                <q-date v-model="date">
-                                  <div class="row items-center justify-end">
-                                    <q-btn v-close-popup label="Close" color="primary" flat />
-                                  </div>
-                                </q-date>
-                              </q-popup-proxy>
-                            </q-icon>
-                          </template>
-                        </q-input>
-                      </q-item>
+                      <q-input dense rounded v-model="user[item.name]" mask="date" :rules="['date']" :label="item.displayName">
+                        <template v-slot:append>
+                          <q-icon name="event" class="cursor-pointer">
+                            <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                              <q-date v-model="user[item.name]">
+                                <div class="row items-center justify-end">
+                                  <q-btn v-close-popup label="Close" color="primary" flat />
+                                </div>
+                              </q-date>
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
                     </div>
-                    <div v-else-if="item.type === 'integer'">
-                      <q-item> <q-input :mask="item.type === 'integer' ? '#' : '#.#'" type="number" dense rounded v-model="user[item.name]"/> </q-item>
+                    <div v-else-if="item.type === 'integer' || item.type === 'float'">
+                      <q-input v-if="item.type === 'integer'" :rules="[val => Number.isInteger(Number(val)) || 'Must be an integer (whole number)']" reverse-fill-mask dense rounded v-model="user[item.name]" :label="item.displayName"/>
+                      <q-input v-else-if="item.type === 'float'" :rules="[val => !isNaN(parseFloat(val)) || 'Must be a float (decimal number)']" reverse-fill-mask dense rounded v-model="user[item.name]" :label="item.displayName"/>
                     </div>
                     <div v-else-if="item.type === 'enum'">
-                      <q-item> <q-select dense rounded :options="item.options" v-model="user[item.name]" /> </q-item>
+                      <q-select dense rounded :options="item.options" v-model="user[item.name]" :label="item.displayName" />
                     </div>
                     <div v-else>
-                      <q-item> <q-input dense rounded v-model="user[item.name]" :label="item.displayName"/> </q-item>
+                      <q-input dense rounded v-model="user[item.name]" :label="item.displayName"/>
                     </div>
                   </div>
                 </div>
