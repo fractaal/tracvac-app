@@ -7,12 +7,15 @@ interface UserDataField {
   name: string
   displayName: string
   type: string
+  options?: string[]
   description?: string
   isShownInAdmin?: boolean
 }
 
 const dataFields: UserDataField[] = []
 // const dataFields: Record<string, UserDataField[]> = {}
+
+const supportedDataFieldTypes = ["string", "integer", "float", "boolean", "date", "enum"]
 
 export const getDataFields = () => dataFields
 
@@ -22,6 +25,12 @@ export const addDataFields = async (data: UserDataField[]) => {
   const fields: Record<string, string> = {}
   await Promise.all(
     data.map(async (item) => {
+      
+      // Supported field checking
+      if (!supportedDataFieldTypes.includes(item.type)) {
+        logger.warn(`User data field ${item.displayName} has an unsupported type ${item.type}. It will still appear in the administrator interface, but your mileage may vary.`)
+      }
+
       if (!(await knex.schema.hasColumn("users", item.name))) {
         // @ts-ignore
         fields[item.type] = item.name
