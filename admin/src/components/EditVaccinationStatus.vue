@@ -60,7 +60,7 @@
                         <q-toggle dense v-model="user[item.name]" :label="item.displayName"/>
                       </q-item>
                     </div>
-                    <div v-if="item.type === 'date'">
+                    <div v-else-if="item.type === 'date'">
                       <q-item>
                         <q-input dense rounded v-model="user[item.name]" mask="date" :rules="['date']">
                           <template v-slot:append>
@@ -77,8 +77,11 @@
                         </q-input>
                       </q-item>
                     </div>
-                    <div v-if="item.type === 'number'">
-                      <q-item> <q-input type="number" dense rounded v-model="user[item.name]"/> </q-item>
+                    <div v-else-if="item.type === 'integer'">
+                      <q-item> <q-input :mask="item.type === 'integer' ? '#' : '#.#'" type="number" dense rounded v-model="user[item.name]"/> </q-item>
+                    </div>
+                    <div v-else-if="item.type === 'enum'">
+                      <q-item> <q-select dense rounded :options="item.options" v-model="user[item.name]" /> </q-item>
                     </div>
                     <div v-else>
                       <q-item> <q-input dense rounded v-model="user[item.name]" :label="item.displayName"/> </q-item>
