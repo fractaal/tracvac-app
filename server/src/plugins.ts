@@ -38,7 +38,7 @@ interface TracVacPlugin {
 }
 
 const requiredManifestKeys = ['name']
-const plugins: TracVacPlugin[] = []
+const plugins: Record<string,any>[] = []
 const clientPluginRoutes: string[] = []
 const adminPluginRoutes: string[] = []
 
@@ -48,6 +48,8 @@ const pluginFolder = path.join(process.cwd(), 'plugins')
 if (!fs.existsSync(pluginFolder)) fs.mkdirSync(pluginFolder)
 
 const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.endsWith('.js'));
+
+export const getLoadedPlugins = () => plugins;
 
 (async () => {
 	app.get("/plugin", async (req, res) => {
@@ -60,7 +62,6 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 
 	await Promise.all(pluginFiles.map(async (fileName: string) => {
 		const plugin: TracVacPlugin = require(path.join(pluginFolder, fileName))
-		plugins.push(plugin)
 
 		let manifest: Record<string,any>
 
@@ -137,8 +138,11 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 			} else if (!((adminPluginPath ?? "NONE") === "NONE")) {
 				logger.warn(`The admin plugin script for ${manifest.name} - ${clientPluginPath} - does not exist. If this plugin has a front-end, it won't work properly!`)
 			}
-
+			
 			plugin.__loaded = true
+
+	
+			plugins.push({...plugin, ...manifest})
 		} catch(err) {
 			logger.error(`Error occured while loading the plugin ${manifest.name} - Load method call failed - ${err}`)
 			plugin.__loaded = false
