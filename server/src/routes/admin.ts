@@ -11,6 +11,8 @@ import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 import { exportTable } from "../exporter"
 import { getInsightLoaders } from "../insight"
 import { getDataFields } from "../user-data-fields"
+import { getRegistrationFields } from "../user-registration-fields"
+import { getLoadedPlugins } from "../plugins"
 
 const logger = Logger("AdminRoute");
 
@@ -547,9 +549,20 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    // User Data Fields
+    // Get User Data Fields
     app.get('/admin/userDataFields', async (req, res) => {
         const filteredUserDataFields = getDataFields().filter(field => field.isShownInAdmin)
         res.json(filteredUserDataFields)
     })
+
+    // Get loaded plugins
+    app.get('/admin/activePlugins', async (req, res) => {
+        res.json(getLoadedPlugins())
+    })
+
+    // Get user registration fields
+    app.get('/admin/userRegistrationFields', async (req, res) => {
+        res.json(getRegistrationFields())
+    })
+
 })();
