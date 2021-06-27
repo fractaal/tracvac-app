@@ -494,7 +494,6 @@ export default Vue.extend({
         const performRequest = async (data: Record<string,any>[]): Promise<[boolean, string]> => {
           try {
             const response = await this.$axios.post('/admin/editUser', {
-              // TODO: Support for arbitrary user fields
               
               data: data.map(user => {
                 const result = {
@@ -508,6 +507,7 @@ export default Vue.extend({
                   group: user.group,
                 }
 
+                // This line adds support for arbitrary user data fields!
                 // @ts-ignore
                 this.userDataFields.map(x => result[x.name] = user[x.name])
 
