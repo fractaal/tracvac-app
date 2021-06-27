@@ -90,11 +90,15 @@
           </div>
         </q-card-section>
       </q-card>
-      <!-- <div>
-        <div class='text-h6 mb-8'>DISCREPANCIES</div>
+    </div>
+    <empty-placeholder class="pt-24" v-else icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
+    <q-dialog v-model="showDiscrepanciesDialog" >
+      <q-card class="p-8">
+        <div class='text-h6'>DISCREPANCIES</div>
+        <div v-if="latestDiscrepancies.length < discrepancies.length" class="mb-4">Only showing 100 of {{discrepancies.length}} discrepancies</div>
         <transition-group name="transition">
           <empty-placeholder key='pl' v-if='discrepancies.length === 0' icon='fas fa-check' title='No discrepancies detected' subtitle="You're good to go!"/>
-          <div v-for='discrepancy in discrepancies' :key='discrepancy.title'>
+          <div v-for='discrepancy in latestDiscrepancies' :key='discrepancy.title'>
             <q-card class='mb-4 ring-4 ring-gray-300 rounded-2xl shadow-xl border-3'>
               <div>
                 <div class='p-4'>
@@ -108,95 +112,79 @@
             </q-card>
           </div>
         </transition-group>
-      </div> -->
-    </div>
-    <empty-placeholder class="pt-24" v-else icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
-    <q-page-sticky :offset='[20, 20]' position="bottom-right">
-      <q-btn fab round @click="showOptionsDialog = !showOptionsDialog" :disable="store.usersToModify.length === 0" class="p-2" color="secondary" direction="up" icon="expand_less" />
-      <q-dialog v-model="showOptionsDialog">
-        <q-card>
-          <div class="p-4 text-h6">Batch Modify</div>
-          <q-list bordered>
-            <q-item clickable v-ripple @click='markAllVaccineStatus'>
-              <q-item-section>Vaccine Status...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-syringe"/>
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-ripple @click='setAllVaccineManufacturer'>
-              <q-item-section>Vaccine Manufacturer...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-building"/>
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-ripple @click='markAllVaccinationStatus'>
-              <q-item-section>Vaccination Status...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-shield-alt"/>
-              </q-item-section>
-            </q-item>
-            <hr>
-            <q-item clickable v-ripple @click='setAllDosageNumber'>
-              <q-item-section>Dosage Number...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-circle-notch"/>
-              </q-item-section>
-            </q-item>
-            <hr>
-            <q-item clickable v-ripple @click='markAllPUI'>
-              <q-item-section>Investigation...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-search"/>
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-ripple @click='markAllPUM'>
-              <q-item-section>Monitoring...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-eye"/>
-              </q-item-section>
-            </q-item>
-            <hr>
-            <q-item clickable v-ripple @click='setAllGroup'>
-              <q-item-section>Group...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-pen"/>
-              </q-item-section>
-            </q-item>
-          </q-list>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="showOptionsDialog">
+      <q-card>
+        <div class="p-4 text-h6">Batch Modify</div>
+        <q-list bordered>
+          <q-item clickable v-ripple @click='markAllVaccineStatus'>
+            <q-item-section>Vaccine Status...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-syringe"/>
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-ripple @click='setAllVaccineManufacturer'>
+            <q-item-section>Vaccine Manufacturer...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-building"/>
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-ripple @click='markAllVaccinationStatus'>
+            <q-item-section>Vaccination Status...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-shield-alt"/>
+            </q-item-section>
+          </q-item>
           <hr>
-          <div class="p-4 text-h6">Others</div>
-          <q-list>
-            <q-item 
-              v-for="item in userDataFields" 
-              :key="item.name" clickable v-ripple 
-              @click='setAllArbitraryField(item.name, item.displayName, item.type)'
-            >
-              <q-item-section>{{item.displayName}}</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-pen"/>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card>
-      </q-dialog>
-      <q-btn
-        class="p-2 mx-2"
-        :disable="store.usersToModify.length === 0"
-        label="Discard"
-        color="negative"
-        icon="close"
-        @click="confirmDiscard"
-        fab
-        />
-      <q-btn
-        class="p-2 mx-2"
-        :disable="store.usersToModify.length === 0"
-        label="Commit changes"
-        color="primary"
-        icon="check"
-        @click="confirmSubmit"
-        fab
-        />
+          <q-item clickable v-ripple @click='setAllDosageNumber'>
+            <q-item-section>Dosage Number...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-circle-notch"/>
+            </q-item-section>
+          </q-item>
+          <hr>
+          <q-item clickable v-ripple @click='markAllPUI'>
+            <q-item-section>Investigation...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-search"/>
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-ripple @click='markAllPUM'>
+            <q-item-section>Monitoring...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-eye"/>
+            </q-item-section>
+          </q-item>
+          <hr>
+          <q-item clickable v-ripple @click='setAllGroup'>
+            <q-item-section>Group...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-pen"/>
+            </q-item-section>
+          </q-item>
+        </q-list>
+        <hr>
+        <div class="p-4 text-h6">Others</div>
+        <q-list>
+          <q-item 
+            v-for="item in userDataFields" 
+            :key="item.name" clickable v-ripple 
+            @click='setAllArbitraryField(item.name, item.displayName, item.type)'
+          >
+            <q-item-section>{{item.displayName}}</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-pen"/>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+    </q-dialog>
+    <q-page-sticky :offset='[20, 20]' position="bottom-right">
+      <q-btn fab round class="p-2 mx-2" v-if="discrepancies.length !== 0" color="negative" icon="warning" @click="showDiscrepanciesDialog = !showDiscrepanciesDialog" />
+      <q-btn fab round @click="showOptionsDialog = !showOptionsDialog" :disable="store.usersToModify.length === 0" class="p-2" color="secondary" direction="up" icon="expand_less" />
+      <q-btn class="p-2 mx-2" :disable="store.usersToModify.length === 0" label="Discard changes" color="negative" icon="close" @click="confirmDiscard" fab />
+      <q-btn class="p-2 mx-2" :disable="store.usersToModify.length === 0" label="Commit changes" color="primary" icon="check" @click="confirmSubmit" fab />
     </q-page-sticky>
   </div>
 </template>
@@ -214,6 +202,7 @@ export default Vue.extend({
     return {
       store,
       showOptionsDialog: false,
+      showDiscrepanciesDialog: false,
       searchFilter: '',
       usersPerPage: 10,
       pageIndex: 1,
@@ -251,6 +240,9 @@ export default Vue.extend({
     },
     paginatedUsers () : Record<string,any>[] {
       return this.filteredUsers.slice((this.pageIndex-1) * this.usersPerPage, ((this.pageIndex-1) * this.usersPerPage) + this.usersPerPage);
+    },
+    latestDiscrepancies (): {title: string, subtitle: string}[] {
+      return this.discrepancies.slice(0, 100)
     }
   },
   methods: {
