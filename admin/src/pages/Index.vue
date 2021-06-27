@@ -1,91 +1,58 @@
 <template>
-  <q-page class="px-8 py-8">
-      <p class="-my-2">TRACVAC</p>
-      <h4 class="m-0 font-light">PEOPLE</h4>
-      <p class="-my-2">SELECT AND EDIT ACCOUNTS</p>
-    <q-tabs
-      class="border-0 border-b border-solid border-gray-300"
-      v-model="activeTab"
-    >
-      <q-tab name="select" class="px-24" icon="add" label="Select" @click='getData({pagination: pagination, filter: searchFilter})'/>
-      <q-tab name="edit" class="px-24" icon="create" label="Edit"/>
-    </q-tabs>
-    <q-tab-panels v-model="activeTab" animated keep-alive>
-      <q-tab-panel name="select">
+  <q-page class="px-8">
+    <q-header class="pt-8 px-8 bg-white text-black">
+      <tracvac-header title="PEOPLE" description="SELECT AND EDIT ACCOUNTS"/>
+      <q-tabs
+        class="-mt-16 border-0 border-b border-solid border-gray-300"
+        v-model="activeTab"
+      >
+        <q-tab name="select" class="px-24" icon="add" label="Select" @click='getData({pagination: pagination, filter: searchFilter})'/>
+        <q-tab name="edit" class="px-24" icon="create" label="Edit"/>
+      </q-tabs>
+    </q-header>
+    <q-tab-panels v-model="activeTab" keep-alive>
+      <q-tab-panel class="p-0" name="select" >
         <br>
-          <div class="flex content-center">
-            <q-input
-              dense
-              outlined
-              class="mr-2"
-              debounce="300"
-              v-model="searchFilter"
-              placeholder="Search names"
-            >
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-            <q-select
-              class='mr-2'
-              v-model="visibleColumns"
-              multiple
-              outlined
-              dense
-              options-dense
-              display-value='Columns'
-              emit-value
-              map-options
-              :options="columns"
-              option-value="name"
-              options-cover
-              style="min-width: 150px"
-            />
-            <q-btn
-              outline class='mr-2'
-              label='Select amount...'
-              icon='fas fa-plus'
-              @click='selectAmountOfPeople'
-            >
-              <q-tooltip content-class="text-base">
-                Select an arbitrary amount of people to update.
-              </q-tooltip>
-            </q-btn>
-            <q-btn
-              outline class="mr-2"
-              label='Select group...'
-              icon='fas fa-plus'
-              @click='selectGroup'
-            >
-              <q-tooltip content-class="text-base">
-                Select people that match the group you specify.
-              </q-tooltip>
-            </q-btn>
-            <q-btn
-              outline class='mr-2'
-              :color='showPUMs ? "green" : "black"'
-              :label='showPUMs ? "Showing Under Monitoring" : "Show Under Monitoring"'
-              :icon='showPUMs ? "fas fa-eye" : "fas fa-eye-slash"'
-              @click='toggleShow("PUMs", !showPUMs)'
-            />
-            <q-btn
-              outline class='mr-2'
-              :color='showPUIs ? "green" : "black"'
-              :label='showPUIs ? "Showing Under Investigation" : "Show Under Investigation"'
-              :icon='showPUIs ? "fas fa-eye" : "fas fa-eye-slash"'
-              @click='toggleShow("PUIs", !showPUIs)'
-            />
+          <div class="flex content-center flex-nowrap justify-between my-2 overflow-x-auto ">
+            <div class="flex content-center flex-nowrap">
+              <q-input dense outlined class="mr-2" debounce="300" v-model="searchFilter" placeholder="Search names" >
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+              <q-select class='mr-2' v-model="visibleColumns" multiple outlined dense options-dense display-value='Columns' emit-value map-options :options="columns" option-value="name" options-cover style="min-width: 150px" />
+              <q-btn outline class='mr-2' label='Select amount...' icon='fas fa-plus' @click='selectAmountOfPeople' >
+                <q-tooltip content-class="text-base">
+                  Select an arbitrary amount of people to update.
+                </q-tooltip>
+              </q-btn>
+              <q-btn outline class="mr-2" label='Select group...' icon='fas fa-plus' @click='selectGroup' >
+                <q-tooltip content-class="text-base">
+                  Select people that match the group you specify.
+                </q-tooltip>
+              </q-btn>
+              <q-btn outline class='mr-2' :color='showPUMs ? "green" : "black"' :label='showPUMs ? "Showing Under Monitoring" : "Show Under Monitoring"' :icon='showPUMs ? "fas fa-eye" : "fas fa-eye-slash"' @click='toggleShow("PUMs", !showPUMs)' />
+              <q-btn outline class='mr-2' :color='showPUIs ? "green" : "black"' :label='showPUIs ? "Showing Under Investigation" : "Show Under Investigation"' :icon='showPUIs ? "fas fa-eye" : "fas fa-eye-slash"' @click='toggleShow("PUIs", !showPUIs)' />
+            </div>
+            <div class="flex content-center flex-nowrap">
+              <q-btn unelevated class="mr-2" round color="blue" icon="keyboard_arrow_up" @click="showOptionsDialog = true"/>
+              <q-btn unelevated class="mr-2" label=" EXPORT AS EXCEL" color="secondary" icon="fas fa-file-export" @click="exportToExcel"/>
+              <q-btn unelevated class="mr-0" :disable="selected.length === 0" label="ADD TO EDITOR PANEL" color="primary" icon="add" @click="addSelectionToEdit"/>
+            </div>
           </div>
         <q-table
           class='sticky'
           :loading="loading"
           virtual-scroll
-          table-style="max-height: 500px;"
+          style="max-height: calc(100vh - 300px);"
           flat
+          separator="vertical"
+          dense
           :columns="columns"
           :visible-columns='visibleColumns'
           :filter="searchFilter"
           :pagination.sync="pagination"
+          :rows-per-page-options="[ 5, 10, 25, 50, 100, 200, 500, 1000, 2500, 5000 ]"
           binary-state-sort
           selection="multiple"
           :selected.sync="selected"
@@ -93,38 +60,61 @@
           :data="data"
           @request="getData"
         >
-          <template v-slot:top>
-            
+          <template v-slot:top></template>
+          <template v-slot:loading>
+            <q-inner-loading showing color="primary" />
           </template>
+          <!--
+          <template v-slot:body-cell="props">
+            <q-td :props="props">
+              <q-menu context-menu>
+                <q-list dense style="min-width: 100px">
+                  <q-item clickable v-close-popup>
+                    <q-item-section>Add to Editor Panel</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup>
+                    <q-item-section>New</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <q-item clickable v-close-popup>
+                    <q-item-section>Quit</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+              {{props.value}}
+            </q-td>
+          </template>
+          -->
         </q-table>
-        <q-page-sticky :offset='[20, 20]' position="bottom-right">
-          <q-btn
-            class="p-2 mx-2"
-            label=" EXPORT AS EXCEL"
-            color="secondary"
-            icon="fas fa-file-export"
-            @click="exportToExcel"
-            fab
-          />
-          <q-btn
-            class="p-2 mx-2"
-            :disable="selected.length !== 1"
-            label=" VIEW LOGS"
-            color="secondary"
-            icon="remove_red_eye"
-            @click="viewLogs"
-            fab
-          />
-          <q-btn
-            class="p-2 mx-2"
-            :disable="selected.length === 0"
-            label="ADD TO EDITOR PANEL"
-            color="primary"
-            icon="add"
-            @click="addSelectionToEdit"
-            fab
-            />
-        </q-page-sticky>
+        <q-dialog v-model="showOptionsDialog">
+          <q-card>
+            <div class="p-4 text-h6">User Actions</div>
+            <q-list>
+              <q-item :disable="selected.length !== 1" clickable v-ripple @click='viewLogs'>
+                <q-item-section>View Logs</q-item-section>
+                <q-item-section avatar>
+                  <q-icon color="primary" name="fas fa-syringe"/>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <div class="p-4 text-h6">Others</div>
+            <q-list>
+              <q-item 
+                :disable="selected.length !== 1"
+                v-for="item in store.userActions" 
+                :key="item.name" clickable v-ripple 
+                @click='item.action(selected[0].id)'
+              >
+                <q-item-section>{{item.name}}</q-item-section>
+                <q-item-section avatar>
+                  <q-icon color="primary" name="fas fa-pen"/>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </q-dialog>
+        <!-- <q-page-sticky :offset='[20, 20]' position="bottom-right"> -->
+        <!-- </q-page-sticky> -->
       </q-tab-panel>
       <q-tab-panel name="edit">
         <edit-vaccination-status ref='edit'/>
@@ -142,6 +132,7 @@ import store from 'src/api/store';
 import peopleColumns from 'src/people-columns';
 import Vue from 'vue';
 import EditVaccinationStatus from 'components/EditVaccinationStatus.vue'
+import TracvacHeader from 'components/TracvacHeader.vue'
 
 // Inject branch field into peopleColumns if isCorporation
 if (store.serverConfig.isCorporation) {
@@ -157,7 +148,7 @@ if (store.serverConfig.isCorporation) {
 
 export default Vue.extend({
   name: 'Index',
-  components: { EditVaccinationStatus },
+  components: { EditVaccinationStatus, TracvacHeader },
   created() {
     
     this.visibleColumns = LocalStorage.getItem('visibleColumns') ?? ['username', 'firstName', 'middleName', 'lastName', 'group']; 
@@ -170,6 +161,15 @@ export default Vue.extend({
   watch: {
     visibleColumns () {
       LocalStorage.set('visibleColumns', this.visibleColumns)
+    },
+    'pagination.rowsPerPage': function (val) {
+      if (val > 1000) {
+        this.$q.dialog({
+          title: 'Warning',
+          message: 'Displaying more than 1,000 items at a time may result in extremely poor performance!',
+          color: 'red'
+        })
+      }
     }
   },
   async activated() {
@@ -182,6 +182,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      showOptionsDialog: false,
       selected: [] as Record<string,any>[],
       store,
       searchFilter: '',
@@ -192,7 +193,7 @@ export default Vue.extend({
       loading: false,
       pagination: {
         page: 0,
-        rowsPerPage: 10,
+        rowsPerPage: 50,
         rowsNumber: 0,
         sortBy: 'id',
         descending: false,
@@ -269,8 +270,10 @@ export default Vue.extend({
     },
     exportToExcel() {
       this.$q.dialog({
-        title: 'Export user data to an excel file?',
-        message: 'You will be exporting all user data.',
+        title: 'Warning!',
+        color: 'red',
+        html: true,
+        message: 'Exporting user data is a <b>blocking operation.</b> Tracvac Server will become unresponsive to all user and administrator requests for a time. Are you sure to proceed?',
         cancel: true,
       }).onOk(async () => {
         try {

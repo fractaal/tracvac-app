@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 rounded-md shadow-xl border-3 border-solid" :class="style">
+  <div class="p-4 rounded-md shadow-lg border-3 border-solid" :class="style">
       <div class="text-lg font-extrabold mb-2">
         <q-icon :name="icon" size="md" class="mr-2"/>
         {{title}}

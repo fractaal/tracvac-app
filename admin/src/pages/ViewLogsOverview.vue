@@ -1,58 +1,12 @@
 <template>
-  <q-page>
-    <q-page-sticky :offset='[20, 20]' position="bottom-right">
-      <q-btn
-        class="p-2 mx-2"
-        label="EXPORT LOGS"
-        color="green"
-        icon="fas fa-file-export"
-        @click="exportToExcel"
-        fab
-      />
-      <q-btn
-        class="p-2 mx-2"
-        :disable="selected.length === 0"
-        label="MARK UNREAD"
-        color="red"
-        icon="fas fa-times"
-        @click="mark(false)"
-        fab
-      />
-      <q-btn
-        class="p-2 mx-2"
-        :disable="selected.length === 0"
-        label="MARK READ"
-        color="green"
-        icon="fas fa-check"
-        @click="mark(true)"
-        fab
-      />
-      <q-btn
-        class="p-2 mx-2"
-        :disable="selected.length !== 1"
-        label="VIEW LOGS"
-        color="secondary"
-        icon="remove_red_eye"
-        @click="viewLogs"
-        fab
-      />
-      <q-btn
-        class="p-2 mx-2"
-        :disable="selected.length === 0"
-        label="ADD TO EDITOR PANEL"
-        color="primary"
-        icon="add"
-        @click="addSelectionToEdit"
-        fab
-      />
-    </q-page-sticky>
-
+  <q-page class="p-8">
+    <tracvac-header title="LOGS" description="VIEW LOGS SUBMITTED BY USERS" class="mb-4"/>
     <q-table
-      class='sticky my-auto'
+      class='sticky my-auto mb-20'
       :loading="loading"
       virtual-scroll
-      table-style="max-height: 700px;"
       flat
+      dense
       :pagination.sync="pagination"
       binary-state-sort
       selection="multiple"
@@ -63,17 +17,13 @@
       @request="getData"
     >
       <template v-slot:top>
-        <div class='flex flex-row items-center content-center'>
-          <div class='text-h6 mr-12'>LOGS</div>
-          <div>
-            <q-btn
-              outline class='mx-2'
-              :color='showOnlyUnread? "green" : "black"'
-              :label='showOnlyUnread? "Showing Only Unread" : "Show Only Unread"'
-              :icon='showOnlyUnread? "fas fa-eye" : "fas fa-eye-slash"'
-              @click='toggleShow(!showOnlyUnread)'
-            />
-          </div>
+        <div class="w-full flex flex-nowrap">
+          <q-btn class="mr-1" flat outline :color='showOnlyUnread? "green" : "black"' :label='showOnlyUnread? "Showing Only Unread" : "Show Only Unread"' :icon='showOnlyUnread? "fas fa-eye" : "fas fa-eye-slash"' @click='toggleShow(!showOnlyUnread)' />
+          <q-btn class="mr-1" flat :disable="selected.length === 0" label="MARK UNREAD" color="red" icon="fas fa-times" @click="mark(false)"/>
+          <q-btn class="mr-1" flat :disable="selected.length === 0" label="MARK READ" color="green" icon="fas fa-check" @click="mark(true)"/>
+          <q-btn class="mr-1" flat :disable="selected.length !== 1" label="VIEW LOGS" color="secondary" icon="remove_red_eye" @click="viewLogs"/>
+          <q-btn class="ml-auto mr-1" unelevated label="EXPORT AS EXCEL"  color="secondary" icon="fas fa-file-export" @click="exportToExcel"/>
+          <q-btn unelevated :disable="selected.length === 0" label="ADD TO EDITOR PANEL" color="primary" icon="add" @click="addSelectionToEdit"/>
         </div>
       </template>
       <template v-slot:body-cell-adminHasRead='props'>
@@ -89,6 +39,7 @@
 <script lang='ts'>
 import Vue from 'vue'
 import store from 'src/api/store';
+import TracvacHeader from 'components/TracvacHeader.vue'
 
 const columns = [
   {
@@ -171,6 +122,7 @@ const columns = [
 
 export default Vue.extend({
   name: 'ViewLogsOverview',
+  components: { TracvacHeader },
   activated() {
     this.getData({pagination: this.pagination})
   },
@@ -184,7 +136,7 @@ export default Vue.extend({
       columns,
       pagination: {
         page: 0,
-        rowsPerPage: 10,
+        rowsPerPage: 50,
         rowsNumber: 0,
         sortBy: 'id',
         descending: false,

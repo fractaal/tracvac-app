@@ -1,6 +1,6 @@
 <template>
   <q-page class="p-8">
-    <h4 class="m-0 font-light">NOTIFICATIONS</h4>
+    <tracvac-header title="NEW NOTIFICATION" description=""/>
     <div>
       <br>
       <p class="m-0 p-0 font-light">NOTIFICATION TITLE</p>
@@ -9,16 +9,21 @@
       <p class="m-0 p-0 font-light">NOTIFICATION CONTENT</p>
       <q-editor v-model="active.content"/>
       <br>
-      <q-btn :loading="loading" class="block p-2 ml-auto" icon="fas fa-check" rounded outline label="Done" @click="submit()"/>
+      <div class="flex justify-end">
+        <q-btn :loading="loading" class="block p-2 mr-4" icon="fas fa-times" outline rounded color="negative" label="Cancel" @click="$router.back()"/>
+        <q-btn :loading="loading" class="block p-2" icon="fas fa-check" unelevated rounded color="primary" label="POST!" @click="submit()"/>
+      </div>
     </div>
   </q-page>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
+import TracvacHeader from 'components/TracvacHeader.vue'
 
 export default Vue.extend({
   name: 'AddNotification',
+  components: { TracvacHeader },
   data() {
     return {
       loading: false,

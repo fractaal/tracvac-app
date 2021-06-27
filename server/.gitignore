@@ -16,11 +16,11 @@ tmp_migrations
 # database and node binding
 public/users/*
 *.log
+plugins
 tracvac-config
 .env
 tracvac-db.sqlite3
 node_sqlite3.node
 xdg-open
 
-cert.pem
-key.pem
+*.pem

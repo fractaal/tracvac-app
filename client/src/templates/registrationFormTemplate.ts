@@ -32,7 +32,8 @@ const template = [
         name: 'middleName',
         displayName: 'Middle Name',
         type: 'string',
-        format: 'Text'
+        format: 'Text',
+        isNotRequired: true
       },
       {
         name: 'suffix',
