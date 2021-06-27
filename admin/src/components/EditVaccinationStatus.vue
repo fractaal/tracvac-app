@@ -432,24 +432,55 @@ export default Vue.extend({
       })
     },
     setAllArbitraryField(field: string, displayName: string, type: string) {
-      let options;
-      switch(type) {
-        case 'boolean': options = {model: [], type: 'checkbox' as const, items: [{label: displayName, value: field}]}; break;
-        default: options = {model: ''};
-      }
-      console.log(field, displayName, type, options)
-      this.$q.dialog({
+      let dialog: Record<string,any> = {
         title: `Set all ${displayName}`,
-        message: `Batch set all of these user's ${displayName} fields (${field})`,
-        options
-      }).onOk((data: any | any[]) => {
+        message: `Batch set all of these user's ${displayName} fields`
+      }
+
+      if (type === 'boolean') {
+        dialog.options = {model: [], type: 'checkbox' as const, items: [{label: displayName, value: field}]}
+      } else if (type === 'integer' || type === 'float') {
+        dialog.prompt = { model: '', type: 'number' }
+      } else if (type === 'date') {
+        dialog.message += ' - Please enter the date as YYYY/MM/DD.'
+        dialog.prompt = { model: '' }
+      } else {
+        dialog.prompt = { model: '' }
+      }
+
+      console.log(field, displayName, type, dialog)
+
+      this.$q.dialog(dialog).onOk((data: any | any[]) => {
         for (const user of store.usersToModify) {
           if (type === 'boolean') {
             // @ts-ignore
             user[field] = data.includes(field)
+          } else {
+            user[field] = data
           }
         }
       })
+
+      // let options;
+      // switch(type) {
+      //   case 'boolean': options = {model: [], type: 'checkbox' as const, items: [{label: displayName, value: field}]}; break;
+      //   default: options = {model: ''};
+      // }
+      // console.log(field, displayName, type, options)
+      // this.$q.dialog({
+      //   title: `Set all ${displayName}`,
+      //   message: `Batch set all of these user's ${displayName} fields (${field})`,
+      //   options
+      // }).onOk((data: any | any[]) => {
+      //   for (const user of store.usersToModify) {
+      //     if (type === 'boolean') {
+      //       // @ts-ignore
+      //       user[field] = data.includes(field)
+      //     } else {
+      //       user[field] = data
+      //     }
+      //   }
+      // })
     },
     confirmSubmit() {
       this.$q.dialog({
