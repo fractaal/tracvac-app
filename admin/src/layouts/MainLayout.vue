@@ -3,7 +3,7 @@
   <q-layout view="lHh lpr lFf"> 
     <q-footer class="bg-white text-black shadow-lg border-2 border-solid border-gray-200 overflow-x-auto">
       <q-toolbar class="p-4">
-        <q-btn flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" />
+        <!-- <q-btn flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" /> -->
         <q-btn flat round dense icon="keyboard_arrow_left" @click="$router.back()" />
         <q-btn flat round dense icon="keyboard_arrow_right" @click="$router.forward()" />
         <q-toolbar-title>
@@ -17,7 +17,7 @@
         <q-btn flat rounded name="articles" label="Configuration" icon="settings" @click="$router.push('/config')"/>
       </q-toolbar>
     </q-footer >
-    <q-drawer
+    <!-- <q-drawer
       v-model="leftDrawerOpen"
       bordered
       content-class="bg-grey-1"
@@ -80,7 +80,7 @@
            </q-item-section>
         </q-item>
       </q-list>
-    </q-drawer>
+    </q-drawer> -->
 
     <q-page-container>
       <keep-alive>
