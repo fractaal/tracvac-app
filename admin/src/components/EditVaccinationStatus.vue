@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class='flex justify-center content-center mb-8'>
-      <q-input outlined rounded dense debounce='500' v-model='searchFilter' label='Filter...' class='w-full mr-2'/>
+      <div class='flex flex-row w-full flex-nowrap'>
+        <q-input outlined rounded dense debounce='500' v-model='searchFilter' label='Filter...' class='w-3/4 mr-2'/>
+        <q-btn :class="discrepancies.length !== 0 ? 'attention' : ''" outline label="SHOW DISCREPANCIES ONLY" :color="showOnlyDiscrepanciesFilter ? 'green' : 'black'" @click="showOnlyDiscrepanciesFilter = !showOnlyDiscrepanciesFilter"/>
+      </div>
       <q-pagination v-model='pageIndex' class="mt-2"  :max='Math.ceil(filteredUsers.length/usersPerPage)' input/>
     </div>
     <div v-if='store.usersToModify.length !== 0' class="overflow-x-visible ">
@@ -96,6 +99,7 @@
       <q-card class="p-8">
         <div class='text-h6'>DISCREPANCIES</div>
         <div v-if="latestDiscrepancies.length < discrepancies.length" class="mb-4">Only showing 100 of {{discrepancies.length}} discrepancies</div>
+        <div v-else class="mb-4">There are {{discrepancies.length}} discrepancies</div>
         <transition-group name="transition">
           <empty-placeholder key='pl' v-if='discrepancies.length === 0' icon='fas fa-check' title='No discrepancies detected' subtitle="You're good to go!"/>
           <div v-for='discrepancy in latestDiscrepancies' :key='discrepancy.title'>
@@ -181,7 +185,7 @@
       </q-card>
     </q-dialog>
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
-      <q-btn fab round class="p-2 mx-2" v-if="discrepancies.length !== 0" color="negative" icon="warning" @click="showDiscrepanciesDialog = !showDiscrepanciesDialog" />
+      <q-btn fab round class="p-2 mx-2 attention" v-if="discrepancies.length !== 0" color="negative" icon="warning" @click="showDiscrepanciesDialog = !showDiscrepanciesDialog" />
       <q-btn fab round @click="showOptionsDialog = !showOptionsDialog" :disable="store.usersToModify.length === 0" class="p-2" color="secondary" direction="up" icon="expand_less" />
       <q-btn class="p-2 mx-2" :disable="store.usersToModify.length === 0" label="Discard changes" color="negative" icon="close" @click="confirmDiscard" fab />
       <q-btn class="p-2 mx-2" :disable="store.usersToModify.length === 0" label="Commit changes" color="primary" icon="check" @click="confirmSubmit" fab />
@@ -204,6 +208,7 @@ export default Vue.extend({
       showOptionsDialog: false,
       showDiscrepanciesDialog: false,
       searchFilter: '',
+      showOnlyDiscrepanciesFilter: false,
       usersPerPage: 10,
       pageIndex: 1,
       discrepancies: [] as {title: string, subtitle: string}[],
@@ -228,10 +233,12 @@ export default Vue.extend({
       return result
     },
     filteredUsers (): Record<string,any>[] {
-      if (this.searchFilter === '') return this.store.usersToModify;
+      if (this.searchFilter === '' && !this.showOnlyDiscrepanciesFilter) return this.store.usersToModify;
       const result = [];
       for (const user of store.usersToModify) {
         const name = `${user.firstName} ${user.middleName} ${user.lastName}`;
+
+        if (this.showOnlyDiscrepanciesFilter && !user.hasDiscrepancy) continue;
         if (name.toLowerCase().indexOf(this.searchFilter.toLowerCase()) !== -1) {
           result.push(user);
         }
