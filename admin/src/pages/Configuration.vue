@@ -1,6 +1,13 @@
 <template>
-  <q-page class="p-8">
-    <h4 class="m-0 font-light">CONFIGURATION</h4>
+  <q-page class="p-8"> 
+    <tracvac-header title="CONFIGURATION" description="SEE HOW TRACVAC IS SET UP"/>
+    <div class="mt-16 flex justify-center content-center py-4 -mx-8 bg-blue-200">
+      <q-icon name="fas fa-check" size="128px" />
+      <div class="ml-8 flex flex-col justify-center content-center">
+        <div class="m-0 font-light text-sm">YOU'RE RUNNING</div>
+        <h4 class="m-0 font-black">TRACVAC {{require('../../../package.json').version}}</h4>
+      </div>
+    </div>
     <div class="grid grid-cols-2 gap-4">
       <div class="mt-16 mx-auto w-3/4">
         <h6 class="m-0 m-0 p-0">GENERAL</h6>
@@ -23,6 +30,12 @@
         </p>
       </div>
     </div>
+    <div>
+      <configuration-list type="plugins" class="my-4 mt-8" />
+      <configuration-list type="dataFields" class="my-4" />
+      <configuration-list type="registrationFields" class="my-4" />
+    </div>
+    <div class="mb-20"/>
   </q-page>
 </template>
 
@@ -32,10 +45,12 @@
 import Vue from 'vue';
 import { getConfig, setConfig } from '../api/config'
 import store from 'src/api/store';
+import TracvacHeader from 'components/TracvacHeader.vue'
+import ConfigurationList from 'components/ConfigurationList.vue'
 
 export default Vue.extend({
   name: 'Configuration',
-  components: {},
+  components: { TracvacHeader, ConfigurationList },
   async mounted() {
     await getConfig();
   },

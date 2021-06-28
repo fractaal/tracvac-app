@@ -41,9 +41,14 @@
           </q-item>
         </q-list>
       </notification-card>
-      <notification-card v-for="(chartItem, title) in chartItems" :title="title" :key="title" type="info">
-        <VueApexChart :series="chartItem.series" :options="{chart: {type: chartItem.type, fontFamily: 'Red Hat Display'}, labels: chartItem.labels}"/>
-      </notification-card>
+    </div>
+    <div v-for="(section, sectionTitle) in chartItems" class="mb-4" :title="sectionTitle" :key="sectionTitle" type="info">
+      <div class="text-h5 mb-2 font-bold">{{sectionTitle.toUpperCase()}}</div>
+      <div class="insight-columns">
+        <notification-card v-for="(chartItem, title) in section" :title="title" :key="title" type="info">
+          <VueApexChart height="250px" :series="chartItem.series" :options="{chart: {type: chartItem.type, fontFamily: 'Red Hat Display'}, labels: chartItem.labels}"/>
+        </notification-card>
+      </div>
     </div>
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
       <q-btn
@@ -79,7 +84,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      autoUpdate: true,
+      autoUpdate: false,
       timeUntilPoll: 0,
       store,
       isLoading: false,
@@ -95,11 +100,15 @@ export default Vue.extend({
       this.insightData = Object.assign({}, this.insightData, (await this.store.axios.get('/admin/insight')).data)
 
       if (this.insightData?.chartItems) {
-        for (const item in this.insightData.chartItems) {
-          this.chartItems[item] = {
-            type: 'pie',
-            series: Object.values(this.insightData.chartItems[item]).map((val) => parseInt(val as string)),
-            labels: Object.keys(this.insightData.chartItems[item])
+        for (const section in this.insightData.chartItems) {
+          for (const item in this.insightData.chartItems[section]) {
+            if (!(section in this.chartItems)) this.chartItems[section] = {};
+
+            this.chartItems[section][item] = {
+              type: 'pie',
+              series: Object.values(this.insightData.chartItems[section][item]).map((val) => parseInt(val as string)),
+              labels: Object.keys(this.insightData.chartItems[section][item])
+            }
           }
         }
       }

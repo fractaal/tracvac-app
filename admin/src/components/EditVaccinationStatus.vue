@@ -1,70 +1,108 @@
 <template>
   <div>
-    <div class="overflow-x-visible grid grid-cols-2 gap-6">
-      <div>
-        <div class='text-h6 mb-8'>EDIT VACCINATION STATUSES</div>
-        <div class='flex mx-auto'>
-          <q-input dense debounce='500' v-model='searchFilter' label='Search...' class='w-1/2 mr-2'/>
-          <q-pagination v-model='pageIndex' :max='Math.ceil(filteredUsers.length/usersPerPage)' input/>
-        </div>
-        <br/>
-        <!-- <transition-group v-if='store.usersToModify.length !== 0' name="transition" mode="out-in"> -->
-          <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "ring-4 ring-red-500" : "ring-4 ring-gray-300"' class="mb-8 rounded-2xl shadow-xl border-3" :key="user.id">
-            <q-card-section>
-              <div class="flex flex-nowrap justify-between">
-                <q-btn class="absolute -mt-8 -ml-8" round color="negative" icon="close" @click="store.usersToModify.splice(idx, 1)"/>
-                <div>
-                  <div class='flex flex-nowrap'>
-                    <q-avatar class='block mb-4 rounded-full ring-4 w-16 h-16 ring-blue-500 shadow-5'>
-                      <q-img ratio='1' :src='"http://localhost/" + user.profilePicturePath'/>
-                    </q-avatar>
-                    <div class='mx-4'>
-                      <h6 class="m-0 p-0 font-bold leading-5">{{user.firstName}} {{user.lastName}}</h6>
-                      <p class="m-0 p-0">@{{user.username}}</p>
-                    </div>
-                  </div>
+    <div class='flex justify-center content-center mb-8'>
+      <div class='flex flex-row w-full flex-nowrap'>
+        <q-input outlined rounded dense debounce='500' v-model='searchFilter' label='Filter...' class='w-3/4 mr-2'/>
+        <q-btn :class="discrepancies.length !== 0 ? 'attention' : ''" outline label="SHOW DISCREPANCIES ONLY" :color="showOnlyDiscrepanciesFilter ? 'green' : 'black'" @click="showOnlyDiscrepanciesFilter = !showOnlyDiscrepanciesFilter"/>
+      </div>
+      <q-pagination v-model='pageIndex' class="mt-2"  :max='Math.ceil(filteredUsers.length/usersPerPage)' input/>
+    </div>
+    <div v-if='store.usersToModify.length !== 0' class="overflow-x-visible ">
+      <!-- grid grid-cols-2 gap-6 -->
+      <q-card v-for="(user, idx) in paginatedUsers" :class='user.hasDiscrepancy ? "bg-red-200 ring-4 ring-red-500" : ""' class="mb-8 rounded-2xl shadow-lg border-2 border-solid border-gray-300" :key="user.id">
+        <q-card-section>
+          <div class="flex flex-nowrap justify-between">
+            <q-btn class="absolute -mt-8 -ml-8" round color="negative" icon="close" @click="store.usersToModify.splice(idx, 1)"/>
+            <div>
+              <div class='flex flex-nowrap'>
+                <q-avatar class='block rounded-full ring-4 w-16 h-16 ring-blue-500 shadow-5'>
+                  <q-img ratio='1' :src='"http://localhost/" + user.profilePicturePath'/>
+                </q-avatar>
+                <div class='mx-4'>
+                  <h6 class="m-0 p-0 font-bold leading-5">{{user.firstName}} {{user.lastName}}</h6>
+                  <p class="m-0 p-0">@{{user.username}}</p>
                 </div>
-                <div>
-                  <q-btn outline label='View Logs' @click='$router.push("view-logs/" + user.id)'/>
-                </div>
-                <!--
-                <div>
-                  <p :class="user.isVaccinated === true ? 'text-green-500' : 'text-red-700'" class="m-0 p-0 text-right font-extrabold">{{user.isVaccinated === true ? '✅ VACCINATED' : '❌ NOT VACCINATED'}}</p>
-                  <p :class="vaccineStatusStyling(user.isVaccineReady)" class="m-0 p-0 text-right font-extrabold">VACCINE IS {{user.isVaccineReady.toUpperCase()}}</p>
-                  <hr/>
-                  <p class="m-0 p-0 text-right">UNDER INVESTIGATION: <b>{{user.isPUI ? 'Yes' : 'No'}}</b></p>
-                  <p class="m-0 p-0 text-right">UNDER MONITORING: <b>{{user.isPUM ? 'Yes' : 'No'}}</b></p>
-                </div>
-                -->
               </div>
-              <br>
-              <div>
+            </div>
+            <div>
+              <q-btn outline label='View Logs' @click='$router.push("view-logs/" + user.id)'/>
+            </div>
+          </div>
+          <br>
+          <div>
+            <div class="flex flex-nowrap overflow-x-auto justify-between">
+              <div class="flex flex-nowrap">
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Not Ready'" color="negative" label="Vaccine Not Ready" @click="toggleVaccineStatus(user, 'Not Ready')"/>
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Pending'" color="primary" label="Vaccine Pending" @click="toggleVaccineStatus(user, 'Pending')"/>
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccineReady != 'Ready'" color="positive" label="Vaccine Ready" @click="toggleVaccineStatus(user, 'Ready')"/>
-                <div class='my-1'/>
+                <q-icon name="fas fa-forward" :color="user.isVaccineReady === 'Ready' ? 'green' : 'red'" class="mx-2 my-auto"/>
+                <!-- <div class='my-1'/> -->
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="user.isVaccinated" label="Not Vaccinated" color="negative" @click="toggleVaccinated(user, false)"/>
                 <q-btn class="mr-1 rounded-xl" unelevated  :outline="!user.isVaccinated" label="Vaccinated" color="green" @click="toggleVaccinated(user, true)"/>
-                <div class='my-1'/>
+                <!-- <div class='my-1'/> -->
+              </div>
+              <div class="flex flex-nowrap">
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="!user.isPUI" :color="user.isPUI ? 'red' : 'green'" label='Under Investigation' @click='togglePUI(user, !user.isPUI)'/>
                 <q-btn class="mr-1 rounded-xl" unelevated :outline="!user.isPUM" :color="user.isPUM ? 'red' : 'green'" label='Under Monitoring' @click='togglePUM(user, !user.isPUM)'/>
-                <div class='my-2'/>
-                <div class='grid grid-cols-3 gap-2'>
-                  <q-input class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
-                  <q-input class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
-                  <q-input class="mr-1" unelevated debounce='500' type='string' outlined label='Group' v-model='user.group'/>
+              </div>
+            </div>
+            <div class='my-2'/>
+            <div class='grid grid-cols-3 gap-2'>
+              <q-input dense class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' outlined label="Vaccine Manufacturer" v-model="user.vaccineManufacturer"/>
+              <q-input dense class="mr-1" unelevated debounce='500' @input='computeDiscrepancies' type='number' outlined label='Dosage No.' v-model='user.dosageNumber'/>
+              <q-input dense class="mr-1" unelevated debounce='500' type='string' outlined label='Group' v-model='user.group'/>
+            </div>
+            <q-separator v-if="userDataFields.length !== 0" class="my-2"/>
+            <div>
+              <div v-for="(section, name) in sectionedUserDataFields" :key="section[0].name" >
+                <div class="text-sm font-black">{{name}}</div>
+                <div class="grid grid-cols-6 mb-2" >
+                  <div class="mx-2" v-for="item in section" :key="item.name" >
+                    <div v-if="item.type === 'boolean'">
+                      <q-toggle dense v-model="user[item.name]" :label="item.displayName"/>
+                    </div>
+                    <div v-else-if="item.type === 'date'">
+                      <q-input dense rounded v-model="user[item.name]" mask="date" :rules="['date']" :label="item.displayName">
+                        <template v-slot:append>
+                          <q-icon name="event" class="cursor-pointer">
+                            <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                              <q-date v-model="user[item.name]">
+                                <div class="row items-center justify-end">
+                                  <q-btn v-close-popup label="Close" color="primary" flat />
+                                </div>
+                              </q-date>
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
+                    </div>
+                    <div v-else-if="item.type === 'integer' || item.type === 'float'">
+                      <q-input v-if="item.type === 'integer'" :rules="[val => Number.isInteger(Number(val)) || 'Must be an integer (whole number)']" reverse-fill-mask dense rounded v-model="user[item.name]" :label="item.displayName"/>
+                      <q-input v-else-if="item.type === 'float'" :rules="[val => !isNaN(parseFloat(val)) || 'Must be a float (decimal number)']" reverse-fill-mask dense rounded v-model="user[item.name]" :label="item.displayName"/>
+                    </div>
+                    <div v-else-if="item.type === 'enum'">
+                      <q-select dense rounded :options="item.options" v-model="user[item.name]" :label="item.displayName" />
+                    </div>
+                    <div v-else>
+                      <q-input dense rounded v-model="user[item.name]" :label="item.displayName"/>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </q-card-section>
-          </q-card>
-        <!-- </transition-group> -->
-        <empty-placeholder v-if='paginatedUsers.length === 0' icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
-      </div>
-      <div>
-        <div class='text-h6 mb-8'>DISCREPANCIES</div>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
+    <empty-placeholder class="pt-24" v-else icon='fas fa-question' title='No users added' subtitle='You need to add users to the editor panel on the select tab first.'/>
+    <q-dialog v-model="showDiscrepanciesDialog" >
+      <q-card class="p-8">
+        <div class='text-h6'>DISCREPANCIES</div>
+        <div v-if="latestDiscrepancies.length < discrepancies.length" class="mb-4">Only showing 100 of {{discrepancies.length}} discrepancies</div>
+        <div v-else class="mb-4">There are {{discrepancies.length}} discrepancies</div>
         <transition-group name="transition">
           <empty-placeholder key='pl' v-if='discrepancies.length === 0' icon='fas fa-check' title='No discrepancies detected' subtitle="You're good to go!"/>
-          <div v-for='discrepancy in discrepancies' :key='discrepancy.title'>
+          <div v-for='discrepancy in latestDiscrepancies' :key='discrepancy.title'>
             <q-card class='mb-4 ring-4 ring-gray-300 rounded-2xl shadow-xl border-3'>
               <div>
                 <div class='p-4'>
@@ -78,89 +116,79 @@
             </q-card>
           </div>
         </transition-group>
-      </div>
-    </div>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="showOptionsDialog">
+      <q-card>
+        <div class="p-4 text-h6">Batch Modify</div>
+        <q-list bordered>
+          <q-item clickable v-ripple @click='markAllVaccineStatus'>
+            <q-item-section>Vaccine Status...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-syringe"/>
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-ripple @click='setAllVaccineManufacturer'>
+            <q-item-section>Vaccine Manufacturer...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-building"/>
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-ripple @click='markAllVaccinationStatus'>
+            <q-item-section>Vaccination Status...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-shield-alt"/>
+            </q-item-section>
+          </q-item>
+          <hr>
+          <q-item clickable v-ripple @click='setAllDosageNumber'>
+            <q-item-section>Dosage Number...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-circle-notch"/>
+            </q-item-section>
+          </q-item>
+          <hr>
+          <q-item clickable v-ripple @click='markAllPUI'>
+            <q-item-section>Investigation...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-search"/>
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-ripple @click='markAllPUM'>
+            <q-item-section>Monitoring...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-eye"/>
+            </q-item-section>
+          </q-item>
+          <hr>
+          <q-item clickable v-ripple @click='setAllGroup'>
+            <q-item-section>Group...</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-pen"/>
+            </q-item-section>
+          </q-item>
+        </q-list>
+        <hr>
+        <div class="p-4 text-h6">Others</div>
+        <q-list>
+          <q-item 
+            v-for="item in userDataFields" 
+            :key="item.name" clickable v-ripple 
+            @click='setAllArbitraryField(item.name, item.displayName, item.type)'
+          >
+            <q-item-section>{{item.displayName}}</q-item-section>
+            <q-item-section avatar>
+              <q-icon color="primary" name="fas fa-pen"/>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+    </q-dialog>
     <q-page-sticky :offset='[20, 20]' position="bottom-right">
-      <q-btn
-        fab
-        round
-        @click="showOptionsDialog = !showOptionsDialog"
-        :disable="store.usersToModify.length === 0"
-        class="p-2"
-        color="secondary"
-        direction="up"
-        icon="expand_less"
-      />
-      <q-dialog v-model="showOptionsDialog">
-        <q-card>
-          <div class="p-4 text-h6">Batch Modify</div>
-          <q-list bordered>
-            <q-item clickable v-ripple @click='markAllVaccineStatus'>
-              <q-item-section>Vaccine Status...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-syringe"/>
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-ripple @click='setAllVaccineManufacturer'>
-              <q-item-section>Vaccine Manufacturer...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-building"/>
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-ripple @click='markAllVaccinationStatus'>
-              <q-item-section>Vaccination Status...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-shield-alt"/>
-              </q-item-section>
-            </q-item>
-            <hr>
-            <q-item clickable v-ripple @click='setAllDosageNumber'>
-              <q-item-section>Dosage Number...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-circle-notch"/>
-              </q-item-section>
-            </q-item>
-            <hr>
-            <q-item clickable v-ripple @click='markAllPUI'>
-              <q-item-section>Investigation...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-search"/>
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-ripple @click='markAllPUM'>
-              <q-item-section>Monitoring...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-eye"/>
-              </q-item-section>
-            </q-item>
-            <hr>
-            <q-item clickable v-ripple @click='setAllGroup'>
-              <q-item-section>Group...</q-item-section>
-              <q-item-section avatar>
-                <q-icon color="primary" name="fas fa-pen"/>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card>
-      </q-dialog>
-      <q-btn
-        class="p-2 mx-2"
-        :disable="store.usersToModify.length === 0"
-        label="Discard"
-        color="negative"
-        icon="close"
-        @click="confirmDiscard"
-        fab
-        />
-      <q-btn
-        class="p-2 mx-2"
-        :disable="store.usersToModify.length === 0"
-        label="Commit changes"
-        color="primary"
-        icon="check"
-        @click="confirmSubmit"
-        fab
-        />
+      <q-btn fab round class="p-2 mx-2 attention" v-if="discrepancies.length !== 0" color="negative" icon="warning" @click="showDiscrepanciesDialog = !showDiscrepanciesDialog" />
+      <q-btn fab round @click="showOptionsDialog = !showOptionsDialog" :disable="store.usersToModify.length === 0" class="p-2" color="secondary" direction="up" icon="expand_less" />
+      <q-btn class="p-2 mx-2" :disable="store.usersToModify.length === 0" label="Discard changes" color="negative" icon="close" @click="confirmDiscard" fab />
+      <q-btn class="p-2 mx-2" :disable="store.usersToModify.length === 0" label="Commit changes" color="primary" icon="check" @click="confirmSubmit" fab />
     </q-page-sticky>
   </div>
 </template>
@@ -170,6 +198,7 @@
 import store from 'src/api/store';
 import Vue from 'vue';
 import EmptyPlaceholder from 'components/EmptyPlaceholder.vue';
+
 export default Vue.extend({
   name: 'EditVaccinationStatus',
   components: { EmptyPlaceholder },
@@ -177,22 +206,40 @@ export default Vue.extend({
     return {
       store,
       showOptionsDialog: false,
+      showDiscrepanciesDialog: false,
       searchFilter: '',
+      showOnlyDiscrepanciesFilter: false,
       usersPerPage: 10,
       pageIndex: 1,
       discrepancies: [] as {title: string, subtitle: string}[],
+      userDataFields: [] as any[],
     }
   },
-  activated() {
+  async activated() {
+    this.userDataFields = (await store.axios.get('/admin/userDataFields')).data
     this.computeDiscrepancies()
   },
   computed: {
+    sectionedUserDataFields (): Record<string, any[]> {
+      const result: Record<string, any[]> = {}
+      this.userDataFields.forEach(field => {
+        if (field.section in result) {
+          result[field.section].push(field)
+        } else {
+          result[field.section] = [field]
+        }
+      })
+
+      return result
+    },
     filteredUsers (): Record<string,any>[] {
-      if (this.searchFilter === '') return this.store.usersToModify;
+      if (this.searchFilter === '' && !this.showOnlyDiscrepanciesFilter) return this.store.usersToModify;
       const result = [];
       for (const user of store.usersToModify) {
         const name = `${user.firstName} ${user.middleName} ${user.lastName}`;
-        if (name.indexOf(this.searchFilter) !== -1) {
+
+        if (this.showOnlyDiscrepanciesFilter && !user.hasDiscrepancy) continue;
+        if (name.toLowerCase().indexOf(this.searchFilter.toLowerCase()) !== -1) {
           result.push(user);
         }
       }
@@ -200,6 +247,9 @@ export default Vue.extend({
     },
     paginatedUsers () : Record<string,any>[] {
       return this.filteredUsers.slice((this.pageIndex-1) * this.usersPerPage, ((this.pageIndex-1) * this.usersPerPage) + this.usersPerPage);
+    },
+    latestDiscrepancies (): {title: string, subtitle: string}[] {
+      return this.discrepancies.slice(0, 100)
     }
   },
   methods: {
@@ -388,6 +438,57 @@ export default Vue.extend({
         this.computeDiscrepancies();
       })
     },
+    setAllArbitraryField(field: string, displayName: string, type: string) {
+      let dialog: Record<string,any> = {
+        title: `Set all ${displayName}`,
+        message: `Batch set all of these user's ${displayName} fields`
+      }
+
+      if (type === 'boolean') {
+        dialog.options = {model: [], type: 'checkbox' as const, items: [{label: displayName, value: field}]}
+      } else if (type === 'integer' || type === 'float') {
+        dialog.prompt = { model: '', type: 'number' }
+      } else if (type === 'date') {
+        dialog.message += ' - Please enter the date as YYYY/MM/DD.'
+        dialog.prompt = { model: '' }
+      } else {
+        dialog.prompt = { model: '' }
+      }
+
+      console.log(field, displayName, type, dialog)
+
+      this.$q.dialog(dialog).onOk((data: any | any[]) => {
+        for (const user of store.usersToModify) {
+          if (type === 'boolean') {
+            // @ts-ignore
+            user[field] = data.includes(field)
+          } else {
+            user[field] = data
+          }
+        }
+      })
+
+      // let options;
+      // switch(type) {
+      //   case 'boolean': options = {model: [], type: 'checkbox' as const, items: [{label: displayName, value: field}]}; break;
+      //   default: options = {model: ''};
+      // }
+      // console.log(field, displayName, type, options)
+      // this.$q.dialog({
+      //   title: `Set all ${displayName}`,
+      //   message: `Batch set all of these user's ${displayName} fields (${field})`,
+      //   options
+      // }).onOk((data: any | any[]) => {
+      //   for (const user of store.usersToModify) {
+      //     if (type === 'boolean') {
+      //       // @ts-ignore
+      //       user[field] = data.includes(field)
+      //     } else {
+      //       user[field] = data
+      //     }
+      //   }
+      // })
+    },
     confirmSubmit() {
       this.$q.dialog({
         title: 'Commit changes?',
@@ -400,8 +501,9 @@ export default Vue.extend({
         const performRequest = async (data: Record<string,any>[]): Promise<[boolean, string]> => {
           try {
             const response = await this.$axios.post('/admin/editUser', {
+              
               data: data.map(user => {
-                return {
+                const result = {
                   id: user.id,
                   isVaccinated: user.isVaccinated,
                   isVaccineReady: user.isVaccineReady,
@@ -411,6 +513,12 @@ export default Vue.extend({
                   dosageNumber: user.dosageNumber,
                   group: user.group,
                 }
+
+                // This line adds support for arbitrary user data fields!
+                // @ts-ignore
+                this.userDataFields.map(x => result[x.name] = user[x.name])
+
+                return result
               })
             })
 

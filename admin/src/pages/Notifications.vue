@@ -1,11 +1,12 @@
 <template>
   <q-page class="p-8">
-    <h4 class="m-0 font-light">NOTIFICATIONS</h4>
+    <tracvac-header title="NOTIFICATIONS" description="EASILY DISSEMINATE INFORMATION"/>
     <div class="mt-4 flex flex-row">
       <q-btn unelevated class="rounded-xl p-2" color="primary" @click="$router.push('/addNotif')" icon="fas fa-plus" label="Post Notification"/>
     </div>
+    <empty-placeholder v-if="notifications.length === 0" icon="fas fa-question" subtitle="You haven't pushed out any notifications yet." title="No notifications found"/>
     <div class="mt-4 grid grid-cols-2 gap-6">
-      <q-card class="shadow-xl rounded-2xl ring-4 ring-gray-300" v-for="notification in notifications" :key="notification.id">
+      <q-card class="shadow-lg rounded-2xl ring-2 ring-gray-300" v-for="notification in notifications" :key="notification.id">
         <q-card-section>
           <div class="flex flex-row justify-between">
             <div>
@@ -28,9 +29,12 @@
 <script lang="ts">
 import { format, formatDistanceToNow } from 'date-fns'
 import Vue from 'vue'
+import TracvacHeader from 'components/TracvacHeader.vue'
+import EmptyPlaceholder from 'components/EmptyPlaceholder.vue'
 
 export default Vue.extend({
   name: 'Notifications',
+  components: { TracvacHeader, EmptyPlaceholder },
   async activated() {
     await this.loadData();
   },

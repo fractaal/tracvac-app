@@ -1,5 +1,12 @@
 export default [
   {
+    name: 'id',
+    required: false,
+    label: 'User ID',
+    field: 'id',
+    sortable: true,
+  },
+  {
     name: 'username',
     required: false,
     label: 'Username',
@@ -12,6 +19,7 @@ export default [
       required: false,
       label: 'First Name',
       field: 'firstName',
+      align: 'left',
       sortable: true,
     },
     {
@@ -19,6 +27,7 @@ export default [
       required: false,
       label: 'Middle Name',
       field: 'middleName',
+      align: 'left',
       sortable: true,
     },
     {
@@ -26,6 +35,7 @@ export default [
       required: false,
       label: 'Last Name',
       field: 'lastName',
+      align: 'left',
       sortable: true,
     },
     {

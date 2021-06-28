@@ -31,6 +31,8 @@
 import Vue from 'vue'
 import { uploadProfilePicture } from '../api/user'
 import { store } from '../api/store'
+import { api } from 'src/api/server'
+import loadPlugin from 'src/api/plugin'
 import * as push from 'src/api/push'
 
 import ButtonCard from '../components/ButtonCard.vue'
@@ -43,6 +45,14 @@ const _ = import('src/api/background')
 export default Vue.extend({
   name: 'Home',
   components: { LargeButtonCard, ButtonCard, ProfilePicture },
+  async created () {
+    const { data: pluginPaths } = await api.get('/plugin')
+    for (const pluginPath of pluginPaths) {
+      const plugin = await loadPlugin(pluginPath)
+      console.log(plugin)
+      await (plugin as any).init(this, api)
+    }
+  },
   activated () {
     startup()
     push.initialize()

@@ -9,6 +9,10 @@ import expressBasicAuth from "express-basic-auth"
 import * as PushScheduler from '../push-scheduler'
 import { PushSubscriptionModel } from "../database/models/PushSubscriptionModel"
 import { exportTable } from "../exporter"
+import { getInsightLoaders } from "../insight"
+import { getDataFields } from "../user-data-fields"
+import { getRegistrationFields } from "../user-registration-fields"
+import { getLoadedPlugins } from "../plugins"
 
 const logger = Logger("AdminRoute");
 
@@ -121,7 +125,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             await UserModel.query(trx).where({ id: user.id }).patch({lastVaccinationTime: new Date().toUTCString()})
                         }
 
-                        await UserModel.query(trx).where({ id: user.id }).patch({
+                        const updatedUser = {
                             isVaccinated: !!user.isVaccinated,
                             vaccineManufacturer: user.vaccineManufacturer,
                             isVaccineReady: user.isVaccineReady,
@@ -129,7 +133,14 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                             isPUM: !!user.isPUM,
                             dosageNumber: user.dosageNumber,
                             group: user.group
-                        });
+                        }
+                        
+                        getDataFields().forEach(field => {
+                            // @ts-ignore I know what I'm doing
+                            updatedUser[field.name] = (field.type === "json" ? JSON.stringify(user[field.name]) : user[field.name])
+                        })
+
+                        await UserModel.query(trx).where({ id: user.id }).patch(updatedUser);
                         
                         // Queue a push to be handled by the push scheduler (IF vaccine/vaccination statuses have changed)
                         if ( 
@@ -469,7 +480,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
 
         // Response construction
-        let response = {
+        let response: Record<string,any> = {
             alerts,
             miscItems: {
                 totalUserCount,
@@ -477,17 +488,36 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
                 usersWithNotifsEnabled, 
             },
             chartItems: {
-                "Professions": professions, 
-                "Sexes": sexes, 
-                "Pregnancies": pregnancies, 
-                "Vaccination Statuses": vaccinationStatuses, 
-                "Vaccine Statuses": vaccineStatuses,
-                "Vaccine Manufacturers": vaccineManufacturers,
-                "Groups - Vaccine Statuses": groupsIsVaccineReady,
-                "Groups - Vaccination Statuses": groupsIsVaccinated,
-                "Groups - Vaccine Manufacturers": groupsVaccineManufacturer,
+                "Demographic": {
+                    "Professions": professions, 
+                    "Sexes": sexes, 
+                    "Pregnancies": pregnancies, 
+                },
+                "Vaccination": {
+                    "Vaccination Statuses": vaccinationStatuses, 
+                    "Vaccine Statuses": vaccineStatuses,
+                    "Vaccine Manufacturers": vaccineManufacturers,
+                },
+                "Vaccination - Groups": {
+                    "Groups - Vaccine Statuses": groupsIsVaccineReady,
+                    "Groups - Vaccination Statuses": groupsIsVaccinated,
+                    "Groups - Vaccine Manufacturers": groupsVaccineManufacturer,
+                }
             }
         }
+
+        // Injecting insight loaders
+        const insightLoaders = getInsightLoaders()
+        const resolvedInsightLoaderValues = await Promise.all(
+            insightLoaders.map(async x => {return {data: x.loader(), section: x.section, name: x.name}}))
+
+        resolvedInsightLoaderValues.forEach(({section, name, data}) => {
+
+            if (!(section in response.chartItems)) response.chartItems[section] = {}
+
+            // @ts-ignore
+            response.chartItems[section][name] = data
+        })
 
         if ((await getConfig()).isCorporation) {
             response = Object.assign(
@@ -518,4 +548,21 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
             res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
         }
     })
+
+    // Get User Data Fields
+    app.get('/admin/userDataFields', async (req, res) => {
+        const filteredUserDataFields = getDataFields().filter(field => field.isShownInAdmin)
+        res.json(filteredUserDataFields)
+    })
+
+    // Get loaded plugins
+    app.get('/admin/activePlugins', async (req, res) => {
+        res.json(getLoadedPlugins())
+    })
+
+    // Get user registration fields
+    app.get('/admin/userRegistrationFields', async (req, res) => {
+        res.json(getRegistrationFields())
+    })
+
 })();
