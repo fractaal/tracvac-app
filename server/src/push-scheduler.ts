@@ -8,7 +8,7 @@ export interface PushQueueItem<T> {
 }
 
 const queue: PushQueueItem<Record<string,any>>[] = [];
-const maxItemsEachPass = 500;
+const maxItemsEachPass = 5000;
 
 export function enqueue<T>(userId: number, data: T) {
   queue.push({data, userId});
