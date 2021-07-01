@@ -5,6 +5,7 @@ export default {
   axios: null as unknown as AxiosInstance,
   userShownInLogs: null as unknown as Record<string,any>,
   unreadLogsCount: 0,
+  endpoint: '' as string,
   userActions: [] as Record<string,any>[],
   serverConfig: {
     isConfigured: false,
