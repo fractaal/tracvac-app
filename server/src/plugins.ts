@@ -56,7 +56,7 @@ export const getLoadedPlugins = () => plugins;
 		res.json(clientPluginRoutes)
 	})
 
-	app.get("/admin/plugin", async (req, res) => {
+	app.get("/admin/plugin", async (req, res) => { // TODO: Arbitrary admin endpoint
 		res.json(adminPluginRoutes)
 	})
 
@@ -130,9 +130,9 @@ export const getLoadedPlugins = () => plugins;
 
 			if (fs.existsSync(adminPluginPath)) {
 				const js = fs.readFileSync(adminPluginPath, { encoding: 'utf8' });
-				adminPluginRoutes.push(`/admin/plugin/${manifest.name}`)
+				adminPluginRoutes.push(`/admin/plugin/${manifest.name}`) // TODO: Arbitrary admin endpoint
 
-				app.get(`/admin/plugin/${manifest.name}`, async (req, res) => {
+				app.get(`/admin/plugin/${manifest.name}`, async (req, res) => { // TODO: Arbitrary admin endpoint
 					res.type(".js").send(js)
 				})
 			} else if (!((adminPluginPath ?? "NONE") === "NONE")) {
