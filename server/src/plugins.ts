@@ -5,6 +5,7 @@ import path from 'path'
 import fs from 'fs'
 import { app } from './index'
 import Logger from './logger'
+import { getConfig } from './config'
 
 // Models
 import { UserModel } from "./database/models/UserModel"
@@ -52,11 +53,13 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 export const getLoadedPlugins = () => plugins;
 
 (async () => {
+	const adminEndpoint = (await getConfig()).adminEndpoint
+	
 	app.get("/plugin", async (req, res) => {
 		res.json(clientPluginRoutes)
 	})
 
-	app.get("/admin/plugin", async (req, res) => { // TODO: Arbitrary admin endpoint
+	app.get(adminEndpoint + "/plugin", async (req, res) => { // TODO: Arbitrary admin endpoint
 		res.json(adminPluginRoutes)
 	})
 
@@ -130,9 +133,9 @@ export const getLoadedPlugins = () => plugins;
 
 			if (fs.existsSync(adminPluginPath)) {
 				const js = fs.readFileSync(adminPluginPath, { encoding: 'utf8' });
-				adminPluginRoutes.push(`/admin/plugin/${manifest.name}`) // TODO: Arbitrary admin endpoint
+				adminPluginRoutes.push(adminEndpoint + `/plugin/${manifest.name}`) // TODO: Arbitrary admin endpoint
 
-				app.get(`/admin/plugin/${manifest.name}`, async (req, res) => { // TODO: Arbitrary admin endpoint
+				app.get(adminEndpoint + `/plugin/${manifest.name}`, async (req, res) => { // TODO: Arbitrary admin endpoint
 					res.type(".js").send(js)
 				})
 			} else if (!((adminPluginPath ?? "NONE") === "NONE")) {
