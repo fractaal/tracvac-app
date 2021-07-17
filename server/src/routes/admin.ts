@@ -32,12 +32,13 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 
 (async () => {
 
-    const endpoint = (await getConfig()).adminEndpoint
+    const config = await getConfig();
+    const endpoint = config.adminEndpoint
 
     // Secure static paths to admin interface
-    app.use(endpoint, expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
+    app.use(endpoint, expressBasicAuth({users: {[config.adminUsername]: config.adminPassword}, challenge: true}))
     // app.use(endpoint, expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
-    app.use(endpoint + '/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
+    app.use(endpoint + '/*', expressBasicAuth({users: {[config.adminUsername]: config.adminPassword}, challenge: true}))
     // app.use(endpoint + '/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
     app.use(endpoint, express.static(internalStaticPath));
     
@@ -46,7 +47,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
     // })
 
     app.get(endpoint + '/setup', async (request, response) => {
-        const config: Partial<Config> = await getConfig();
+        // const config: Partial<Config> = await getConfig();
         response.json({
             ...config
         })
