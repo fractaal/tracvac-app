@@ -1,5 +1,5 @@
 import express from 'express'
-import { app, internalStaticPath } from "../index"
+import { internalStaticPath } from "../index"
 import Logger from '../logger'
 import { raw } from 'objection'
 import { NotificationModel } from "../database/models/NotificationModel"
@@ -30,8 +30,11 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 };
 */
 
+
 (async () => {
 
+    const app = express()
+    
     const config = await getConfig();
     const endpoint = config.adminEndpoint
 
@@ -576,4 +579,5 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         res.json(getRegistrationFields())
     })
 
+    app.listen(parseInt(config.adminPort), config.adminIp, 511)
 })();
