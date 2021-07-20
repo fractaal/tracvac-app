@@ -1,4 +1,5 @@
 import express from 'express'
+import { json } from 'body-parser'
 import { internalStaticPath } from "../index"
 import Logger from '../logger'
 import { raw } from 'objection'
@@ -34,6 +35,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 (async () => {
 
     const app = express()
+    app.use(json({limit: '10mb'}));
     
     const config = await getConfig();
     const endpoint = config.adminEndpoint
