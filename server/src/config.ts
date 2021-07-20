@@ -8,14 +8,26 @@ export interface Config {
     secret: string;
     httpPort: string;
     httpsPort: string;
+    adminPort: string;
     adminEndpoint: string;
     adminPassword: string;
     adminUsername: string;
+    adminIp: string;
     isCorporation: boolean;
     email: string;
 }
 
-const requiredConfigKeys = ['name', 'location', 'httpPort', 'httpsPort', 'adminPassword', 'adminEndpoint', 'adminUsername', 'email'] as const
+const requiredConfigKeys = [
+    'name', 
+    'location', 
+    'httpPort', 
+    'httpsPort', 
+    'adminPassword', 
+    'adminEndpoint', 
+    'adminUsername', 
+    'adminIp', 
+    'adminPort',
+    'email'] as const
 
 const logger = Logger('Config')
 
@@ -27,9 +39,11 @@ export async function getConfig(): Promise<Config> {
         secret: process.env.SECRET ,
         httpsPort: process.env.PORT_SECURE ?? '443' ,
         httpPort: process.env.PORT ?? '80' ,
+        adminPort: process.env.ADMIN_PORT ,
         adminEndpoint: process.env.ADMIN_ENDPOINT ,
         adminUsername: process.env.ADMIN_USERNAME ,
         adminPassword: process.env.ADMIN_PASSWORD ,
+        adminIp: process.env.ADMIN_IP ,
         isCorporation: !!process.env.IS_CORPORATION ,
         email: process.env.EMAIL 
     } as Partial<Config>;
