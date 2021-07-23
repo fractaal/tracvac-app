@@ -31,10 +31,10 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 };
 */
 
+export const app = express();
 
 (async () => {
 
-    const app = express()
     app.use(json({limit: '10mb'}));
     
     const config = await getConfig();
