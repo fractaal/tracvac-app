@@ -30,7 +30,6 @@ export default boot(({ Vue }) => {
   const hook = (method: 'get' | 'post') => {
     return (url: string, config?: AxiosRequestConfig | undefined) => {
       const modifiedUrl = path.join(subpath, url.split('/').slice(url.indexOf('admin')+1).join('/'))
-      console.log(modifiedUrl)
       if (method === 'get') {
         return get.call(axios, modifiedUrl, config)
       } else if (method === 'post') {
