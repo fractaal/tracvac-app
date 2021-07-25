@@ -1,4 +1,6 @@
-import { app } from "../index"
+import express from 'express'
+import { json } from 'body-parser'
+import { internalStaticPath } from "../index"
 import Logger from '../logger'
 import { raw } from 'objection'
 import { NotificationModel } from "../database/models/NotificationModel"
@@ -16,6 +18,7 @@ import { getLoadedPlugins } from "../plugins"
 
 const logger = Logger("AdminRoute");
 
+
 /**
 const adminCheckerMiddleware = (request: Request, response: Response, next: NextFunction) => {
     if (request.socket.localAddress === request.socket.remoteAddress) {
@@ -28,21 +31,34 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 };
 */
 
-(async () => {
-    app.use('/admin/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
-    app.use('/admin', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
-    app.get('/admin', (request, response) => {
-        response.redirect('/secure')
-    })
+export const app = express();
 
-    app.get('/admin/setup', async (request, response) => {
-        const config: Partial<Config> = await getConfig();
+(async () => {
+
+    app.use(json({limit: '10mb'}));
+    
+    const config = await getConfig();
+    const endpoint = config.adminEndpoint
+
+    // Secure static paths to admin interface
+    app.use(endpoint, expressBasicAuth({users: {[config.adminUsername]: config.adminPassword}, challenge: true}))
+    // app.use(endpoint, expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
+    app.use(endpoint + '/*', expressBasicAuth({users: {[config.adminUsername]: config.adminPassword}, challenge: true}))
+    // app.use(endpoint + '/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
+    app.use(endpoint, express.static(internalStaticPath));
+    
+    // app.get(endpoint, (request, response) => {
+    //     response.redirect('/secure')
+    // })
+
+    app.get(endpoint + '/setup', async (request, response) => {
+        // const config: Partial<Config> = await getConfig();
         response.json({
             ...config
         })
     })
 
-    app.get('/admin/getUser/:id', async (req, res) => {
+    app.get(endpoint + '/getUser/:id', async (req, res) => {
         try {
             const user = await UserModel.query().findById(req.params.id) as UserModel | null
 
@@ -57,7 +73,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/getUsers', async (request, response) => {
+    app.post(endpoint + '/getUsers', async (request, response) => {
         if (request.body.pageSize === 0) request.body.pageSize = 1000;
         if (
             request.body.pageSize !== undefined &&
@@ -100,7 +116,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/editUser', async (request, response) => {
+    app.post(endpoint + '/editUser', async (request, response) => {
         if (request.body.data) {
             for (const user of request.body.data as Partial<UserModel>[]) {
                 if (
@@ -161,7 +177,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/getNotifications', async (request, response) => {
+    app.post(endpoint + '/getNotifications', async (request, response) => {
         if (request.body.pageSize !== undefined && request.body.page !== undefined) {
             const result = await NotificationModel.query().select('*').orderBy('createdAt', 'desc');
 
@@ -171,7 +187,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/postNotification', async (request, response) => {
+    app.post(endpoint + '/postNotification', async (request, response) => {
         if (
             request.body.title &&
             request.body.content
@@ -200,7 +216,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/deleteNotification', async (request, response) => {
+    app.post(endpoint + '/deleteNotification', async (request, response) => {
         if (request.body.notificationId) {
             try {
                 await NotificationModel.query().deleteById(request.body.notificationId);
@@ -214,7 +230,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/viewLogs', async (request, response) => {
+    app.post(endpoint + '/viewLogs', async (request, response) => {
         if (request.body.userId) {
             try {
                 const result = await LogModel.query().select('*').where({userId: request.body.userId}).orderBy('createdAt', 'desc');
@@ -229,7 +245,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.get('/admin/export', async (_, response) => {
+    app.get(endpoint + '/export', async (_, response) => {
         const [result, data] = await exportTable(await UserModel.query().select('*'), ['password'])
         if (result) {
             response.download(data) 
@@ -238,7 +254,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     });
 
-    app.get('/admin/export-logs', async(_, response) => {
+    app.get(endpoint + '/export-logs', async(_, response) => {
         const [result, data] = await exportTable(
             await LogModel.query()
                 .select(raw('logs.*, users.email, users."firstName", users."middleName", users."lastName"'))
@@ -253,7 +269,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/getUnreadLogsCount', async (req, res) => {
+    app.post(endpoint + '/getUnreadLogsCount', async (req, res) => {
         try {
             res.json({result: true, count: (await LogModel.query().select('*').where({adminHasRead: false})).length})
         } catch {
@@ -261,7 +277,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/getLogs', async (req, res) => {
+    app.post(endpoint + '/getLogs', async (req, res) => {
         if (req.body.pageSize == 0) req.body.pageSize = 999;
         try {
             interface UserLogModel extends LogModel {
@@ -300,7 +316,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/markLogs', async (req, res) => {
+    app.post(endpoint + '/markLogs', async (req, res) => {
         try {
             await LogModel.transaction(async (trx) => {
                 // Admin interface should just return array of IDs of what to acknowledge
@@ -319,7 +335,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.post('/admin/selectAmountOfPeople', async (req, res) => {
+    app.post(endpoint + '/selectAmountOfPeople', async (req, res) => {
         try {
             if (req.body.limit) {
                 const selection = await UserModel.query().select('*').limit(req.body.limit);
@@ -333,7 +349,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
         }
     })
 
-    app.get('/admin/insight', async (req, res) => {
+    app.get(endpoint + '/insight', async (req, res) => {
         const totalUserCount = parseInt((await UserModel.query()
             .select()
             .count('*') as any[])[0].count)
@@ -534,7 +550,7 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
     })
 
     // Groups 
-    app.post('/admin/getAllUsersFromGroup', async (req, res) => {
+    app.post(endpoint + '/getAllUsersFromGroup', async (req, res) => {
         if (!req.body.group) { res.json({result: false, message: "Missing group parameter"}); return; }
         try {
             const selection = await UserModel.query().select('*').where('group', req.body.group);
@@ -550,19 +566,20 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
     })
 
     // Get User Data Fields
-    app.get('/admin/userDataFields', async (req, res) => {
+    app.get(endpoint + '/userDataFields', async (req, res) => {
         const filteredUserDataFields = getDataFields().filter(field => field.isShownInAdmin)
         res.json(filteredUserDataFields)
     })
 
     // Get loaded plugins
-    app.get('/admin/activePlugins', async (req, res) => {
+    app.get(endpoint + '/activePlugins', async (req, res) => {
         res.json(getLoadedPlugins())
     })
 
     // Get user registration fields
-    app.get('/admin/userRegistrationFields', async (req, res) => {
+    app.get(endpoint + '/userRegistrationFields', async (req, res) => {
         res.json(getRegistrationFields())
     })
 
+    app.listen(parseInt(config.adminPort), config.adminIp, 511)
 })();

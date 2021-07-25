@@ -5,6 +5,7 @@ import path from 'path'
 import fs from 'fs'
 import { app } from './index'
 import Logger from './logger'
+import { getConfig } from './config'
 
 // Models
 import { UserModel } from "./database/models/UserModel"
@@ -17,6 +18,9 @@ import * as UserRegistrationFields from "./user-registration-fields"
 import * as UserDataFields from "./user-data-fields"
 import * as Insight from "./insight"
 
+// Administrator Express application 
+import { app as adminApp } from "./routes/admin"
+
 const logger = Logger("PluginManager")
 
 interface TracVacPlugin {
@@ -26,6 +30,8 @@ interface TracVacPlugin {
 		UserDataFields: Record<string,any>
 		Insight: typeof Insight
 		app: Express.Application
+		adminEndpoint: string;
+		adminApp: Express.Application
 		logger: ReturnType<typeof Logger>
 	}): Promise<void>
 	getManifest(): Record<string,any>
@@ -52,11 +58,15 @@ const pluginFiles = fs.readdirSync(pluginFolder).filter(fileName => fileName.end
 export const getLoadedPlugins = () => plugins;
 
 (async () => {
+	const adminEndpoint = (await getConfig()).adminEndpoint
+	
+	// Clientside plugin code 
 	app.get("/plugin", async (req, res) => {
 		res.json(clientPluginRoutes)
 	})
 
-	app.get("/admin/plugin", async (req, res) => {
+	// Administrator-side plugin code
+	adminApp.get(adminEndpoint + "/plugin", async (req, res) => { // TODO: Arbitrary admin endpoint
 		res.json(adminPluginRoutes)
 	})
 
@@ -110,6 +120,8 @@ export const getLoadedPlugins = () => plugins;
 				UserRegistrationFields,
 				Insight,
 				app,
+				adminEndpoint,
+				adminApp,
 				logger: Logger(manifest.name + "Plugin")
 			})
 
@@ -130,9 +142,9 @@ export const getLoadedPlugins = () => plugins;
 
 			if (fs.existsSync(adminPluginPath)) {
 				const js = fs.readFileSync(adminPluginPath, { encoding: 'utf8' });
-				adminPluginRoutes.push(`/admin/plugin/${manifest.name}`)
+				adminPluginRoutes.push(adminEndpoint + `/plugin/${manifest.name}`) // TODO: Arbitrary admin endpoint
 
-				app.get(`/admin/plugin/${manifest.name}`, async (req, res) => {
+				adminApp.get(adminEndpoint + `/plugin/${manifest.name}`, async (req, res) => { // TODO: Arbitrary admin endpoint
 					res.type(".js").send(js)
 				})
 			} else if (!((adminPluginPath ?? "NONE") === "NONE")) {

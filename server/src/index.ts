@@ -58,10 +58,6 @@ if (!fs.existsSync(staticPath)) fs.mkdirSync(staticPath);
   app.use('/app', express.static(frontEndPath));
   app.use('/', express.static(frontEndPath));
 
-  // Secure static paths to admin interface
-  app.use('/secure', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
-  app.use('/secure/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
-  app.use('/secure', express.static(internalStaticPath));
 
   logger.log(`Static files path: ${staticPath}`);
 
