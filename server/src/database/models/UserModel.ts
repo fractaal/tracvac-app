@@ -130,6 +130,7 @@ export class UserModel extends BaseModel {
   lastVaccinationTime!: string;
   group!: string;
   companyBranch!: string;
+  vaccinationSchedule!: string;
 
   static tableName = 'users'
 
