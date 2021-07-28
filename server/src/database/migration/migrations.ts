@@ -306,5 +306,19 @@ export const migrations = [
         table.dropColumn('companyBranch')
       })
     }
+  },
+  {
+    version: 10,
+    description: 'Add schedule field to users table',
+    up: async (knex) => {
+      await knex.schema.table('users', table => {
+        table.dateTime('vaccinationSchedule')
+      })
+    },
+    down: async(knex) => {
+      await knex.schema.table('user', table => {
+        table.dropColumn('vaccinationSchedule')
+      })
+    }
   }
 ] as {version: number; description: string; up(knex: Knex): Promise<any>; down(knex: Knex): Promise<any>}[];
