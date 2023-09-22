@@ -19,32 +19,34 @@ import * as UserDataFields from "./user-data-fields"
 import * as Insight from "./insight"
 
 // Administrator Express application 
-import { app as adminApp } from "./routes/admin"
+// import { app as adminApp } from "./routes/admin"
+
+const adminApp = app;
 
 const logger = Logger("PluginManager")
 
 interface TracVacPlugin {
-	load (options: {
-		Models: Record<string,any>,
-		UserRegistrationFields: Record<string,any>
-		UserDataFields: Record<string,any>
+	load(options: {
+		Models: Record<string, any>,
+		UserRegistrationFields: Record<string, any>
+		UserDataFields: Record<string, any>
 		Insight: typeof Insight
 		app: Express.Application
 		adminEndpoint: string;
 		adminApp: Express.Application
 		logger: ReturnType<typeof Logger>
 	}): Promise<void>
-	getManifest(): Record<string,any>
+	getManifest(): Record<string, any>
 	getClientPlugin(): string
 	getAdminPlugin(): string
-	
+
 	// These values are injected by TracVac on load
 	__loaded: boolean
 	__errored: boolean
 }
 
 const requiredManifestKeys = ['name']
-const plugins: Record<string,any>[] = []
+const plugins: Record<string, any>[] = []
 const clientPluginRoutes: string[] = []
 const adminPluginRoutes: string[] = []
 
@@ -59,7 +61,7 @@ export const getLoadedPlugins = () => plugins;
 
 (async () => {
 	const adminEndpoint = (await getConfig()).adminEndpoint
-	
+
 	// Clientside plugin code 
 	app.get("/plugin", async (req, res) => {
 		res.json(clientPluginRoutes)
@@ -73,24 +75,24 @@ export const getLoadedPlugins = () => plugins;
 	await Promise.all(pluginFiles.map(async (fileName: string) => {
 		const plugin: TracVacPlugin = require(path.join(pluginFolder, fileName))
 
-		let manifest: Record<string,any>
+		let manifest: Record<string, any>
 
 		try {
 			manifest = plugin.getManifest()
-		
+
 			const goodManifest = requiredManifestKeys.reduce((acc, curr) => {
 				const result = curr in manifest && acc ? true : false
 				if (!result) logger.error(`Bad manifest - misisng key ${curr}`)
 				return result
 			}, true)
-			
+
 			if (!goodManifest) {
 				logger.error(`Error occured while trying to load plugin ${fileName} - Bad manifest`)
 				plugin.__errored = true
 				return
 			}
 
-		} catch(err) {
+		} catch (err) {
 			logger.error(`Error occured while trying to load plugin @ ${fileName} - ${err}`)
 			plugin.__errored = true
 			return
@@ -115,7 +117,7 @@ export const getLoadedPlugins = () => plugins;
 					LogModel,
 					NotificationModel,
 					PushSubscriptionModel
-				}, 
+				},
 				UserDataFields,
 				UserRegistrationFields,
 				Insight,
@@ -150,12 +152,12 @@ export const getLoadedPlugins = () => plugins;
 			} else if (!((adminPluginPath ?? "NONE") === "NONE")) {
 				logger.warn(`The admin plugin script for ${manifest.name} - ${clientPluginPath} - does not exist. If this plugin has a front-end, it won't work properly!`)
 			}
-			
+
 			plugin.__loaded = true
 
-	
-			plugins.push({...plugin, ...manifest})
-		} catch(err) {
+
+			plugins.push({ ...plugin, ...manifest })
+		} catch (err) {
 			logger.error(`Error occured while loading the plugin ${manifest.name} - Load method call failed - ${err}`)
 			plugin.__loaded = false
 			plugin.__errored = true
@@ -163,7 +165,7 @@ export const getLoadedPlugins = () => plugins;
 	}))
 
 	const numErrored = plugins.reduce((acc, curr) => { return curr.__errored ? ++acc : acc }, 0)
-	const numLoaded = plugins.reduce((acc, curr) => { return curr.__loaded? ++acc : acc }, 0)
+	const numLoaded = plugins.reduce((acc, curr) => { return curr.__loaded ? ++acc : acc }, 0)
 
 	if (numErrored) logger.warn(
 		`${numErrored} plugins failed to load. 
