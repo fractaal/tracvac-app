@@ -31,22 +31,23 @@ const adminCheckerMiddleware = (request: Request, response: Response, next: Next
 };
 */
 
-export const app = express();
+// export const app = express();
+import { app } from '../index'
 
 (async () => {
 
-    app.use(json({limit: '10mb'}));
-    
+    // app.use(json({ limit: '10mb' }));
+
     const config = await getConfig();
     const endpoint = config.adminEndpoint
 
     // Secure static paths to admin interface
-    app.use(endpoint, expressBasicAuth({users: {[config.adminUsername]: config.adminPassword}, challenge: true}))
+    app.use(endpoint, expressBasicAuth({ users: { [config.adminUsername]: config.adminPassword }, challenge: true }))
     // app.use(endpoint, expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
-    app.use(endpoint + '/*', expressBasicAuth({users: {[config.adminUsername]: config.adminPassword}, challenge: true}))
+    app.use(endpoint + '/*', expressBasicAuth({ users: { [config.adminUsername]: config.adminPassword }, challenge: true }))
     // app.use(endpoint + '/*', expressBasicAuth({users: {admin: (await getConfig()).adminPassword}, challenge: true}))
     app.use(endpoint, express.static(internalStaticPath));
-    
+
     // app.get(endpoint, (request, response) => {
     //     response.redirect('/secure')
     // })
@@ -63,13 +64,13 @@ export const app = express();
             const user = await UserModel.query().findById(req.params.id) as UserModel | null
 
             if (user) {
-                res.json({result: true, data: user})
+                res.json({ result: true, data: user })
             } else {
-                res.status(400).json({result: false, message: `User doesn't exist.`})
+                res.status(400).json({ result: false, message: `User doesn't exist.` })
             }
-        } catch(err) {
+        } catch (err) {
             logger.error(err)
-            res.status(500).json({result: false, message: `Server error occurred while trying to get user`})
+            res.status(500).json({ result: false, message: `Server error occurred while trying to get user` })
         }
     })
 
@@ -91,7 +92,7 @@ export const app = express();
                         `%${request.body.filter}%`
                     ).where(
                         (() => {
-                            const where = {} as Record<string,any>;
+                            const where = {} as Record<string, any>;
                             if (request.body.showPUMs) where.isPUM = true;
                             if (request.body.showPUIs) where.isPUI = true;
                             return where
@@ -102,7 +103,7 @@ export const app = express();
                 result = await UserModel.query()
                     .where(
                         (() => {
-                            const where = {} as Record<string,any>;
+                            const where = {} as Record<string, any>;
                             if (request.body.showPUMs) where.isPUM = true;
                             if (request.body.showPUIs) where.isPUI = true;
                             return where
@@ -112,7 +113,7 @@ export const app = express();
             }
             response.json(result);
         } else {
-            response.status(400).json({result: false, message: 'Missing params'})
+            response.status(400).json({ result: false, message: 'Missing params' })
         }
     })
 
@@ -128,7 +129,7 @@ export const app = express();
                     user.isPUI === undefined &&
                     user.dosageNumber === undefined &&
                     user.group === undefined
-                ) response.status(400).json({result: false, message: "Missing parameters."})
+                ) response.status(400).json({ result: false, message: "Missing parameters." })
             }
 
             try {
@@ -138,7 +139,7 @@ export const app = express();
                         // Updating lastVaccinationTime
                         const [oldUser] = await UserModel.query(trx).where({ id: user.id }).select('isVaccinated', 'isVaccineReady')
                         if (!oldUser.isVaccinated && user.isVaccinated) {
-                            await UserModel.query(trx).where({ id: user.id }).patch({lastVaccinationTime: new Date().toUTCString()})
+                            await UserModel.query(trx).where({ id: user.id }).patch({ lastVaccinationTime: new Date().toUTCString() })
                         }
 
                         const updatedUser = {
@@ -150,28 +151,28 @@ export const app = express();
                             dosageNumber: user.dosageNumber,
                             group: user.group
                         }
-                        
+
                         getDataFields().forEach(field => {
                             // @ts-ignore I know what I'm doing
                             updatedUser[field.name] = (field.type === "json" ? JSON.stringify(user[field.name]) : user[field.name])
                         })
 
                         await UserModel.query(trx).where({ id: user.id }).patch(updatedUser);
-                        
+
                         // Queue a push to be handled by the push scheduler (IF vaccine/vaccination statuses have changed)
-                        if ( 
+                        if (
                             oldUser.isVaccinated !== user.isVaccinated ||
-                            oldUser.isVaccineReady !== user.isVaccineReady  
+                            oldUser.isVaccineReady !== user.isVaccineReady
                         ) {
-                            PushScheduler.enqueue(user.id as number, {title: "Your vaccine/vaccination status has changed!", message: "You might want to check it out!"})
+                            PushScheduler.enqueue(user.id as number, { title: "Your vaccine/vaccination status has changed!", message: "You might want to check it out!" })
                         }
                     }
                 })
                 logger.log(`Committed changes to ${request.body.data.length} people`)
-                response.json({result: true, message: "Changes committed!"})
+                response.json({ result: true, message: "Changes committed!" })
             } catch (err) {
                 logger.error(`Error occurred while updating users: ${err}`)
-                response.status(500).json({result: false, message: 'Something happened while trying to update the users. The changes have not been committed.'});
+                response.status(500).json({ result: false, message: 'Something happened while trying to update the users. The changes have not been committed.' });
             }
 
         }
@@ -183,7 +184,7 @@ export const app = express();
 
             response.json(result);
         } else {
-            response.status(400).json({result: false, message: 'Missing page/pageSize params'})
+            response.status(400).json({ result: false, message: 'Missing page/pageSize params' })
         }
     })
 
@@ -203,16 +204,16 @@ export const app = express();
                 // Notify all users
                 const userIds = await UserModel.query().select('id')
                 for (const user of userIds) {
-                    PushScheduler.enqueue(user.id, {title: request.body.title, message: "New LGU notification"});
+                    PushScheduler.enqueue(user.id, { title: request.body.title, message: "New LGU notification" });
                 }
 
                 logger.log(`New notification ${notifToAdd.title} added`)
-                response.json({result: true, message: 'Notification posted!'});
+                response.json({ result: true, message: 'Notification posted!' });
             } catch (e) {
-                response.status(500).json({result: false, message: `Server side error: ${e}`});
+                response.status(500).json({ result: false, message: `Server side error: ${e}` });
             }
         } else {
-            response.status(400).json({result: false, message: "Missing title / content"});
+            response.status(400).json({ result: false, message: "Missing title / content" });
         }
     })
 
@@ -221,59 +222,59 @@ export const app = express();
             try {
                 await NotificationModel.query().deleteById(request.body.notificationId);
                 logger.log(`Deleted notification ${request.body.notificationId}`)
-                response.json({result: true});
-            } catch(e) {
-                response.status(500).json({result: false, message: 'Something happened while trying to delete the notification.'});
+                response.json({ result: true });
+            } catch (e) {
+                response.status(500).json({ result: false, message: 'Something happened while trying to delete the notification.' });
             }
         } else {
-            response.status(400).json({result: false, message: "Notification ID missing"});
+            response.status(400).json({ result: false, message: "Notification ID missing" });
         }
     })
 
     app.post(endpoint + '/viewLogs', async (request, response) => {
         if (request.body.userId) {
             try {
-                const result = await LogModel.query().select('*').where({userId: request.body.userId}).orderBy('createdAt', 'desc');
+                const result = await LogModel.query().select('*').where({ userId: request.body.userId }).orderBy('createdAt', 'desc');
                 logger.log(`Returning logs for user ${request.body.userId}`)
-                response.json({result: true, data: result});
-            } catch(err) {
+                response.json({ result: true, data: result });
+            } catch (err) {
                 logger.error(`Notification retrieval for user ${request.body.userId} failed: ${err}`)
-                response.status(500).json({result: false, message: "Something happened while trying to retrieve notifications"})
+                response.status(500).json({ result: false, message: "Something happened while trying to retrieve notifications" })
             }
         } else {
-            response.status(400).json({result: false, message: "User ID missing"});
+            response.status(400).json({ result: false, message: "User ID missing" });
         }
     })
 
     app.get(endpoint + '/export', async (_, response) => {
         const [result, data] = await exportTable(await UserModel.query().select('*'), ['password'])
         if (result) {
-            response.download(data) 
+            response.download(data)
         } else {
-            response.json({result, message: data})
+            response.json({ result, message: data })
         }
     });
 
-    app.get(endpoint + '/export-logs', async(_, response) => {
+    app.get(endpoint + '/export-logs', async (_, response) => {
         const [result, data] = await exportTable(
             await LogModel.query()
                 .select(raw('logs.*, users.email, users."firstName", users."middleName", users."lastName"'))
                 .leftJoinRelated("users")
                 .where(raw('logs."userId" = users.id')),
-                []
-            )
+            []
+        )
         if (result) {
             response.download(data)
         } else {
-            response.json({result, message: data})
+            response.json({ result, message: data })
         }
     })
 
     app.post(endpoint + '/getUnreadLogsCount', async (req, res) => {
         try {
-            res.json({result: true, count: (await LogModel.query().select('*').where({adminHasRead: false})).length})
+            res.json({ result: true, count: (await LogModel.query().select('*').where({ adminHasRead: false })).length })
         } catch {
-            res.status(500).json({result: false})
+            res.status(500).json({ result: false })
         }
     })
 
@@ -290,7 +291,7 @@ export const app = express();
                 .where(
                     (() => {
                         if (req.body.showOnlyUnread) {
-                            return {adminHasRead: false}
+                            return { adminHasRead: false }
                         } else return {}
                     })()
                 )
@@ -307,7 +308,7 @@ export const app = express();
             });
             logger.log(`Returning ${unreadLogs.results.length} logs`);
 
-        } catch(err) {
+        } catch (err) {
             logger.error(`Error occurred while trying to return unread logs: ${err.stack}`);
             res.status(500).json({
                 result: false,
@@ -320,7 +321,7 @@ export const app = express();
         try {
             await LogModel.transaction(async (trx) => {
                 // Admin interface should just return array of IDs of what to acknowledge
-                const numRead = await LogModel.query(trx).findByIds(req.body.data).patch({ adminHasRead: req.body.read});
+                const numRead = await LogModel.query(trx).findByIds(req.body.data).patch({ adminHasRead: req.body.read });
                 res.json({
                     result: true,
                     message: `Marked ${req.body.read} ${numRead} logs.`
@@ -329,9 +330,9 @@ export const app = express();
             })
 
 
-        } catch(err) {
+        } catch (err) {
             logger.error(`Error occurred while trying to mark logs: ${err.stack}`)
-            res.status(500).json({result: false, message: `An error occurred while trying to mark logs!`});
+            res.status(500).json({ result: false, message: `An error occurred while trying to mark logs!` });
         }
     })
 
@@ -339,13 +340,13 @@ export const app = express();
         try {
             if (req.body.limit) {
                 const selection = await UserModel.query().select('*').limit(req.body.limit);
-                res.json({result: true, data: selection});
+                res.json({ result: true, data: selection });
             } else {
-                res.json({result: false, message: "Missing amount parameter"});
+                res.json({ result: false, message: "Missing amount parameter" });
             }
-        } catch(err) {
+        } catch (err) {
             logger.error(`Error occurred while trying to get amount of users: ${err.stack}`)
-            res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
+            res.status(500).json({ result: false, message: `An error occurred while trying to get the amount of users!` });
         }
     })
 
@@ -356,7 +357,7 @@ export const app = express();
 
         const logsAfterVaccination = await LogModel.query()
             .select()
-            .count('*', { as: 'count'})
+            .count('*', { as: 'count' })
             .from('logs')
             .where('logs.createdAt', '>', UserModel.query().select('lastVaccinationTime').where(raw('id = "userId"')))
             .joinRelated('users')
@@ -364,24 +365,24 @@ export const app = express();
             .orderBy('count', 'desc')
             .groupBy('firstName', 'middleName', 'lastName', 'users.id')
             .where(raw('users.id = "userId"'))
-        
-        const professions: Record<string,any> = {};
+
+        const professions: Record<string, any> = {};
         (await UserModel.query()
             .select('profession')
             .count('profession')
             .groupBy('profession')
             .orderBy('profession', 'desc')
         ).forEach((val: any) => professions[val.profession] = val.count)
-            
 
-        const sexes: Record<string,any> = {}; 
+
+        const sexes: Record<string, any> = {};
         (await UserModel.query()
             .select('sex')
             .count('sex')
             .groupBy('sex')
         ).forEach((val: any) => sexes[val.sex] = val.count)
 
-        const pregnancies: Record<string,any> = {}; 
+        const pregnancies: Record<string, any> = {};
         (await UserModel.query()
             .select('pregnancyStatus')
             .count('pregnancyStatus')
@@ -390,22 +391,22 @@ export const app = express();
 
         const usersWithNotifsEnabled = parseInt((await PushSubscriptionModel.query()
             .countDistinct("userId") as any[])[0].count)
-        
-        const vaccinationStatuses: Record<string,any> = {};
+
+        const vaccinationStatuses: Record<string, any> = {};
         (await UserModel.query()
             .select('isVaccinated')
             .count('isVaccinated')
             .groupBy('isVaccinated')
         ).forEach((val: any) => vaccinationStatuses[val.isVaccinated === true ? "Yes" : "No"] = val.count)
-        
-        const vaccineStatuses: Record<string,any> = {};
+
+        const vaccineStatuses: Record<string, any> = {};
         (await UserModel.query()
             .select('isVaccineReady')
             .count('isVaccineReady')
             .groupBy('isVaccineReady')
         ).forEach((val: any) => vaccineStatuses[val.isVaccineReady] = val.count)
 
-        const vaccineManufacturers: Record<string,any> = {};
+        const vaccineManufacturers: Record<string, any> = {};
         (await UserModel.query()
             .select('vaccineManufacturer')
             .count('vaccineManufacturer')
@@ -413,7 +414,7 @@ export const app = express();
         ).forEach((val: any) => vaccineManufacturers[val.vaccineManufacturer] = val.count)
 
         // Group analytics
-        const groupsIsVaccineReady: Record<string,any> = {};
+        const groupsIsVaccineReady: Record<string, any> = {};
         (await UserModel.query()
             .select('group', 'isVaccineReady')
             .count('isVaccineReady')
@@ -421,7 +422,7 @@ export const app = express();
             .orderBy('group')
         ).forEach((val: any) => groupsIsVaccineReady[`${val.group || 'No Group'} - ${val.isVaccineReady}`] = val.count)
 
-        const groupsIsVaccinated: Record<string,any> = {};
+        const groupsIsVaccinated: Record<string, any> = {};
         (await UserModel.query()
             .select('group', 'isVaccinated')
             .count('isVaccinated')
@@ -429,14 +430,14 @@ export const app = express();
             .orderBy('group')
         ).forEach((val: any) => groupsIsVaccinated[`${val.group || 'No Group'} - ${val.isVaccinated === true ? 'Yes' : 'No'}`] = val.count)
 
-        const groupsVaccineManufacturer: Record<string,any> = {};
+        const groupsVaccineManufacturer: Record<string, any> = {};
         (await UserModel.query()
             .select('group', 'vaccineManufacturer')
             .count('vaccineManufacturer')
             .groupBy('group', 'vaccineManufacturer')
             .orderBy('group')
         ).forEach((val: any) => groupsVaccineManufacturer[`${val.group || 'No Group'} - ${val.vaccineManufacturer || 'No vaccine manufacturer'}`] = val.count)
-        
+
         // Branch analytics (TODO)
         let branchIsVaccineReady: Record<string, any> = {};
         let branchIsVaccinated: Record<string, any> = {};
@@ -472,19 +473,19 @@ export const app = express();
         delete vaccineManufacturers.null
 
         // Alerts
-        const alerts: {title: string; message?: string; type: string;}[] = []
+        const alerts: { title: string; message?: string; type: string; }[] = []
 
-        alerts.push({title: `${totalUserCount} users registered`, type: 'info'})
+        alerts.push({ title: `${totalUserCount} users registered`, type: 'info' })
 
         if (totalUserCount < 30) {
             alerts.push({
-                title: 'Insight data may not be accurate', 
+                title: 'Insight data may not be accurate',
                 type: 'warn',
-                message: 
-                `Only ${totalUserCount} samples are available.<br/>The more users register, the more representative this data is of the population.`
+                message:
+                    `Only ${totalUserCount} samples are available.<br/>The more users register, the more representative this data is of the population.`
             })
         }
-        
+
         // Alert if only a small percentage of users have notifications enabled.
         const percentageNotifsEnabled = (usersWithNotifsEnabled / totalUserCount) * 100
         if (percentageNotifsEnabled < 65) {
@@ -496,21 +497,21 @@ export const app = express();
         }
 
         // Response construction
-        let response: Record<string,any> = {
+        let response: Record<string, any> = {
             alerts,
             miscItems: {
                 totalUserCount,
                 logsAfterVaccination,
-                usersWithNotifsEnabled, 
+                usersWithNotifsEnabled,
             },
             chartItems: {
                 "Demographic": {
-                    "Professions": professions, 
-                    "Sexes": sexes, 
-                    "Pregnancies": pregnancies, 
+                    "Professions": professions,
+                    "Sexes": sexes,
+                    "Pregnancies": pregnancies,
                 },
                 "Vaccination": {
-                    "Vaccination Statuses": vaccinationStatuses, 
+                    "Vaccination Statuses": vaccinationStatuses,
                     "Vaccine Statuses": vaccineStatuses,
                     "Vaccine Manufacturers": vaccineManufacturers,
                 },
@@ -525,9 +526,9 @@ export const app = express();
         // Injecting insight loaders
         const insightLoaders = getInsightLoaders()
         const resolvedInsightLoaderValues = await Promise.all(
-            insightLoaders.map(async x => {return {data: x.loader(), section: x.section, name: x.name}}))
+            insightLoaders.map(async x => { return { data: x.loader(), section: x.section, name: x.name } }))
 
-        resolvedInsightLoaderValues.forEach(({section, name, data}) => {
+        resolvedInsightLoaderValues.forEach(({ section, name, data }) => {
 
             if (!(section in response.chartItems)) response.chartItems[section] = {}
 
@@ -537,8 +538,8 @@ export const app = express();
 
         if ((await getConfig()).isCorporation) {
             response = Object.assign(
-                {}, 
-                response, 
+                {},
+                response,
                 {
                     "Branch - Vaccine Statuses": branchIsVaccineReady,
                     "Branch - Vaccination Statuses": branchIsVaccinated,
@@ -551,17 +552,17 @@ export const app = express();
 
     // Groups 
     app.post(endpoint + '/getAllUsersFromGroup', async (req, res) => {
-        if (!req.body.group) { res.json({result: false, message: "Missing group parameter"}); return; }
+        if (!req.body.group) { res.json({ result: false, message: "Missing group parameter" }); return; }
         try {
             const selection = await UserModel.query().select('*').where('group', req.body.group);
             if (selection.length === 0) {
-                res.json({result: false, message: "Group does not exist, or has no members."})
+                res.json({ result: false, message: "Group does not exist, or has no members." })
             } else {
-                res.json({result: true, data: selection});
+                res.json({ result: true, data: selection });
             }
-        } catch(err) {
+        } catch (err) {
             logger.error(`Error occurred while trying get all users from group ${req.body.group}: ${err.stack}`)
-            res.status(500).json({result: false, message: `An error occurred while trying to get the amount of users!`});
+            res.status(500).json({ result: false, message: `An error occurred while trying to get the amount of users!` });
         }
     })
 
@@ -581,5 +582,5 @@ export const app = express();
         res.json(getRegistrationFields())
     })
 
-    app.listen(parseInt(config.adminPort), config.adminIp, 511)
+    // app.listen(parseInt(config.adminPort), config.adminIp, 511)
 })();
